@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap');
+@import "tailwindcss";
+@import "@lark-apaas/client-toolkit-lite/styles.css";
+@import "tw-animate-css";
+@import "./tailwind-theme.css";
+@import "./typography.css";
+
+/* ===== 全局火影背景 ===== */
+html, body, #root {
+  min-height: 100vh;
+}
+
+body {
+  background-color: #0a0a10 !important;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 70, 20, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(255, 120, 30, 0.1) 0%, transparent 50%) !important;
+  background-attachment: fixed;
+}
+
+main, .min-h-screen {
+  background-color: transparent !important;
+}
