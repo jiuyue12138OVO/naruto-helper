@@ -11,7 +11,7 @@ document.title = "火影忍者辅助助手";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter basename={process.env.CLIENT_BASE_PATH || "/"}>
+    <BrowserRouter basename="/naruto-helper">
       <AppContainer>
         <ErrorBoundary
           fallbackRender={({ error, resetErrorBoundary }) => (
