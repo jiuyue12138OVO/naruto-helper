@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>火影忍者辅助助手</title>
     <link href="https://lf3-static.bytednsdoc.com/obj/eden-cn/ylcylz_fsph_ryhs/ljhwZthlaukjlkulzlp/feisuda/feisuda.svg" rel="shortcut icon"/>
+    <script>
+      // 强制守护标题，防止被 AppContainer 覆盖
+      (function() {
+        const TITLE = "火影忍者辅助助手";
+        document.title = TITLE;
+        new MutationObserver(function() {
+          if (document.title !== TITLE) {
+            document.title = TITLE;
+          }
+        }).observe(document.querySelector('title') || document.head, {
+          childList: true,
+          subtree: true,
+          characterData: true
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
