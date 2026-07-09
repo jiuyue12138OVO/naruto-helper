@@ -6,6 +6,8 @@ import TierListPage from "@/pages/TierListPage/TierListPage";
 import NinjaScrollPage from "@/pages/NinjaScrollPage/NinjaScrollPage";
 import ScrollListPage from "@/pages/ScrollListPage/ScrollListPage";
 import DataManagementPage from "@/pages/DataManagementPage/DataManagementPage";
+import BattleBPPage from "@/pages/BattleBPPage/BattleBPPage";
+import SummonPage from "@/pages/SummonPage/SummonPage";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 
 export default function App() {
@@ -15,8 +17,10 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="tier-list" element={<TierListPage />} />
-          <Route path="ninja-scroll" element={<NinjaScrollPage />} />
           <Route path="scroll-list" element={<ScrollListPage />} />
+          <Route path="summons" element={<SummonPage />} />
+          <Route path="ninja-scroll" element={<NinjaScrollPage />} />
+          <Route path="battle-bp" element={<BattleBPPage />} />
           <Route path="data-management" element={<DataManagementPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />

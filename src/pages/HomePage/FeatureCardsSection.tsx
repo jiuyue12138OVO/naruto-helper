@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Swords, ScrollText, Eye, Plus } from 'lucide-react'
+import { Swords, ScrollText, Eye, Flame, Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 const FEATURES = [
@@ -28,6 +28,22 @@ const FEATURES = [
     gradient: 'from-amber-500/20 to-orange-600/20',
     iconBg: 'bg-amber-500/10 text-amber-500',
   },
+  {
+    title: '通灵兽大全',
+    description: '通灵兽图鉴，图片、技能、描述一览无余',
+    icon: Flame,
+    path: '/summons',
+    gradient: 'from-yellow-500/20 to-orange-600/20',
+    iconBg: 'bg-yellow-500/10 text-yellow-500',
+  },
+  {
+    title: '武斗赛BP',
+    description: 'Ban/Pick 辅助工具，助你制定对战策略',
+    icon: Shield,
+    path: '/battle-bp',
+    gradient: 'from-blue-500/20 to-indigo-600/20',
+    iconBg: 'bg-blue-500/10 text-blue-500',
+  },
 ]
 
 export default function FeatureCardsSection() {
@@ -49,7 +65,7 @@ export default function FeatureCardsSection() {
           <p className="text-muted-foreground">选择你需要的功能，快速上手</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon
             return (
@@ -84,28 +100,6 @@ export default function FeatureCardsSection() {
               </motion.div>
             )
           })}
-
-          {/* 预留扩展位 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="border-dashed border-border/30 bg-transparent h-full">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center gap-3 h-full min-h-[200px]">
-                <div className="size-14 rounded-xl bg-muted/30 flex items-center justify-center">
-                  <Plus className="size-7 text-muted-foreground/40" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-muted-foreground/60 mb-1">
-                    更多功能
-                  </h3>
-                  <p className="text-sm text-muted-foreground/40">即将推出</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </div>
     </section>

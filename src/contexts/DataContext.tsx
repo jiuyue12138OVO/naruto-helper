@@ -3,11 +3,16 @@ import { scopedStorage } from '@lark-apaas/client-toolkit-lite'
 import { INinja, MOCK_NINJAS } from '@/data/ninjas'
 import { IScroll, MOCK_SCROLLS } from '@/data/scrolls'
 import { IRecommendation, MOCK_RECOMMENDATIONS } from '@/data/recommendations'
+import { ISummon, MOCK_SUMMONS } from '@/data/summons'
+import { IBPCounter, MOCK_COUNTERS } from '@/data/battleBp'
 
 const NINJAS_KEY = 'naruto_ninjas'
 const SCROLLS_KEY = 'naruto_scrolls'
 const RECS_KEY = 'naruto_recommendations'
 const NINJA_TAGS_KEY = 'naruto_ninja_tags'
+const SUMMONS_KEY = 'naruto_summons'
+const COUNTERS_KEY = 'naruto_counters'
+const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -29,7 +34,11 @@ interface DataContextType {
   ninjas: INinja[]
   scrolls: IScroll[]
   recommendations: IRecommendation[]
+  summons: ISummon[]
   ninjaTags: string[]
+  counters: IBPCounter[]
+  blindPickOrder: string[]
+  setBlindPickOrder: (order: string[]) => void
   addNinja: (ninja: INinja) => void
   updateNinja: (id: string, data: Partial<INinja>) => void
   deleteNinja: (id: string) => void
@@ -39,8 +48,15 @@ interface DataContextType {
   addRecommendation: (rec: IRecommendation) => void
   updateRecommendation: (id: string, data: Partial<IRecommendation>) => void
   deleteRecommendation: (id: string) => void
+  addSummon: (summon: ISummon) => void
+  updateSummon: (id: string, data: Partial<ISummon>) => void
+  deleteSummon: (id: string) => void
   addNinjaTag: (tag: string) => void
   removeNinjaTag: (tag: string) => void
+  updateNinjaBlindPick: (id: string, blindPick: boolean) => void
+  addCounter: (counter: IBPCounter) => void
+  updateCounter: (id: string, data: Partial<IBPCounter>) => void
+  deleteCounter: (id: string) => void
   resetAllData: () => void
 }
 
@@ -49,11 +65,11 @@ const DataContext = createContext<DataContextType | null>(null)
 export function DataProvider({ children }: { children: ReactNode }) {
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
-    // 兼容旧数据：补全 rating 和 tags
     return stored.map(n => ({
       ...n,
       rating: n.rating || 'B',
       tags: n.tags || [],
+      blindPick: n.blindPick || false,
     }))
   })
   const [scrolls, setScrolls] = useState<IScroll[]>(() =>
@@ -62,12 +78,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [recommendations, setRecommendations] = useState<IRecommendation[]>(() =>
     loadFromStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
   )
+  const [summons, setSummons] = useState<ISummon[]>(() =>
+    loadFromStorage(SUMMONS_KEY, MOCK_SUMMONS)
+  )
   const [ninjaTags, setNinjaTags] = useState<string[]>(() =>
     loadFromStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
   )
+  const [counters, setCounters] = useState<IBPCounter[]>(() =>
+    loadFromStorage(COUNTERS_KEY, MOCK_COUNTERS)
+  )
+  const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() =>
+    loadFromStorage(BLIND_PICK_ORDER_KEY, [])
+  )
 
-  // 标签持久化
   useEffect(() => { saveToStorage(NINJA_TAGS_KEY, ninjaTags) }, [ninjaTags])
+  useEffect(() => { saveToStorage(SUMMONS_KEY, summons) }, [summons])
+  useEffect(() => { saveToStorage(COUNTERS_KEY, counters) }, [counters])
+  useEffect(() => { saveToStorage(BLIND_PICK_ORDER_KEY, blindPickOrder) }, [blindPickOrder])
 
   // --- Ninja CRUD ---
   const addNinja = useCallback((ninja: INinja) => {
@@ -144,6 +171,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  // --- Summon CRUD ---
+  const addSummon = useCallback((summon: ISummon) => {
+    setSummons((prev) => {
+      const next = [...prev, summon]
+      saveToStorage(SUMMONS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const updateSummon = useCallback((id: string, data: Partial<ISummon>) => {
+    setSummons((prev) => {
+      const next = prev.map((s) => (s.id === id ? { ...s, ...data } : s))
+      saveToStorage(SUMMONS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const deleteSummon = useCallback((id: string) => {
+    setSummons((prev) => {
+      const next = prev.filter((s) => s.id !== id)
+      saveToStorage(SUMMONS_KEY, next)
+      return next
+    })
+  }, [])
+
   // --- Ninja Tags ---
   const addNinjaTag = useCallback((tag: string) => {
     setNinjaTags(prev => {
@@ -156,16 +208,59 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setNinjaTags(prev => prev.filter(t => t !== tag))
   }, [])
 
+  // --- Blind Pick ---
+  const updateNinjaBlindPick = useCallback((id: string, blindPick: boolean) => {
+    setNinjas((prev) => {
+      const next = prev.map((n) => (n.id === id ? { ...n, blindPick } : n))
+      saveToStorage(NINJAS_KEY, next)
+      return next
+    })
+    if (!blindPick) {
+      setBlindPickOrder(prev => prev.filter(nid => nid !== id))
+    }
+  }, [])
+
+  // --- Counter CRUD ---
+  const addCounter = useCallback((counter: IBPCounter) => {
+    setCounters((prev) => {
+      const next = [...prev, counter]
+      saveToStorage(COUNTERS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const updateCounter = useCallback((id: string, data: Partial<IBPCounter>) => {
+    setCounters((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, ...data } : c))
+      saveToStorage(COUNTERS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const deleteCounter = useCallback((id: string) => {
+    setCounters((prev) => {
+      const next = prev.filter((c) => c.id !== id)
+      saveToStorage(COUNTERS_KEY, next)
+      return next
+    })
+  }, [])
+
   // --- Reset ---
   const resetAllData = useCallback(() => {
     setNinjas(MOCK_NINJAS)
     setScrolls(MOCK_SCROLLS)
     setRecommendations(MOCK_RECOMMENDATIONS)
+    setSummons(MOCK_SUMMONS)
     setNinjaTags(DEFAULT_NINJA_TAGS)
+    setCounters(MOCK_COUNTERS)
+    setBlindPickOrder([])
     saveToStorage(NINJAS_KEY, MOCK_NINJAS)
     saveToStorage(SCROLLS_KEY, MOCK_SCROLLS)
     saveToStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
+    saveToStorage(SUMMONS_KEY, MOCK_SUMMONS)
     saveToStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
+    saveToStorage(COUNTERS_KEY, MOCK_COUNTERS)
+    saveToStorage(BLIND_PICK_ORDER_KEY, [])
   }, [])
 
   return (
@@ -174,7 +269,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ninjas,
         scrolls,
         recommendations,
+        summons,
         ninjaTags,
+        counters,
+        blindPickOrder,
+        setBlindPickOrder,
         addNinja,
         updateNinja,
         deleteNinja,
@@ -184,8 +283,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addRecommendation,
         updateRecommendation,
         deleteRecommendation,
+        addSummon,
+        updateSummon,
+        deleteSummon,
         addNinjaTag,
         removeNinjaTag,
+        updateNinjaBlindPick,
+        addCounter,
+        updateCounter,
+        deleteCounter,
         resetAllData,
       }}
     >

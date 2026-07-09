@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { Swords, ScrollText, Eye, Home, Menu, X } from 'lucide-react'
+import { Swords, ScrollText, Eye, Home, Menu, X, Flame, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const NAV_ITEMS = [
   { path: '/', label: '首页', icon: Home },
   { path: '/tier-list', label: '忍者强度排行', icon: Swords },
-  { path: '/ninja-scroll', label: '忍者密卷推荐', icon: ScrollText },
   { path: '/scroll-list', label: '密卷大全', icon: Eye },
+  { path: '/summons', label: '通灵兽大全', icon: Flame },
+  { path: '/ninja-scroll', label: '忍者密卷推荐', icon: ScrollText },
+  { path: '/battle-bp', label: '武斗赛BP', icon: Shield },
 ]
 
 export default function Header() {
@@ -18,7 +20,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex h-16 items-center justify-between">
         {/* Logo */}
         <NavLink to="/" className="flex items-center gap-2 shrink-0">
-          <div className="size-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+          <div className="size-8 rounded-lg bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center">
             <span className="text-white text-sm font-bold">忍</span>
           </div>
           <span className="text-lg font-bold text-foreground hidden sm:block">
