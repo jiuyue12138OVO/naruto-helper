@@ -6,10 +6,16 @@
     "path": "/tier-list"
   },
   {
+    "path": "/scroll-list"
+  },
+  {
+    "path": "/summons"
+  },
+  {
     "path": "/ninja-scroll"
   },
   {
-    "path": "/scroll-list"
+    "path": "/battle-bp"
   },
   {
     "path": "/data-management"
