@@ -2421,5 +2421,310 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 3
         }
       ]
+    },
+    {
+      "id": "1783615817111",
+      "ninjaId": "1783613067111",
+      "ninjaName": "干柿鬼鲛【青年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615832489",
+      "ninjaId": "1783612963145",
+      "ninjaName": "飞段【恶灵之影】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615863743",
+      "ninjaId": "1783612892533",
+      "ninjaName": "飞段【晓创生】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783615875561",
+      "ninjaId": "1783612815098",
+      "ninjaName": "三船",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615884201",
+      "ninjaId": "1783612673505",
+      "ninjaName": "天天【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615902259",
+      "ninjaId": "1783612618366",
+      "ninjaName": "绝",
+      "scrolls": [
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783615936098",
+      "ninjaId": "1783612495912",
+      "ninjaName": "宇智波鼬",
+      "scrolls": [
+        {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349379011",
+          "scrollName": "风遁·真空波",
+          "priority": 2
+        },
+        {
+          "scrollId": "10",
+          "scrollName": "土遁·地动",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349842473",
+          "scrollName": "木遁·扦插之术",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1783615944625",
+      "ninjaId": "1783612422409",
+      "ninjaName": "三船【青年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615960961",
+      "ninjaId": "1783612306958",
+      "ninjaName": "桃地再不斩【秽土转生】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783615971660",
+      "ninjaId": "1783612223157",
+      "ninjaName": "秋道丁次【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "1783349733336",
+          "scrollName": "冰遁·燕吹雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615980885",
+      "ninjaId": "1783612144356",
+      "ninjaName": "宇智波泉奈",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783615999072",
+      "ninjaId": "1783612076325",
+      "ninjaName": "猿飞阿斯玛【桀骜之刃】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783616022106",
+      "ninjaId": "1783591722037",
+      "ninjaName": "黑绝",
+      "scrolls": [
+        {
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
+          "priority": 1
+        },
+        {
+          "scrollId": "10",
+          "scrollName": "土遁·地动",
+          "priority": 2
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1783616037440",
+      "ninjaId": "1783317094790",
+      "ninjaName": "纲手【少女】",
+      "scrolls": [
+        {
+          "scrollId": "4",
+          "scrollName": "雷遁·雷电击",
+          "priority": 1
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783616049328",
+      "ninjaId": "1783317084240",
+      "ninjaName": "重吾【鹰】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783616057153",
+      "ninjaId": "1783316753096",
+      "ninjaName": "紫阳花",
+      "scrolls": [
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783616071629",
+      "ninjaId": "1783316968545",
+      "ninjaName": "蝎【晓创生】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783616087402",
+      "ninjaId": "1783316859772",
+      "ninjaName": "纲手【传说中的三忍】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1783616095001",
+      "ninjaId": "1783316800764",
+      "ninjaName": "雨琉【羁绊】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783616100075",
+      "ninjaId": "1783316733980",
+      "ninjaName": "大和【木叶工匠】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        }
+      ]
     }
   ]

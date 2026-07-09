@@ -28,7 +28,29 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-const DEFAULT_NINJA_TAGS = ['瞬发', '抓取', '乱闪', '突进', '隐身', '霸体', '飞行', '无敌', '高爆发', '高输出', '格挡']
+const DEFAULT_NINJA_TAGS = [
+    "抓取",
+    "乱闪",
+    "突进",
+    "隐身",
+    "霸体",
+    "飞行",
+    "无敌",
+    "高爆发",
+    "高输出",
+    "格挡",
+    "破霸体",
+    "纯抓",
+    "低真空期",
+    "大招可接",
+    "拉扯",
+    "金刚体",
+    "位移",
+    "高机动性",
+    "大招特殊情况可接",
+    "防反",
+    "瞬发"
+  ]
 
 interface DataContextType {
   ninjas: INinja[]
