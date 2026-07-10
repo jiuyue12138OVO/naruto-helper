@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Search, X, Swords } from 'lucide-react'
+import { Search, X, Swords, Network } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -19,7 +20,6 @@ export default function BattleBPPage() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
 
-  // 过滤后的忍者列表
   const filtered = useMemo(() => {
     let list = ninjas
     if (searchKeyword.trim()) {
@@ -29,20 +29,16 @@ export default function BattleBPPage() {
     return list
   }, [ninjas, searchKeyword])
 
-  // 按梯度分组，每组内盲选位按自定义顺序排在最前
   const groupedNinjas = useMemo(() => {
     const blindOrderMap = new Map(blindPickOrder.map((id, idx) => [id, idx]))
     const sortByBlindOrderAndName = (a: INinja, b: INinja) => {
-      // 盲选位优先
       if (a.blindPick && !b.blindPick) return -1
       if (!a.blindPick && b.blindPick) return 1
-      // 同为盲选位，按自定义顺序
       if (a.blindPick && b.blindPick) {
         const ia = blindOrderMap.has(a.id) ? blindOrderMap.get(a.id)! : Infinity
         const ib = blindOrderMap.has(b.id) ? blindOrderMap.get(b.id)! : Infinity
         return ia - ib
       }
-      // 同为非盲选，按名称排序
       return a.name.localeCompare(b.name)
     }
 
@@ -68,6 +64,16 @@ export default function BattleBPPage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-1">武斗赛<span className="text-primary">BP</span></h1>
           <p className="text-muted-foreground text-sm">查看忍者克制关系与盲选位</p>
+        </div>
+
+        {/* 3D 克制关系图入口 */}
+        <div className="flex items-center gap-4">
+          <Link to="/counter-graph-3d">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Network className="size-4" />
+              查看 3D 克制关系图
+            </Button>
+          </Link>
         </div>
 
         <div className="relative max-w-md">

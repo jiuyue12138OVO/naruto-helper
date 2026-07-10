@@ -8,6 +8,7 @@ import ScrollListPage from "@/pages/ScrollListPage/ScrollListPage";
 import DataManagementPage from "@/pages/DataManagementPage/DataManagementPage";
 import BattleBPPage from "@/pages/BattleBPPage/BattleBPPage";
 import SummonPage from "@/pages/SummonPage/SummonPage";
+import CounterGraph3DPage from "@/pages/CounterGraph3DPage/CounterGraph3DPage";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 
 export default function App() {
@@ -21,8 +22,8 @@ export default function App() {
           <Route path="summons" element={<SummonPage />} />
           <Route path="ninja-scroll" element={<NinjaScrollPage />} />
           <Route path="battle-bp" element={<BattleBPPage />} />
-          {/* 🔒 后台管理入口改为密码路径 */}
           <Route path="644064643989" element={<DataManagementPage />} />
+          <Route path="counter-graph-3d" element={<CounterGraph3DPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
