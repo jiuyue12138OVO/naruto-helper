@@ -29,28 +29,10 @@ function saveToStorage(key: string, data: unknown) {
 }
 
 const DEFAULT_NINJA_TAGS = [
-    "抓取",
-    "乱闪",
-    "突进",
-    "隐身",
-    "霸体",
-    "飞行",
-    "无敌",
-    "高爆发",
-    "高输出",
-    "格挡",
-    "破霸体",
-    "纯抓",
-    "低真空期",
-    "大招可接",
-    "拉扯",
-    "金刚体",
-    "位移",
-    "高机动性",
-    "大招特殊情况可接",
-    "防反",
-    "瞬发"
-  ]
+  "抓取", "乱闪", "突进", "隐身", "霸体", "飞行", "无敌", "高爆发", "高输出", "格挡",
+  "破霸体", "纯抓", "低真空期", "大招可接", "拉扯", "金刚体", "位移", "高机动性",
+  "大招特殊情况可接", "防反", "瞬发"
+]
 
 interface DataContextType {
   ninjas: INinja[]
@@ -100,9 +82,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [recommendations, setRecommendations] = useState<IRecommendation[]>(() =>
     loadFromStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
   )
-  const [summons, setSummons] = useState<ISummon[]>(() =>
-    loadFromStorage(SUMMONS_KEY, MOCK_SUMMONS)
-  )
+  // ✅ 修改处：防止空数组覆盖默认数据
+  const [summons, setSummons] = useState<ISummon[]>(() => {
+    const stored = loadFromStorage(SUMMONS_KEY, MOCK_SUMMONS)
+    return Array.isArray(stored) && stored.length > 0 ? stored : MOCK_SUMMONS
+  })
   const [ninjaTags, setNinjaTags] = useState<string[]>(() =>
     loadFromStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
   )
