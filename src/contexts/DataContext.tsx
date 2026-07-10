@@ -13,6 +13,11 @@ const NINJA_TAGS_KEY = 'naruto_ninja_tags'
 const SUMMONS_KEY = 'naruto_summons'
 const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
+const VERSION_KEY = 'naruto_data_version'
+
+// 🔥 修改此处即可：任何字符串，只要与之前不同就会触发更新
+// 建议使用日期，例如 '2026-07-11' 或 'v2.3'
+const DATA_VERSION = '2026-07-11'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -26,6 +31,25 @@ function saveToStorage(key: string, data: unknown) {
   try {
     scopedStorage.setItem(key, JSON.stringify(data))
   } catch { /* 静默失败 */ }
+}
+
+// 🔥 版本检查：只要存储的版本不等于当前版本，就清除所有数据
+function checkVersionAndClearIfNeeded() {
+  const storedVersion = scopedStorage.getItem(VERSION_KEY)
+  if (storedVersion !== DATA_VERSION) {
+    // 版本不匹配，清除所有相关数据
+    try {
+      scopedStorage.removeItem(NINJAS_KEY)
+      scopedStorage.removeItem(SCROLLS_KEY)
+      scopedStorage.removeItem(RECS_KEY)
+      scopedStorage.removeItem(SUMMONS_KEY)
+      scopedStorage.removeItem(COUNTERS_KEY)
+      scopedStorage.removeItem(NINJA_TAGS_KEY)
+      scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
+    } catch (e) { /* 忽略清除错误 */ }
+    // 更新版本号
+    saveToStorage(VERSION_KEY, DATA_VERSION)
+  }
 }
 
 const DEFAULT_NINJA_TAGS = [
@@ -67,6 +91,9 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  // 🔥 在组件初始化时调用版本检查
+  checkVersionAndClearIfNeeded()
+
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
     return stored.map(n => ({
@@ -82,7 +109,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [recommendations, setRecommendations] = useState<IRecommendation[]>(() =>
     loadFromStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
   )
-  // ✅ 修改处：防止空数组覆盖默认数据
   const [summons, setSummons] = useState<ISummon[]>(() => {
     const stored = loadFromStorage(SUMMONS_KEY, MOCK_SUMMONS)
     return Array.isArray(stored) && stored.length > 0 ? stored : MOCK_SUMMONS
