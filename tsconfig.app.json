@@ -6,8 +6,7 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["node"]  // 如果之前已有其他类型，请合并，例如 "types": ["vite/client", "node"]
+    "types": ["vite/client", "node"]
   },
-  "include": ["src"],
-  "exclude": ["src/components/ui"]
+  "include": ["src"]
 }

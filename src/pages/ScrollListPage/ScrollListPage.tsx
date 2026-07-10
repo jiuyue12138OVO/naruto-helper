@@ -5,17 +5,14 @@ import { useData } from '@/contexts/DataContext'
 
 export default function ScrollListPage() {
   const { scrolls } = useData()
-  const [activeTier, setActiveTier] = useState('all')
   const [keyword, setKeyword] = useState('')
 
   const filtered = useMemo(() => {
-    return scrolls.filter((s) => {
-      const matchTier = activeTier === 'all' || s.tier === activeTier
-      const matchKeyword =
-        !keyword || s.name.toLowerCase().includes(keyword.toLowerCase())
-      return matchTier && matchKeyword
-    })
-  }, [scrolls, activeTier, keyword])
+    if (!keyword) return scrolls
+    return scrolls.filter((s) =>
+      s.name.toLowerCase().includes(keyword.toLowerCase())
+    )
+  }, [scrolls, keyword])
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,15 +21,10 @@ export default function ScrollListPage() {
           <h1 className="text-3xl font-bold text-foreground mb-1">
             密卷<span className="text-primary">大全</span>
           </h1>
-          <p className="text-muted-foreground text-sm">浏览全部密卷详细信息</p>
+          <p className="text-muted-foreground text-sm">点击图片查看详细信息</p>
         </div>
 
-        <FilterBarSection
-          activeTier={activeTier}
-          onTierChange={setActiveTier}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-        />
+        <FilterBarSection keyword={keyword} onKeywordChange={setKeyword} />
 
         <ScrollGridSection scrolls={filtered} />
       </div>
