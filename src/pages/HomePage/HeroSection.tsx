@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -16,6 +16,8 @@ export default function HeroSection() {
   const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [wallpapers, setWallpapers] = useState<string[]>([])
+  const [isReady, setIsReady] = useState(false) // 首张图是否已加载
+  const nextImageRef = useRef<HTMLImageElement | null>(null)
 
   // 随机打乱数组
   const shuffleArray = useCallback((arr: string[]) => {
@@ -27,13 +29,28 @@ export default function HeroSection() {
     return shuffled
   }, [])
 
-  // 初始化：打乱所有壁纸
+  // 初始化：打乱所有壁纸，并预加载第一张
   useEffect(() => {
     const all = getAllWallpapers()
     if (all.length > 0) {
-      setWallpapers(shuffleArray(all))
+      const shuffled = shuffleArray(all)
+      setWallpapers(shuffled)
+      // 预加载第一张壁纸
+      const img = new Image()
+      img.src = shuffled[0]
+      img.onload = () => setIsReady(true)
     }
   }, [shuffleArray])
+
+  // 预加载下一张壁纸（当 currentIndex 或 wallpapers 变化时）
+  useEffect(() => {
+    if (wallpapers.length === 0) return
+    const nextIndex = (currentIndex + 1) % wallpapers.length
+    const img = new Image()
+    img.src = wallpapers[nextIndex]
+    nextImageRef.current = img
+    // 不需要 onload 回调，只是让浏览器缓存
+  }, [currentIndex, wallpapers])
 
   // 定时切换
   useEffect(() => {
@@ -41,8 +58,8 @@ export default function HeroSection() {
     const timer = setInterval(() => {
       setCurrentIndex(prev => {
         const next = prev + 1
-        // 一轮播放完后重新洗牌
         if (next >= wallpapers.length) {
+          // 一轮播放完后重新洗牌并返回开头
           setWallpapers(shuffleArray(getAllWallpapers()))
           return 0
         }
@@ -52,7 +69,7 @@ export default function HeroSection() {
     return () => clearInterval(timer)
   }, [wallpapers, shuffleArray])
 
-  const currentWallpaper = wallpapers[currentIndex] || ''
+  const currentWallpaper = isReady ? (wallpapers[currentIndex] || '') : ''
 
   return (
     <section className="w-full relative overflow-hidden">
