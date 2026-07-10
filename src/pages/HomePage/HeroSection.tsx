@@ -4,8 +4,8 @@ import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 
-// 动态导入 wallpapers 文件夹下所有图片（支持 jpg / png / jpeg）
-const wallpaperModules = import.meta.glob('@/assets/wallpapers/*.{jpg,png,jpeg}', {
+// 动态导入 wallpapers 文件夹下所有图片（支持 jpg / png / jpeg / webp）
+const wallpaperModules = import.meta.glob('@/assets/wallpapers/*.{jpg,png,jpeg,webp}', {
   eager: true,
   import: 'default',
 }) as Record<string, string>
