@@ -22,6 +22,16 @@
         });
       })();
     </script>
+    <script>
+      // SPA 路由恢复：配合 404.html 实现刷新页面时正常显示对应页面
+      (function(){
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
