@@ -21,7 +21,8 @@ export default function App() {
           <Route path="summons" element={<SummonPage />} />
           <Route path="ninja-scroll" element={<NinjaScrollPage />} />
           <Route path="battle-bp" element={<BattleBPPage />} />
-          <Route path="data-management" element={<DataManagementPage />} />
+          {/* 🔒 后台管理入口改为密码路径 */}
+          <Route path="644064643989" element={<DataManagementPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
