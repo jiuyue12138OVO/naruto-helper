@@ -264,7 +264,7 @@
         "低真空期",
         "拉扯"
       ],
-      "blindPick": false
+      "blindPick": true
     },
     {
       "id": "15",
@@ -789,7 +789,7 @@
         "霸体",
         "高爆发"
       ],
-      "blindPick": false
+      "blindPick": true
     },
     {
       "id": "1783309521385",
@@ -6520,6 +6520,17 @@
       ],
       "counterScrollIds": [
         "1783349802096"
+      ],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1783660675150",
+      "ninjaId": "8",
+      "counterNinjaIds": [
+        "1783309162593"
+      ],
+      "counterScrollIds": [
+        "1783350952440"
       ],
       "counterSummonIds": []
     }

@@ -278,7 +278,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "拉扯"
       ],
-      "blindPick": false
+      "blindPick": true
     },
     {
       "id": "15",
@@ -803,7 +803,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "霸体",
         "高爆发"
       ],
-      "blindPick": false
+      "blindPick": true
     },
     {
       "id": "1783309521385",
