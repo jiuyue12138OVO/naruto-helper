@@ -155,8 +155,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783596221427",
       "ninjaId": "1783591722037",
       "counterNinjaIds": [
-        "1783315719485",
-        "1783309208477"
+        "1783309208477",
+        "1783315719485"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []
@@ -166,8 +166,9 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "ninjaId": "15",
       "counterNinjaIds": [
         "1783309311486",
-        "1783315644309",
-        "1783309172598"
+        "1783316557259",
+        "1783309172598",
+        "1783315644309"
       ],
       "counterScrollIds": [
         "1783350283755",

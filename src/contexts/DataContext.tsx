@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 版本号（必须与 public/version.json 和 index.html 中的 LATEST_DATA_VERSION 完全一致）
-const DATA_VERSION = '2026-07-11-12-11'
+const DATA_VERSION = '2026-07-11-13-29'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -32,8 +32,8 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 本地版本检查：清除旧数据
-function clearOldDataIfVersionChanged() {
+// 本地版本检查（如果版本不一致，仅清除数据，不刷新）
+function ensureDataVersion() {
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
     try {
@@ -93,50 +93,14 @@ const DataContext = createContext<DataContextType | null>(null)
 export function DataProvider({ children }: { children: ReactNode }) {
   const [showUpdateMsg, setShowUpdateMsg] = useState(false)
 
-  // 挂载时执行本地版本检查
+  // 挂载时仅进行版本清理，无刷新
   useEffect(() => {
-    const needUpdate = clearOldDataIfVersionChanged()
-    if (needUpdate) {
+    const updated = ensureDataVersion()
+    if (updated) {
       setShowUpdateMsg(true)
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
-    } else {
-      // 本地版本已是最新，再检查远程是否有更高版本
-      checkRemoteVersion()
+      setTimeout(() => setShowUpdateMsg(false), 2000)
     }
   }, [])
-
-  // 远程版本检查（仅在本地版本已最新的情况下执行）
-  async function checkRemoteVersion() {
-    try {
-      const res = await fetch('/naruto-helper/version.json', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json()
-      const remoteVersion = data.version
-      const currentVersion = scopedStorage.getItem(VERSION_KEY) || DATA_VERSION
-      // 如果远程版本与本地不同，并且远程版本不为空，则更新
-      if (remoteVersion && remoteVersion !== currentVersion) {
-        // 清除所有数据并更新版本号
-        try {
-          scopedStorage.removeItem(NINJAS_KEY)
-          scopedStorage.removeItem(SCROLLS_KEY)
-          scopedStorage.removeItem(RECS_KEY)
-          scopedStorage.removeItem(SUMMONS_KEY)
-          scopedStorage.removeItem(COUNTERS_KEY)
-          scopedStorage.removeItem(NINJA_TAGS_KEY)
-          scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
-        } catch (e) {}
-        saveToStorage(VERSION_KEY, remoteVersion)
-        setShowUpdateMsg(true)
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
-      }
-    } catch (e) {
-      // 网络错误忽略
-    }
-  }
 
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
