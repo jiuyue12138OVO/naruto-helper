@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 版本号（必须与 public/version.json 和 index.html 中的 LATEST_DATA_VERSION 完全一致）
-const DATA_VERSION = '2026-07-11-13-29'
+const DATA_VERSION = '2026-07-11-18-36'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
