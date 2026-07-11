@@ -15,7 +15,7 @@ const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
-// 🔥 修改此处即可：任何字符串，只要与之前不同就会触发更新
+// 🔥 版本号（必须与 public/version.json 和 index.html 中的 LATEST_DATA_VERSION 完全一致）
 const DATA_VERSION = '2026-07-11-12-11'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -32,8 +32,8 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 版本检查：只要存储的版本不等于当前版本，就清除所有数据
-function checkVersionAndClearIfNeeded(): boolean {
+// 本地版本检查：清除旧数据
+function clearOldDataIfVersionChanged() {
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
     try {
@@ -95,39 +95,48 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // 挂载时执行本地版本检查
   useEffect(() => {
-    const needUpdate = checkVersionAndClearIfNeeded()
+    const needUpdate = clearOldDataIfVersionChanged()
     if (needUpdate) {
       setShowUpdateMsg(true)
       setTimeout(() => {
         window.location.reload()
       }, 1500)
+    } else {
+      // 本地版本已是最新，再检查远程是否有更高版本
+      checkRemoteVersion()
     }
   }, [])
 
-  // 每次页面加载时请求远程 version.json，检测是否有新版本
-  useEffect(() => {
-    async function checkVersionRemote() {
-      try {
-        const res = await fetch('/naruto-helper/version.json', { cache: 'no-store' })
-        if (!res.ok) return
-        const data = await res.json()
-        const remoteVersion = data.version
-        const currentVersion = scopedStorage.getItem(VERSION_KEY) || DATA_VERSION
-        if (remoteVersion !== currentVersion) {
-          // 检测到远程版本更新，清除数据并刷新
-          checkVersionAndClearIfNeeded()
-          saveToStorage(VERSION_KEY, remoteVersion)
-          setShowUpdateMsg(true)
-          setTimeout(() => {
-            window.location.reload()
-          }, 1500)
-        }
-      } catch (e) {
-        // 网络错误忽略
+  // 远程版本检查（仅在本地版本已最新的情况下执行）
+  async function checkRemoteVersion() {
+    try {
+      const res = await fetch('/naruto-helper/version.json', { cache: 'no-store' })
+      if (!res.ok) return
+      const data = await res.json()
+      const remoteVersion = data.version
+      const currentVersion = scopedStorage.getItem(VERSION_KEY) || DATA_VERSION
+      // 如果远程版本与本地不同，并且远程版本不为空，则更新
+      if (remoteVersion && remoteVersion !== currentVersion) {
+        // 清除所有数据并更新版本号
+        try {
+          scopedStorage.removeItem(NINJAS_KEY)
+          scopedStorage.removeItem(SCROLLS_KEY)
+          scopedStorage.removeItem(RECS_KEY)
+          scopedStorage.removeItem(SUMMONS_KEY)
+          scopedStorage.removeItem(COUNTERS_KEY)
+          scopedStorage.removeItem(NINJA_TAGS_KEY)
+          scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
+        } catch (e) {}
+        saveToStorage(VERSION_KEY, remoteVersion)
+        setShowUpdateMsg(true)
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
       }
+    } catch (e) {
+      // 网络错误忽略
     }
-    checkVersionRemote()
-  }, [])
+  }
 
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
