@@ -16,7 +16,6 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 修改此处即可：任何字符串，只要与之前不同就会触发更新
-// 建议使用日期，例如 '2026-07-11' 或 'v2.3'
 const DATA_VERSION = '2026-07-11'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -33,11 +32,10 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 🔥 版本检查：只要存储的版本不等于当前版本，就清除所有数据
-function checkVersionAndClearIfNeeded() {
+// 版本检查：只要存储的版本不等于当前版本，就清除所有数据，并返回 true 表示需要提示
+function checkVersionAndClearIfNeeded(): boolean {
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
-    // 版本不匹配，清除所有相关数据
     try {
       scopedStorage.removeItem(NINJAS_KEY)
       scopedStorage.removeItem(SCROLLS_KEY)
@@ -47,9 +45,10 @@ function checkVersionAndClearIfNeeded() {
       scopedStorage.removeItem(NINJA_TAGS_KEY)
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
     } catch (e) { /* 忽略清除错误 */ }
-    // 更新版本号
     saveToStorage(VERSION_KEY, DATA_VERSION)
+    return true
   }
+  return false
 }
 
 const DEFAULT_NINJA_TAGS = [
@@ -86,13 +85,23 @@ interface DataContextType {
   updateCounter: (id: string, data: Partial<IBPCounter>) => void
   deleteCounter: (id: string) => void
   resetAllData: () => void
+  showUpdateMsg: boolean
 }
 
 const DataContext = createContext<DataContextType | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  // 🔥 在组件初始化时调用版本检查
-  checkVersionAndClearIfNeeded()
+  const [showUpdateMsg, setShowUpdateMsg] = useState(false)
+
+  // 只在组件挂载时执行一次版本检查
+  useEffect(() => {
+    const needUpdate = checkVersionAndClearIfNeeded()
+    if (needUpdate) {
+      setShowUpdateMsg(true)
+      const timer = setTimeout(() => setShowUpdateMsg(false), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
 
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
@@ -325,6 +334,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateCounter,
         deleteCounter,
         resetAllData,
+        showUpdateMsg,
       }}
     >
       {children}
