@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 修改此处即可：任何字符串，只要与之前不同就会触发更新
-const DATA_VERSION = '2026-07-11-4'
+const DATA_VERSION = '2026-07-11-12-11'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -32,7 +32,7 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 版本检查：只要存储的版本不等于当前版本，就清除所有数据，并返回 true 表示需要提示
+// 版本检查：只要存储的版本不等于当前版本，就清除所有数据
 function checkVersionAndClearIfNeeded(): boolean {
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
@@ -93,14 +93,40 @@ const DataContext = createContext<DataContextType | null>(null)
 export function DataProvider({ children }: { children: ReactNode }) {
   const [showUpdateMsg, setShowUpdateMsg] = useState(false)
 
-  // 只在组件挂载时执行一次版本检查
+  // 挂载时执行本地版本检查
   useEffect(() => {
     const needUpdate = checkVersionAndClearIfNeeded()
     if (needUpdate) {
       setShowUpdateMsg(true)
-      const timer = setTimeout(() => setShowUpdateMsg(false), 2000)
-      return () => clearTimeout(timer)
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
     }
+  }, [])
+
+  // 每次页面加载时请求远程 version.json，检测是否有新版本
+  useEffect(() => {
+    async function checkVersionRemote() {
+      try {
+        const res = await fetch('/naruto-helper/version.json', { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        const remoteVersion = data.version
+        const currentVersion = scopedStorage.getItem(VERSION_KEY) || DATA_VERSION
+        if (remoteVersion !== currentVersion) {
+          // 检测到远程版本更新，清除数据并刷新
+          checkVersionAndClearIfNeeded()
+          saveToStorage(VERSION_KEY, remoteVersion)
+          setShowUpdateMsg(true)
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+        }
+      } catch (e) {
+        // 网络错误忽略
+      }
+    }
+    checkVersionRemote()
   }, [])
 
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
