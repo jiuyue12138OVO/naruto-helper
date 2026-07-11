@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 修改此处即可：任何字符串，只要与之前不同就会触发更新
-const DATA_VERSION = '2026-07-11'
+const DATA_VERSION = '2026-07-11-1'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
