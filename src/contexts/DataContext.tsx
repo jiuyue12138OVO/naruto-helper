@@ -15,8 +15,8 @@ const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
-// 🔥 修改此处即可：每次更新数据时改一个新字符串，例如 '2026-07-12'
-const DATA_VERSION = '2026-07-12-20-46'
+// 🔥 版本号：部署到线上前修改此值即可强制用户更新数据
+const DATA_VERSION = '2026-07-12-01-41'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -32,8 +32,13 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 🔥 版本检查：只要存储的版本不等于当前版本，就清除所有数据
+// 🔥 版本检查：本地开发环境不执行，线上环境才生效
 function checkVersionAndClearIfNeeded() {
+  // 如果当前是本地开发（localhost 或 127.0.0.1），直接返回，不清除数据
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return
+  }
+
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
     try {
@@ -45,6 +50,7 @@ function checkVersionAndClearIfNeeded() {
       scopedStorage.removeItem(NINJA_TAGS_KEY)
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
     } catch (e) { /* 忽略清除错误 */ }
+    // 更新版本号
     saveToStorage(VERSION_KEY, DATA_VERSION)
   }
 }
