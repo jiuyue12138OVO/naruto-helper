@@ -15,8 +15,8 @@ const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
-// 🔥 版本号（必须与 public/version.json 和 index.html 中的 LATEST_DATA_VERSION 完全一致）
-const DATA_VERSION = '2026-07-11-18-46'
+// 🔥 修改此处即可：每次更新数据时改一个新字符串，例如 '2026-07-12'
+const DATA_VERSION = '2026-07-12-20-46'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -32,8 +32,8 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 本地版本检查（如果版本不一致，仅清除数据，不刷新）
-function ensureDataVersion() {
+// 🔥 版本检查：只要存储的版本不等于当前版本，就清除所有数据
+function checkVersionAndClearIfNeeded() {
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
     try {
@@ -46,9 +46,7 @@ function ensureDataVersion() {
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
     } catch (e) { /* 忽略清除错误 */ }
     saveToStorage(VERSION_KEY, DATA_VERSION)
-    return true
   }
-  return false
 }
 
 const DEFAULT_NINJA_TAGS = [
@@ -85,22 +83,13 @@ interface DataContextType {
   updateCounter: (id: string, data: Partial<IBPCounter>) => void
   deleteCounter: (id: string) => void
   resetAllData: () => void
-  showUpdateMsg: boolean
 }
 
 const DataContext = createContext<DataContextType | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [showUpdateMsg, setShowUpdateMsg] = useState(false)
-
-  // 挂载时仅进行版本清理，无刷新
-  useEffect(() => {
-    const updated = ensureDataVersion()
-    if (updated) {
-      setShowUpdateMsg(true)
-      setTimeout(() => setShowUpdateMsg(false), 2000)
-    }
-  }, [])
+  // 🔥 在组件初始化时调用版本检查
+  checkVersionAndClearIfNeeded()
 
   const [ninjas, setNinjas] = useState<INinja[]>(() => {
     const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
@@ -333,7 +322,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateCounter,
         deleteCounter,
         resetAllData,
-        showUpdateMsg,
       }}
     >
       {children}

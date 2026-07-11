@@ -2726,5 +2726,93 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         }
       ]
+    },
+    {
+      "id": "1783773764346",
+      "ninjaId": "1783763999035",
+      "ninjaName": "不缘",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        },
+        {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1783773783144",
+      "ninjaId": "1783773559637",
+      "ninjaName": "春野樱【沙滩排球】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1783773796844",
+      "ninjaId": "1783773718280",
+      "ninjaName": "干柿鬼鲛【鲛肌融合】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1783773814925",
+      "ninjaId": "1783735988278",
+      "ninjaName": "宇智波佐助【兄弟之战】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 4
+        }
+      ]
     }
   ]

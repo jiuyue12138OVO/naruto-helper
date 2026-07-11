@@ -9,32 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>火影忍者辅助助手</title>
     <link href="https://lf3-static.bytednsdoc.com/obj/eden-cn/ylcylz_fsph_ryhs/ljhwZthlaukjlkulzlp/feisuda/feisuda.svg" rel="shortcut icon"/>
-    
-    <!-- 🔥 版本更新（无刷新） -->
-    <script>
-      (function() {
-        const LATEST_DATA_VERSION = '2026-07-11-18-46';   // 每次更新数据后修改此处
-        try {
-          const storedVersion = localStorage.getItem('naruto_data_version');
-          if (storedVersion !== LATEST_DATA_VERSION) {
-            // 清除所有旧数据
-            const keys = [
-              'naruto_ninjas',
-              'naruto_scrolls',
-              'naruto_recommendations',
-              'naruto_summons',
-              'naruto_counters',
-              'naruto_ninja_tags',
-              'naruto_blind_pick_order'
-            ];
-            keys.forEach(function(k) { localStorage.removeItem(k); });
-            // 写入最新版本号（无需刷新，页面会自然加载新数据）
-            localStorage.setItem('naruto_data_version', LATEST_DATA_VERSION);
-          }
-        } catch(e) {}
-      })();
-    </script>
-
     <script>
       // 强制守护标题，防止被 AppContainer 覆盖
       (function() {
@@ -51,7 +25,6 @@
         });
       })();
     </script>
-
     <script>
       // SPA 路由恢复：配合 404.html 实现刷新页面时正常显示对应页面
       (function(){
