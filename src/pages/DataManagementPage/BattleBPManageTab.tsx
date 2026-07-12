@@ -86,16 +86,6 @@ export default function BattleBPManageTab() {
     return [...ordered, ...remaining]
   }, [blindPickNinjas, blindPickOrder, ninjas])
 
-  const moveBlindPick = (index: number, direction: 'up' | 'down') => {
-    const newOrder = orderedBlindNinjas.map(n => n.id)
-    if (direction === 'up' && index > 0) {
-      [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]]
-    } else if (direction === 'down' && index < newOrder.length - 1) {
-      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]]
-    }
-    setBlindPickOrder(newOrder)
-  }
-
   const moveFormItem = (type: 'ninja' | 'scroll' | 'summon', index: number, direction: 'up' | 'down') => {
     setForm(prev => {
       const key = type === 'ninja' ? 'counterNinjaIds' : type === 'scroll' ? 'counterScrollIds' : 'counterSummonIds'
@@ -114,7 +104,6 @@ export default function BattleBPManageTab() {
     return ninjas.filter(n => n.name.toLowerCase().includes(searchNinja.toLowerCase()))
   }, [ninjas, searchNinja])
 
-  // 将盲选位忍者列表按梯度分组
   const groupedFilteredNinjas = useMemo(() => {
     return TIER_ORDER.map(tier => ({
       tier,
@@ -138,7 +127,6 @@ export default function BattleBPManageTab() {
     return summons.filter(s => s.name.toLowerCase().includes(searchCounterSummon.toLowerCase()))
   }, [summons, searchCounterSummon])
 
-  // 忍者选择器过滤列表
   const filteredSelectNinjas = useMemo(() => {
     if (!searchSelectNinja) return ninjas
     return ninjas.filter(n => n.name.toLowerCase().includes(searchSelectNinja.toLowerCase()))
@@ -181,7 +169,6 @@ export default function BattleBPManageTab() {
     })
   }
 
-  // 根据梯度对克制关系忍者分组（用于弹窗显示）
   const groupedSelectNinjas = useMemo(() => {
     return TIER_ORDER.map(tier => ({
       tier,
@@ -189,7 +176,6 @@ export default function BattleBPManageTab() {
     })).filter(group => group.ninjas.length > 0)
   }, [filteredSelectNinjas])
 
-  // 渲染忍者项目（带图片）
   const renderNinjaItem = (n: (typeof ninjas)[number]) => (
     <div className="flex items-center gap-2">
       <div className="w-6 h-6 rounded overflow-hidden bg-muted shrink-0">
@@ -198,6 +184,31 @@ export default function BattleBPManageTab() {
       <span className="truncate">{n.name}</span>
     </div>
   )
+
+  // 拖拽处理函数
+  const handleDragStart = (e: React.DragEvent, ninjaId: string) => {
+    e.dataTransfer.setData('text/plain', ninjaId)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault()
+    const draggedId = e.dataTransfer.getData('text/plain')
+    if (!draggedId) return
+    const currentOrder = orderedBlindNinjas.map(n => n.id)
+    const fromIndex = currentOrder.indexOf(draggedId)
+    if (fromIndex < 0 || fromIndex === targetIndex) return
+
+    const newOrder = [...currentOrder]
+    newOrder.splice(fromIndex, 1)
+    newOrder.splice(targetIndex, 0, draggedId)
+    setBlindPickOrder(newOrder)
+  }
 
   return (
     <Accordion type="single" collapsible className="space-y-6">
@@ -214,7 +225,6 @@ export default function BattleBPManageTab() {
                   <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input value={searchNinja} onChange={e => setSearchNinja(e.target.value)} placeholder="搜索忍者..." className="pl-9" />
                 </div>
-                {/* 按梯度分组展示忍者复选框 */}
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {groupedFilteredNinjas.map(group => (
                     <div key={group.tier}>
@@ -239,20 +249,24 @@ export default function BattleBPManageTab() {
                   )}
                 </div>
 
-                {/* 盲选位排序区域 */}
+                {/* 盲选位拖拽排序区域 */}
                 {orderedBlindNinjas.length > 0 && (
                   <div>
-                    <Label className="mb-2">盲选位排序（点击上下箭头调整顺序）</Label>
+                    <Label className="mb-2">盲选位排序（按住拖动调整顺序）</Label>
                     <div className="space-y-1">
                       {orderedBlindNinjas.map((ninja, idx) => (
-                        <div key={ninja.id} className="flex items-center gap-2 bg-muted/40 rounded px-2 py-1">
+                        <div
+                          key={ninja.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, ninja.id)}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx)}
+                          className="flex items-center gap-2 bg-muted/40 rounded px-2 py-1 cursor-grab active:cursor-grabbing hover:bg-muted/60 transition-colors"
+                        >
+                          <span className="text-xs text-muted-foreground w-5 text-right font-mono">
+                            {idx + 1}
+                          </span>
                           {renderNinjaItem(ninja)}
-                          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === 0} onClick={() => moveBlindPick(idx, 'up')}>
-                            <ArrowUp className="size-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === orderedBlindNinjas.length - 1} onClick={() => moveBlindPick(idx, 'down')}>
-                            <ArrowDown className="size-4" />
-                          </Button>
                         </div>
                       ))}
                     </div>
@@ -264,7 +278,7 @@ export default function BattleBPManageTab() {
         </Card>
       </AccordionItem>
 
-      {/* 克制关系配置 */}
+      {/* 克制关系配置（保持不变） */}
       <AccordionItem value="counter-config">
         <Card>
           <CardContent className="p-4 space-y-4">

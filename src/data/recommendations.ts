@@ -618,6 +618,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
+          "priority": 2
         }
       ]
     },
@@ -2812,6 +2817,23 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1783820728398",
+      "ninjaId": "1783820703293",
+      "ninjaName": "猿飞日斩",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
         }
       ]
     }
