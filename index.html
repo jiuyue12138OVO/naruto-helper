@@ -7,42 +7,36 @@
     <meta http-equiv="Expires" content="0" />
 
     <!-- 🔥 全局拦截飞书 / 监控请求 -->
-    <script>
+    <!-- 🔥 图标守护：动态 GIF，监听 DOM 变化，防止被删除 -->
+<script>
   (function() {
-    const ICON_PATH = '/naruto.gif'; // 确保 public/ 下有 naruto.gif
+    const ICON_PATH = '/naruto.gif';
 
-    function setFavicon() {
-      document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(link => {
-        link.parentNode.removeChild(link);
-      });
-      const link = document.createElement('link');
-      link.rel = 'icon';
-      link.type = 'image/gif';
-      link.href = ICON_PATH;
-      document.head.appendChild(link);
+    function ensureFavicon() {
+      let icon = document.querySelector('link[rel="icon"]');
+      // 如果图标不存在，或者路径不对，则重新创建
+      if (!icon || icon.getAttribute('href') !== ICON_PATH) {
+        if (icon) icon.remove();
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/gif';
+        link.href = ICON_PATH;
+        document.head.appendChild(link);
+      }
     }
 
-    setFavicon();
-    // 每 500ms 重新设置，防止 AppContainer 删除
-    setInterval(setFavicon, 500);
+    // 立即设置
+    ensureFavicon();
+
+    // 监听 <head> 的子节点变化、属性变化，一旦图标被修改就恢复
+    new MutationObserver(ensureFavicon).observe(document.head, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['href']
+    });
   })();
   </script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>火影忍者辅助助手</title>
-
-    <!-- 标题守护 -->
-    <script>
-      (function() {
-        const TITLE = "火影忍者辅助助手";
-        document.title = TITLE;
-        new MutationObserver(function() {
-          if (document.title !== TITLE) document.title = TITLE;
-        }).observe(document.querySelector('title') || document.head, {
-          childList: true, subtree: true, characterData: true
-        });
-      })();
-    </script>
 
     <!-- 🔥 图标：使用您的 GIF 作为动态图标 -->
     <script>
