@@ -16,10 +16,9 @@ export default function HeroSection() {
   const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [wallpapers, setWallpapers] = useState<string[]>([])
-  const [isReady, setIsReady] = useState(false) // 首张图是否已加载
+  const [isReady, setIsReady] = useState(false)
   const nextImageRef = useRef<HTMLImageElement | null>(null)
 
-  // 随机打乱数组
   const shuffleArray = useCallback((arr: string[]) => {
     const shuffled = [...arr]
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -29,51 +28,45 @@ export default function HeroSection() {
     return shuffled
   }, [])
 
-  // 初始化：打乱所有壁纸，并预加载第一张
   useEffect(() => {
     const all = getAllWallpapers()
     if (all.length > 0) {
       const shuffled = shuffleArray(all)
       setWallpapers(shuffled)
-      // 预加载第一张壁纸
       const img = new Image()
       img.src = shuffled[0]
       img.onload = () => setIsReady(true)
     }
   }, [shuffleArray])
 
-  // 预加载下一张壁纸（当 currentIndex 或 wallpapers 变化时）
   useEffect(() => {
     if (wallpapers.length === 0) return
     const nextIndex = (currentIndex + 1) % wallpapers.length
     const img = new Image()
     img.src = wallpapers[nextIndex]
     nextImageRef.current = img
-    // 不需要 onload 回调，只是让浏览器缓存
   }, [currentIndex, wallpapers])
 
-  // 定时切换
   useEffect(() => {
     if (wallpapers.length === 0) return
     const timer = setInterval(() => {
       setCurrentIndex(prev => {
         const next = prev + 1
         if (next >= wallpapers.length) {
-          // 一轮播放完后重新洗牌并返回开头
           setWallpapers(shuffleArray(getAllWallpapers()))
           return 0
         }
         return next
       })
-    }, 5000) // 5 秒切换
+    }, 5000)
     return () => clearInterval(timer)
   }, [wallpapers, shuffleArray])
 
   const currentWallpaper = isReady ? (wallpapers[currentIndex] || '') : ''
 
   return (
-    <section className="w-full relative overflow-hidden">
-      {/* 背景轮播 */}
+    <section className="w-full relative overflow-hidden min-h-screen flex flex-col">
+      {/* 背景轮播：覆盖整个 section */}
       <div className="absolute inset-0">
         <AnimatePresence initial={false}>
           {currentWallpaper && (
@@ -92,36 +85,35 @@ export default function HeroSection() {
             />
           )}
         </AnimatePresence>
-        {/* 固定渐变遮罩 */}
+        {/* 渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
       </div>
 
-      {/* 内容 */}
-      <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-2xl mx-auto"
-        >
+      {/* 内容区域：垂直居中，顶部留出标题栏高度 */}
+      <div className="relative flex-1 flex items-center justify-center pt-16">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32 text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-            火影忍者手游辅助工具
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6"
+            >
+              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+              火影忍者手游辅助工具
+            </motion.div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4">
-            火影忍者<span className="text-primary">辅助助手</span>
-          </h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-            一站式忍者强度排行、密卷推荐搭配、数据管理，助你制霸决斗场
-          </p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4">
+              火影忍者<span className="text-primary">辅助助手</span>
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
+              强度排行 · 密卷推荐 · 通灵兽大全 · 武斗赛BP
+            </p>
 
-          <div className="flex items-center justify-center gap-3">
             <Button
               size="lg"
               className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 shadow-lg shadow-orange-500/25"
@@ -130,15 +122,8 @@ export default function HeroSection() {
               查看强度排行
               <ArrowRight className="size-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => navigate('/ninja-scroll')}
-            >
-              密卷推荐
-            </Button>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   )
