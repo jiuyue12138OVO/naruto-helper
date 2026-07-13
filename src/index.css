@@ -21,3 +21,22 @@ body {
 main, .min-h-screen {
   background-color: transparent !important;
 }
+
+/* ===== 隐藏飞书妙搭水印 ===== */
+/* 尝试通过属性选择器隐藏 */
+[data-watermark],
+[class*="watermark"],
+[class*="miaoda"],
+a[href*="miaoda"] {
+  display: none !important;
+}
+
+/* 如果水印是固定定位在右下角的容器 */
+body > div[style*="position: fixed"][style*="right:"][style*="bottom:"] {
+  display: none !important;
+}
+
+/* 覆盖可能的内联样式 */
+[data-miaoda-watermark] {
+  display: none !important;
+}

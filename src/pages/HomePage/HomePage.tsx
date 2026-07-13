@@ -9,7 +9,7 @@ export default function HomePage() {
       {/* 缓存提示条 */}
       <div className="w-full bg-card/80 backdrop-blur-sm border-y border-border/30 py-2 px-4 text-center">
         <p className="text-sm text-muted-foreground">
-          为获取最新数据更新，建议清除浏览器缓存或使用无痕模式打开本站。
+          若未能获取最新数据，请清除浏览器缓存或使用无痕模式打开本站。
         </p>
       </div>
 

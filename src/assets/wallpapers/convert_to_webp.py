@@ -19,13 +19,18 @@ for filename in os.listdir(folder):
     base, ext = os.path.splitext(filename)
     ext_lower = ext.lower()
 
+    # 🔥 跳过已存在的 WebP 文件，避免重复压缩造成质量损失
+    if ext_lower == '.webp':
+        print(f'⏭️ 跳过 WebP 文件: {filename}')
+        continue
+
     try:
         img = Image.open(filepath)
         # 限制图片尺寸
         img.thumbnail(MAX_SIZE, Image.Resampling.LANCZOS)
 
         if ext_lower in convert_extensions:
-            # 新图：转换为 WebP 并保存
+            # 转换为 WebP 并保存
             new_name = base + '.webp'
             new_path = os.path.join(folder, new_name)
             img.save(new_path, 'webp', quality=WEBP_QUALITY)
@@ -33,10 +38,6 @@ for filename in os.listdir(folder):
             if DELETE_ORIGINALS:
                 os.remove(filepath)
                 print(f'🗑️ 已删除原文件: {filename}')
-        elif ext_lower == '.webp':
-            # 已有的 WebP：直接覆盖二次压缩
-            img.save(filepath, 'webp', quality=WEBP_QUALITY)
-            print(f'🔄 二次压缩: {filename}')
         else:
             print(f'⏭️ 跳过非图片文件: {filename}')
     except Exception as e:

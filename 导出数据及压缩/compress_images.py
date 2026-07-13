@@ -16,26 +16,24 @@ def compress_base64_image(base64_str: str) -> str:
     # 匹配 data:image/...;base64,... 前缀
     match = re.match(r'^data:image/(\w+);base64,(.+)$', base64_str)
     if not match:
-        # 如果不是 base64 图片（可能是 URL），直接返回
         return base64_str
 
-    img_format = match.group(1)  # png, jpeg, jpg...
+    img_format = match.group(1).lower()  # png, jpeg, jpg, webp...
     img_data = match.group(2)
 
+    # 🔥 如果已经是 WebP 格式，跳过压缩，避免重复压缩
+    if img_format == 'webp':
+        return base64_str
+
     try:
-        # 解码 base64
         img_bytes = base64.b64decode(img_data)
     except Exception:
-        return base64_str  # 解码失败，保留原样
+        return base64_str
 
     try:
         with Image.open(io.BytesIO(img_bytes)) as img:
-            # 如果图片过大，缩放至 MAX_IMAGE_SIZE 以内
             img.thumbnail(MAX_IMAGE_SIZE, Image.Resampling.LANCZOS)
-            # 转换为 RGB（WebP 不支持 RGBA 透明度？支持，但有损模式默认使用 RGBA 转 RGB，无损保留透明）
-            # 如果有透明通道且想保留，可改为 lossless=True，但体积更大。这里使用有损压缩，转为 RGB
             if img.mode in ('RGBA', 'LA', 'P'):
-                # 有透明通道的处理：创建白色背景
                 background = Image.new('RGB', img.size, (255, 255, 255))
                 if img.mode == 'P':
                     img = img.convert('RGBA')
@@ -44,11 +42,9 @@ def compress_base64_image(base64_str: str) -> str:
             elif img.mode != 'RGB':
                 img = img.convert('RGB')
 
-            # 保存为 WebP 到字节流
             output = io.BytesIO()
             img.save(output, format='webp', quality=WEBP_QUALITY)
             webp_bytes = output.getvalue()
-        # 重新编码为 base64
         new_b64 = base64.b64encode(webp_bytes).decode('utf-8')
         return f'data:image/webp;base64,{new_b64}'
     except Exception as e:
