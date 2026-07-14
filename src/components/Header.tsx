@@ -21,7 +21,7 @@ export default function Header() {
         <NavLink to="/" className="flex items-center gap-2 shrink-0">
           <div className="size-8 rounded-lg bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center overflow-hidden">
             <img
-              src="/naruto-icon.png"
+              src={import.meta.env.BASE_URL + 'naruto-icon.png'}
               alt="Naruto Helper"
               className="w-full h-full object-cover"
             />
