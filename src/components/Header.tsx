@@ -1,15 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { Swords, ScrollText, Eye, Home, Menu, X, Flame, Shield } from 'lucide-react'
+import { Home, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const NAV_ITEMS = [
   { path: '/', label: '首页', icon: Home },
-  { path: '/tier-list', label: '忍者强度排行', icon: Swords },
-  { path: '/scroll-list', label: '密卷大全', icon: Eye },
-  { path: '/summons', label: '通灵兽大全', icon: Flame },
-  { path: '/ninja-scroll', label: '忍者密卷推荐', icon: ScrollText },
-  { path: '/battle-bp', label: '武斗赛BP', icon: Shield },
+  { path: '/tier-list', label: '忍者', icon: '🥷🏻' },
+  { path: '/scrolls', label: '密卷', icon: '📜' },
+  { path: '/summons', label: '通灵兽', icon: '🐶' },
+  { path: '/battle-bp', label: '武斗赛', icon: '🏆' },
 ]
 
 export default function Header() {
@@ -45,7 +44,11 @@ export default function Header() {
                   }`
                 }
               >
-                <Icon className="size-4" />
+                {typeof Icon === 'string' ? (
+                  <span className="text-base leading-none">{Icon}</span>
+                ) : (
+                  <Icon className="size-4" />
+                )}
                 {item.label}
               </NavLink>
             )
@@ -84,7 +87,11 @@ export default function Header() {
                     }`
                   }
                 >
-                  <Icon className="size-4" />
+                  {typeof Icon === 'string' ? (
+                    <span className="text-base leading-none">{Icon}</span>
+                  ) : (
+                    <Icon className="size-4" />
+                  )}
                   {item.label}
                 </NavLink>
               )

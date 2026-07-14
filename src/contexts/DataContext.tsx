@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 版本号：部署到线上前修改此值即可强制用户更新数据
-const DATA_VERSION = '2026-07-13-23-10'
+const DATA_VERSION = '2026-07-14-11-00'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -69,7 +69,8 @@ interface DataContextType {
   ninjaTags: string[]
   counters: IBPCounter[]
   blindPickOrder: string[]
-  setBlindPickOrder: (order: string[]) => void
+  // 🔥 修改这里：接受直接赋值或函数式更新
+  setBlindPickOrder: (order: string[] | ((prev: string[]) => string[])) => void
   addNinja: (ninja: INinja) => void
   updateNinja: (id: string, data: Partial<INinja>) => void
   deleteNinja: (id: string) => void

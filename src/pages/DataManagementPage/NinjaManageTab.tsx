@@ -104,6 +104,9 @@ export default function NinjaManageTab() {
   // 新增标签状态
   const [newTagName, setNewTagName] = useState('')
 
+  // 🔥 新增：待删除的标签名称（用于确认对话框）
+  const [tagToDelete, setTagToDelete] = useState<string | null>(null)
+
   const handleAddTag = () => {
     const tag = newTagName.trim()
     if (tag && !ninjaTags.includes(tag)) {
@@ -197,6 +200,14 @@ export default function NinjaManageTab() {
     if (deleteId) {
       deleteNinja(deleteId)
       setDeleteId(null)
+    }
+  }
+
+  // 🔥 处理删除标签的确认
+  function handleDeleteTagConfirm() {
+    if (tagToDelete) {
+      removeNinjaTag(tagToDelete)
+      setTagToDelete(null)
     }
   }
 
@@ -437,7 +448,7 @@ export default function NinjaManageTab() {
                         className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation()
-                          removeNinjaTag(tag)
+                          setTagToDelete(tag)   // 🔥 打开确认对话框
                         }}
                         title="删除此标签"
                       >
@@ -467,7 +478,7 @@ export default function NinjaManageTab() {
         </DialogContent>
       </Dialog>
 
-      {/* 删除确认 */}
+      {/* 删除忍者确认 */}
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -479,6 +490,22 @@ export default function NinjaManageTab() {
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>确认删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 🔥 删除标签确认 */}
+      <AlertDialog open={!!tagToDelete} onOpenChange={(v) => !v && setTagToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除标签？</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除标签「{tagToDelete}」吗？此操作将从标签列表中移除该标签，但不会影响已拥有此标签的忍者数据。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTagConfirm}>确认删除</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
