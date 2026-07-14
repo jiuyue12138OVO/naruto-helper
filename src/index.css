@@ -34,3 +34,16 @@ div:has(> p:contains("由妙搭搭建")) {
 div[style*="position: fixed"][style*="right: 12px"][style*="bottom: 12px"] {
   display: none !important;
 }
+/* ===== 响应式背景尺寸 ===== */
+/* 手机端（宽度 < 768px）：完整显示图片，避免裁剪 */
+@media (max-width: 767px) {
+  .bg-hero-wallpaper {
+    background-size: contain;
+  }
+}
+/* 桌面端（宽度 ≥ 768px）：覆盖全屏 */
+@media (min-width: 768px) {
+  .bg-hero-wallpaper {
+    background-size: cover;
+  }
+}

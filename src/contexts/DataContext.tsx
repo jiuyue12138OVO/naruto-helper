@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 版本号：部署到线上前修改此值即可强制用户更新数据
-const DATA_VERSION = '2026-07-14-11-00'
+const DATA_VERSION = '2026-07-14-11-18'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -56,10 +56,28 @@ function checkVersionAndClearIfNeeded() {
 }
 
 const DEFAULT_NINJA_TAGS = [
-  "抓取", "乱闪", "突进", "隐身", "霸体", "飞行", "无敌", "高爆发", "高输出", "格挡",
-  "破霸体", "纯抓", "低真空期", "大招可接", "拉扯", "金刚体", "位移", "高机动性",
-  "大招特殊情况可接", "防反", "瞬发"
-]
+    "抓取",
+    "乱闪",
+    "突进",
+    "隐身",
+    "霸体",
+    "飞行",
+    "无敌",
+    "高爆发",
+    "高输出",
+    "格挡",
+    "破霸体",
+    "纯抓",
+    "低真空期",
+    "大招可接",
+    "拉扯",
+    "金刚体",
+    "位移",
+    "高机动性",
+    "大招特殊情况可接",
+    "防反",
+    "瞬发"
+  ]
 
 interface DataContextType {
   ninjas: INinja[]

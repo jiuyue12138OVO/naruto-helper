@@ -19,11 +19,6 @@ export default function HeroSection() {
   const [isReady, setIsReady] = useState(false)
   const nextImageRef = useRef<HTMLImageElement | null>(null)
 
-  // 🔥 响应式背景尺寸：手机端完整显示，桌面端覆盖全屏
-  const [bgSize, setBgSize] = useState<'cover' | 'contain'>(
-    typeof window !== 'undefined' && window.innerWidth < 768 ? 'contain' : 'cover'
-  )
-
   const shuffleArray = useCallback((arr: string[]) => {
     const shuffled = [...arr]
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -67,21 +62,12 @@ export default function HeroSection() {
     return () => clearInterval(timer)
   }, [wallpapers, shuffleArray])
 
-  // 监听窗口变化，更新背景尺寸
-  useEffect(() => {
-    const handleResize = () => {
-      setBgSize(window.innerWidth < 768 ? 'contain' : 'cover')
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
   const currentWallpaper = isReady ? (wallpapers[currentIndex] || '') : ''
 
   return (
     <section className="w-full relative overflow-hidden min-h-screen flex flex-col">
       {/* 背景轮播：覆盖整个 section */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-[#0a0a10]">
         <AnimatePresence initial={false}>
           {currentWallpaper && (
             <motion.div
@@ -90,13 +76,9 @@ export default function HeroSection() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.2, ease: 'easeInOut' }}
-              className="absolute inset-0"
+              className="absolute inset-0 bg-no-repeat bg-center bg-hero-wallpaper"
               style={{
                 backgroundImage: `url(${currentWallpaper})`,
-                backgroundSize: bgSize,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                backgroundColor: '#0a0a10', // 空白区域填充深色
               }}
             />
           )}
