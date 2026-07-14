@@ -6,10 +6,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <HeroSection />
       
-      {/* 缓存提示条 */}
-      <div className="w-full bg-card/80 backdrop-blur-sm border-y border-border/30 py-2 px-4 text-center">
+      {/* 提示条：缓存 + 数据加载说明 */}
+      <div className="w-full bg-card/80 backdrop-blur-sm border-y border-border/30 py-3 px-4 text-center space-y-1">
         <p className="text-sm text-muted-foreground">
           若未能获取最新数据，请清除浏览器缓存或使用无痕模式打开本站。
+        </p>
+        <p className="text-sm text-muted-foreground">
+          点击下方功能卡片后，将按需加载对应数据，首次打开可能稍慢，再次访问速度更快。
         </p>
       </div>
 
