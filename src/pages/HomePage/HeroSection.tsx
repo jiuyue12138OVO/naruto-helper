@@ -28,27 +28,31 @@ export default function HeroSection() {
     return shuffled
   }, [])
 
+  // 初始化：仅预加载第一张壁纸，快速显示
   useEffect(() => {
     const all = getAllWallpapers()
     if (all.length > 0) {
       const shuffled = shuffleArray(all)
       setWallpapers(shuffled)
+      // 只预加载第一张
       const img = new Image()
       img.src = shuffled[0]
       img.onload = () => setIsReady(true)
     }
   }, [shuffleArray])
 
+  // 每次 currentIndex 变化时，预加载下一张壁纸（确保下次切换流畅）
   useEffect(() => {
-    if (wallpapers.length === 0) return
+    if (!isReady || wallpapers.length === 0) return
     const nextIndex = (currentIndex + 1) % wallpapers.length
     const img = new Image()
     img.src = wallpapers[nextIndex]
     nextImageRef.current = img
-  }, [currentIndex, wallpapers])
+  }, [currentIndex, wallpapers, isReady])
 
+  // 定时切换
   useEffect(() => {
-    if (wallpapers.length === 0) return
+    if (!isReady || wallpapers.length === 0) return
     const timer = setInterval(() => {
       setCurrentIndex(prev => {
         const next = prev + 1
@@ -60,13 +64,13 @@ export default function HeroSection() {
       })
     }, 5000)
     return () => clearInterval(timer)
-  }, [wallpapers, shuffleArray])
+  }, [isReady, wallpapers, shuffleArray])
 
   const currentWallpaper = isReady ? (wallpapers[currentIndex] || '') : ''
 
   return (
     <section className="w-full relative overflow-hidden min-h-screen flex flex-col">
-      {/* 背景轮播：覆盖整个 section */}
+      {/* 背景轮播：首屏加载时显示纯色背景 */}
       <div className="absolute inset-0 bg-[#0a0a10]">
         <AnimatePresence initial={false}>
           {currentWallpaper && (
@@ -83,7 +87,7 @@ export default function HeroSection() {
             />
           )}
         </AnimatePresence>
-        {/* 渐变遮罩 */}
+        {/* 渐变遮罩始终存在 */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
       </div>
 
