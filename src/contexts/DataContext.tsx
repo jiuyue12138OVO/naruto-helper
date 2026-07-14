@@ -16,7 +16,7 @@ const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
 // 🔥 版本号：部署到线上前修改此值即可强制用户更新数据
-const DATA_VERSION = '2026-07-14-11-42'
+import { DATA_VERSION } from '@/version'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {

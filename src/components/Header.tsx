@@ -17,13 +17,17 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/30">
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex h-16 items-center justify-between">
-        {/* Logo */}
+        {/* Logo：使用网站图标 + 英文名称 */}
         <NavLink to="/" className="flex items-center gap-2 shrink-0">
-          <div className="size-8 rounded-lg bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">忍</span>
+          <div className="size-8 rounded-lg bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center overflow-hidden">
+            <img
+              src="/naruto-icon.png"
+              alt="Naruto Helper"
+              className="w-full h-full object-cover"
+            />
           </div>
           <span className="text-lg font-bold text-foreground hidden sm:block">
-            忍者助手
+            Naruto Helper
           </span>
         </NavLink>
 
