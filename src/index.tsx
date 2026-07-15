@@ -24,3 +24,11 @@ createRoot(document.getElementById("root")!).render(
     </HashRouter>
   </StrictMode>,
 );
+
+// 移除初始加载提示（带淡出动画）
+const loadingEl = document.getElementById('initial-loading');
+if (loadingEl) {
+  loadingEl.style.transition = 'opacity 0.3s';
+  loadingEl.style.opacity = '0';
+  setTimeout(() => loadingEl.remove(), 300);
+}
