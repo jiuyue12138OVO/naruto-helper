@@ -3156,5 +3156,17 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         }
       ]
+    },
+    {
+      "id": "1784093273217",
+      "ninjaId": "1784074755345",
+      "ninjaName": "大蛇丸",
+      "scrolls": [
+        {
+          "scrollId": "1783349733336",
+          "scrollName": "冰遁·燕吹雪",
+          "priority": 1
+        }
+      ]
     }
   ]

@@ -126,6 +126,14 @@ export default function NinjaManageTab() {
     setNewTagName('')
   }
 
+  // 切换趋势标记
+  const handleToggleTrend = useCallback((ninjaId: string) => {
+    const ninja = ninjas.find(n => n.id === ninjaId)
+    if (!ninja) return
+    const nextTrend = ninja.trend === 'up' ? 'down' : (ninja.trend === 'down' ? undefined : 'up')
+    updateNinja(ninjaId, { trend: nextTrend })
+  }, [ninjas, updateNinja])
+
   // 表格过滤 + 排序
   const filteredAndSorted = useMemo(() => {
     let list = [...ninjas]
@@ -256,15 +264,6 @@ export default function NinjaManageTab() {
       setTagToDelete(null)
     }
   }
-
-  // 表格和梯度视图共用的编辑按钮（在梯度视图中点击铅笔图标）
-  const handleEditFromGrid = useCallback((ninja: INinja) => {
-    openEdit(ninja)
-  }, [])
-
-  const handleDeleteFromGrid = useCallback((id: string) => {
-    setDeleteId(id)
-  }, [])
 
   return (
     <div className="space-y-4">
@@ -460,11 +459,24 @@ export default function NinjaManageTab() {
                         onDragStart={(e) => handleGridDragStart(e, ninja.id)}
                         className="cursor-grab active:cursor-grabbing group relative"
                       >
-                        <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1">
+                        <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
                           <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
+                          {/* 趋势标记按钮 (移至左下角) */}
+                          <button
+                            className={`absolute bottom-1 left-1 z-10 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold bg-background/60 backdrop-blur-sm transition-colors ${
+                              ninja.trend === 'up' ? 'text-red-500' : ninja.trend === 'down' ? 'text-green-500' : 'text-muted-foreground/60'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleTrend(ninja.id);
+                            }}
+                            title="点击切换升降标记"
+                          >
+                            {ninja.trend === 'up' ? '▲' : ninja.trend === 'down' ? '▼' : '●'}
+                          </button>
                         </Card>
                         <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
-                        {/* 操作按钮（悬停显示） */}
+                        {/* 操作按钮（悬停显示，仍在右上角） */}
                         <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             size="icon"

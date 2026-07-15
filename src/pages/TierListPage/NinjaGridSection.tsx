@@ -39,6 +39,16 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
     return acc
   }, {})
 
+  // 每个梯度内部排序：趋势上升的优先，然后无趋势，然后趋势下降的
+  Object.keys(grouped).forEach(tier => {
+    grouped[tier].sort((a, b) => {
+      const trendOrder = { up: 0, undefined: 1, down: 2 }
+      const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
+      const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
+      return trendA - trendB
+    })
+  })
+
   if (ninjas.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
@@ -79,15 +89,33 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: i * 0.03 }}
                     whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    className="cursor-pointer"
+                    className="cursor-pointer relative"
                     onClick={() => setSelectedNinja(ninja)}
                   >
-                    <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors group aspect-square flex items-center justify-center p-1">
+                    <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
                       <Image
                         src={ninja.imageUrl}
                         alt={ninja.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                       />
+                      {/* 动态升降箭头（右上角） */}
+                      {ninja.trend && (
+                        <motion.span
+                          className={`absolute top-1 right-1 text-xs font-bold bg-background/60 rounded-full px-1 py-0.5 backdrop-blur-sm ${
+                            ninja.trend === 'up' ? 'text-red-500' : 'text-green-500'
+                          }`}
+                          animate={{
+                            y: ninja.trend === 'up' ? [-2, 2, -2] : [2, -2, 2],
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                          }}
+                        >
+                          {ninja.trend === 'up' ? '▲' : '▼'}
+                        </motion.span>
+                      )}
                     </Card>
                     <p className="text-xs text-muted-foreground truncate text-center mt-1 leading-tight">
                       {ninja.name}
@@ -100,7 +128,7 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
         })}
       </div>
 
-      {/* 详情弹窗（包含完整信息） */}
+      {/* 详情弹窗（包含趋势信息） */}
       <Dialog open={!!selectedNinja} onOpenChange={(open) => !open && setSelectedNinja(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -134,6 +162,14 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
                     {selectedNinja.rating}
                   </Badge>
                 </div>
+                {selectedNinja.trend && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">趋势：</span>
+                    <Badge variant="secondary" className={`text-xs ${selectedNinja.trend === 'up' ? 'text-red-500' : 'text-green-500'}`}>
+                      {selectedNinja.trend === 'up' ? '上升' : '下降'}
+                    </Badge>
+                  </div>
+                )}
               </div>
 
               {selectedNinja.tags && selectedNinja.tags.length > 0 && (
