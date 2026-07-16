@@ -6,7 +6,7 @@ from PIL import Image
 import os
 
 # ================= 配置 =================
-INPUT_JSON = "导出数据及压缩/naruto-data-2026-07-15.json"  # 输入文件名
+INPUT_JSON = "导出数据及压缩/naruto-data-2026-07-16.json"  # 输入文件名
 OUTPUT_JSON = "导出数据及压缩/naruto-data-compressed.json"  # 输出文件名
 WEBP_QUALITY = 80  # WebP 质量（1-100），80 是推荐平衡点
 MAX_IMAGE_SIZE = (800, 800)  # 限制图片最大尺寸，防止过大

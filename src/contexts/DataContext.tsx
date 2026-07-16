@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { scopedStorage } from '@lark-apaas/client-toolkit-lite'
-import { INinja, MOCK_NINJAS } from '@/data/ninjas'
-import { IScroll, MOCK_SCROLLS } from '@/data/scrolls'
-import { IRecommendation, MOCK_RECOMMENDATIONS } from '@/data/recommendations'
-import { ISummon, MOCK_SUMMONS } from '@/data/summons'
-import { IBPCounter, MOCK_COUNTERS } from '@/data/battleBp'
+import type { INinja } from '@/data/ninjas'
+import type { IScroll } from '@/data/scrolls'
+import type { IRecommendation } from '@/data/recommendations'
+import type { ISummon } from '@/data/summons'
+import type { IBPCounter } from '@/data/battleBp'
 
 const NINJAS_KEY = 'naruto_ninjas'
 const SCROLLS_KEY = 'naruto_scrolls'
@@ -15,7 +15,6 @@ const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const VERSION_KEY = 'naruto_data_version'
 
-// 🔥 版本号：部署到线上前修改此值即可强制用户更新数据
 import { DATA_VERSION } from '@/version'
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -32,13 +31,10 @@ function saveToStorage(key: string, data: unknown) {
   } catch { /* 静默失败 */ }
 }
 
-// 🔥 版本检查：本地开发环境不执行，线上环境才生效
 function checkVersionAndClearIfNeeded() {
-  // 如果当前是本地开发（localhost 或 127.0.0.1），直接返回，不清除数据
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return
   }
-
   const storedVersion = scopedStorage.getItem(VERSION_KEY)
   if (storedVersion !== DATA_VERSION) {
     try {
@@ -50,34 +46,15 @@ function checkVersionAndClearIfNeeded() {
       scopedStorage.removeItem(NINJA_TAGS_KEY)
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
     } catch (e) { /* 忽略清除错误 */ }
-    // 更新版本号
     saveToStorage(VERSION_KEY, DATA_VERSION)
   }
 }
 
 const DEFAULT_NINJA_TAGS = [
-    "抓取",
-    "乱闪",
-    "突进",
-    "隐身",
-    "霸体",
-    "飞行",
-    "无敌",
-    "高爆发",
-    "高输出",
-    "格挡",
-    "破霸体",
-    "纯抓",
-    "低真空期",
-    "大招可接",
-    "拉扯",
-    "金刚体",
-    "位移",
-    "高机动性",
-    "大招特殊情况可接",
-    "防反",
-    "瞬发"
-  ]
+  "抓取", "乱闪", "突进", "隐身", "霸体", "飞行", "无敌", "高爆发", "高输出",
+  "格挡", "破霸体", "纯抓", "低真空期", "大招可接", "拉扯", "金刚体", "位移",
+  "高机动性", "大招特殊情况可接", "防反", "瞬发"
+]
 
 interface DataContextType {
   ninjas: INinja[]
@@ -87,8 +64,12 @@ interface DataContextType {
   ninjaTags: string[]
   counters: IBPCounter[]
   blindPickOrder: string[]
-  // 🔥 修改这里：接受直接赋值或函数式更新
   setBlindPickOrder: (order: string[] | ((prev: string[]) => string[])) => void
+  ensureNinjas: () => Promise<void>
+  ensureScrolls: () => Promise<void>
+  ensureRecommendations: () => Promise<void>
+  ensureSummons: () => Promise<void>
+  ensureCounters: () => Promise<void>
   addNinja: (ninja: INinja) => void
   updateNinja: (id: string, data: Partial<INinja>) => void
   deleteNinja: (id: string) => void
@@ -113,42 +94,97 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  // 🔥 在组件初始化时调用版本检查
   checkVersionAndClearIfNeeded()
 
-  const [ninjas, setNinjas] = useState<INinja[]>(() => {
-    const stored = loadFromStorage(NINJAS_KEY, MOCK_NINJAS)
-    return stored.map(n => ({
-      ...n,
-      rating: n.rating || 'B',
-      tags: n.tags || [],
-      blindPick: n.blindPick || false,
-    }))
-  })
-  const [scrolls, setScrolls] = useState<IScroll[]>(() =>
-    loadFromStorage(SCROLLS_KEY, MOCK_SCROLLS)
-  )
-  const [recommendations, setRecommendations] = useState<IRecommendation[]>(() =>
-    loadFromStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
-  )
+  const [ninjas, setNinjas] = useState<INinja[]>(() => loadFromStorage(NINJAS_KEY, []))
+  const [scrolls, setScrolls] = useState<IScroll[]>(() => loadFromStorage(SCROLLS_KEY, []))
+  const [recommendations, setRecommendations] = useState<IRecommendation[]>(() => loadFromStorage(RECS_KEY, []))
   const [summons, setSummons] = useState<ISummon[]>(() => {
-    const stored = loadFromStorage(SUMMONS_KEY, MOCK_SUMMONS)
-    return Array.isArray(stored) && stored.length > 0 ? stored : MOCK_SUMMONS
+    const stored = loadFromStorage(SUMMONS_KEY, [])
+    return Array.isArray(stored) ? stored : []
   })
   const [ninjaTags, setNinjaTags] = useState<string[]>(() =>
     loadFromStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
   )
-  const [counters, setCounters] = useState<IBPCounter[]>(() =>
-    loadFromStorage(COUNTERS_KEY, MOCK_COUNTERS)
-  )
+  const [counters, setCounters] = useState<IBPCounter[]>(() => loadFromStorage(COUNTERS_KEY, []))
   const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() =>
     loadFromStorage(BLIND_PICK_ORDER_KEY, [])
   )
+
+  const loadingRef = useRef({
+    ninjas: false,
+    scrolls: false,
+    recs: false,
+    summons: false,
+    counters: false,
+  })
 
   useEffect(() => { saveToStorage(NINJA_TAGS_KEY, ninjaTags) }, [ninjaTags])
   useEffect(() => { saveToStorage(SUMMONS_KEY, summons) }, [summons])
   useEffect(() => { saveToStorage(COUNTERS_KEY, counters) }, [counters])
   useEffect(() => { saveToStorage(BLIND_PICK_ORDER_KEY, blindPickOrder) }, [blindPickOrder])
+
+  // --- Async data loaders ---
+  const ensureNinjas = useCallback(async () => {
+    if (ninjas.length > 0 || loadingRef.current.ninjas) return
+    loadingRef.current.ninjas = true
+    const { MOCK_NINJAS } = await import('@/data/ninjas')
+    setNinjas(prev => {
+      if (prev.length > 0) return prev
+      const data = MOCK_NINJAS.map(n => ({
+        ...n,
+        rating: n.rating || 'B',
+        tags: n.tags || [],
+        blindPick: n.blindPick || false,
+      }))
+      saveToStorage(NINJAS_KEY, data)
+      return data
+    })
+  }, [ninjas.length])
+
+  const ensureScrolls = useCallback(async () => {
+    if (scrolls.length > 0 || loadingRef.current.scrolls) return
+    loadingRef.current.scrolls = true
+    const { MOCK_SCROLLS } = await import('@/data/scrolls')
+    setScrolls(prev => {
+      if (prev.length > 0) return prev
+      saveToStorage(SCROLLS_KEY, MOCK_SCROLLS)
+      return MOCK_SCROLLS
+    })
+  }, [scrolls.length])
+
+  const ensureRecommendations = useCallback(async () => {
+    if (recommendations.length > 0 || loadingRef.current.recs) return
+    loadingRef.current.recs = true
+    const { MOCK_RECOMMENDATIONS } = await import('@/data/recommendations')
+    setRecommendations(prev => {
+      if (prev.length > 0) return prev
+      saveToStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
+      return MOCK_RECOMMENDATIONS
+    })
+  }, [recommendations.length])
+
+  const ensureSummons = useCallback(async () => {
+    if (summons.length > 0 || loadingRef.current.summons) return
+    loadingRef.current.summons = true
+    const { MOCK_SUMMONS } = await import('@/data/summons')
+    setSummons(prev => {
+      if (prev.length > 0) return prev
+      saveToStorage(SUMMONS_KEY, MOCK_SUMMONS)
+      return MOCK_SUMMONS
+    })
+  }, [summons.length])
+
+  const ensureCounters = useCallback(async () => {
+    if (counters.length > 0 || loadingRef.current.counters) return
+    loadingRef.current.counters = true
+    const { MOCK_COUNTERS } = await import('@/data/battleBp')
+    setCounters(prev => {
+      if (prev.length > 0) return prev
+      saveToStorage(COUNTERS_KEY, MOCK_COUNTERS)
+      return MOCK_COUNTERS
+    })
+  }, [counters.length])
 
   // --- Ninja CRUD ---
   const addNinja = useCallback((ninja: INinja) => {
@@ -301,20 +337,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // --- Reset ---
   const resetAllData = useCallback(() => {
-    setNinjas(MOCK_NINJAS)
-    setScrolls(MOCK_SCROLLS)
-    setRecommendations(MOCK_RECOMMENDATIONS)
-    setSummons(MOCK_SUMMONS)
+    setNinjas([])
+    setScrolls([])
+    setRecommendations([])
+    setSummons([])
     setNinjaTags(DEFAULT_NINJA_TAGS)
-    setCounters(MOCK_COUNTERS)
+    setCounters([])
     setBlindPickOrder([])
-    saveToStorage(NINJAS_KEY, MOCK_NINJAS)
-    saveToStorage(SCROLLS_KEY, MOCK_SCROLLS)
-    saveToStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
-    saveToStorage(SUMMONS_KEY, MOCK_SUMMONS)
+    saveToStorage(NINJAS_KEY, [])
+    saveToStorage(SCROLLS_KEY, [])
+    saveToStorage(RECS_KEY, [])
+    saveToStorage(SUMMONS_KEY, [])
     saveToStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
-    saveToStorage(COUNTERS_KEY, MOCK_COUNTERS)
+    saveToStorage(COUNTERS_KEY, [])
     saveToStorage(BLIND_PICK_ORDER_KEY, [])
+    // 标记重置，下次进入页面时会重新动态加载
+    loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false }
   }, [])
 
   return (
@@ -328,6 +366,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         counters,
         blindPickOrder,
         setBlindPickOrder,
+        ensureNinjas,
+        ensureScrolls,
+        ensureRecommendations,
+        ensureSummons,
+        ensureCounters,
         addNinja,
         updateNinja,
         deleteNinja,

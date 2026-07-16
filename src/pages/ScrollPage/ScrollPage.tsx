@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react' // 新增 useEffect
 import { motion } from 'framer-motion'
 import { Search, X, Swords, ScrollText } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -16,20 +16,34 @@ import { IRecommendation } from '@/data/recommendations'
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 
 export default function ScrollPage() {
-  const { scrolls, ninjas, recommendations } = useData()
+  const {
+    scrolls, ninjas, recommendations,
+    ensureScrolls, ensureRecommendations, ensureNinjas // 新增三个加载函数
+  } = useData()
+  const [loading, setLoading] = useState(true)
+
   const [mode, setMode] = useState<'scrollToNinja' | 'ninjaToScroll'>('scrollToNinja')
   const [searchScroll, setSearchScroll] = useState('')
   const [searchNinja, setSearchNinja] = useState('')
   const [selectedScroll, setSelectedScroll] = useState<IScroll | null>(null)
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
 
-  // 过滤密卷
+  // 按需加载三个数据模块
+  useEffect(() => {
+    Promise.all([
+      ensureScrolls(),
+      ensureRecommendations(),
+      ensureNinjas()
+    ]).finally(() => setLoading(false))
+  }, [ensureScrolls, ensureRecommendations, ensureNinjas])
+
+  // ... 原有过滤、分组逻辑完全不变 ...
+
   const filteredScrolls = useMemo(() => {
     if (!searchScroll.trim()) return scrolls
     return scrolls.filter(s => s.name.toLowerCase().includes(searchScroll.toLowerCase()))
   }, [scrolls, searchScroll])
 
-  // 根据密卷ID查找适配的忍者
   const getNinjasForScroll = (scrollId: string): INinja[] => {
     const ids = new Set<string>()
     recommendations.forEach(rec => {
@@ -40,7 +54,6 @@ export default function ScrollPage() {
     return ninjas.filter(n => ids.has(n.id))
   }
 
-  // 根据忍者ID查找推荐的密卷（按优先级排序）
   const getScrollsForNinja = (ninjaId: string) => {
     const rec = recommendations.find(r => r.ninjaId === ninjaId)
     if (!rec) return []
@@ -53,7 +66,6 @@ export default function ScrollPage() {
       .filter(s => s.detail)
   }
 
-  // B模式：按梯度分组显示有推荐的忍者
   const groupedNinjas = useMemo(() => {
     const ninjaIds = new Set(recommendations.map(r => r.ninjaId))
     let filtered = ninjas.filter(n => ninjaIds.has(n.id))
@@ -67,6 +79,15 @@ export default function ScrollPage() {
     })
     return groups
   }, [ninjas, recommendations, searchNinja])
+
+  // 加载中
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">加载密卷数据中...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

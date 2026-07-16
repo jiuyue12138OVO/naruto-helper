@@ -1,7 +1,9 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import ForceGraph3D from 'react-force-graph-3d'
 import { useData } from '@/contexts/DataContext'
 import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
 import * as THREE from 'three'
 
 interface GraphNode {
@@ -22,16 +24,26 @@ interface GraphLink {
 }
 
 export default function CounterGraph3DPage() {
-  const { ninjas, counters } = useData()
+  // ===== 1. 按需加载数据 =====
+  const { ninjas, counters, ensureNinjas, ensureCounters } = useData()
+  const [loading, setLoading] = useState(true)
+
   const fgRef = useRef<any>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [focusNodeId, setFocusNodeId] = useState<string | null>(null)
-  const [enabled, setEnabled] = useState(false) // 是否加载3D图
+  const [enabled, setEnabled] = useState(false)
 
   const lastClickTimeRef = useRef<number>(0)
   const lastClickNodeRef = useRef<string | null>(null)
 
-  // 全量节点和连线
+  // 挂载后立即加载 ninjas 和 counters
+  useEffect(() => {
+    Promise.all([ensureNinjas(), ensureCounters()]).finally(() =>
+      setLoading(false)
+    )
+  }, [ensureNinjas, ensureCounters])
+
+  // ===== 以下逻辑完全不变 =====
   const { allNodes, allLinks } = useMemo(() => {
     const relevantIds = new Set<string>()
     counters.forEach(c => {
@@ -62,7 +74,6 @@ export default function CounterGraph3DPage() {
     return { allNodes: nodes, allLinks: links }
   }, [ninjas, counters])
 
-  // 相关节点集合
   const relatedNodeIds = useMemo(() => {
     if (!focusNodeId) return new Set<string>()
     const ids = new Set<string>()
@@ -78,7 +89,6 @@ export default function CounterGraph3DPage() {
     return ids
   }, [focusNodeId, counters])
 
-  // 区分克制方（counter）和被克制方（countered）
   const { counterPartIds, counteredPartIds } = useMemo(() => {
     if (!focusNodeId) return { counterPartIds: [], counteredPartIds: [] }
     const cpart: string[] = []
@@ -91,21 +101,26 @@ export default function CounterGraph3DPage() {
         cparted.push(c.ninjaId)
       }
     })
-    return { counterPartIds: Array.from(new Set(cpart)), counteredPartIds: Array.from(new Set(cparted)) }
+    return {
+      counterPartIds: Array.from(new Set(cpart)),
+      counteredPartIds: Array.from(new Set(cparted)),
+    }
   }, [focusNodeId, counters])
 
-  // 聚焦时过滤连线
   const links = useMemo(() => {
     if (!focusNodeId) return allLinks
     return allLinks.filter(l => {
-      const srcId = typeof l.source === 'string' ? l.source : (l.source as any).id
-      const tgtId = typeof l.target === 'string' ? l.target : (l.target as any).id
-      return (srcId === focusNodeId && relatedNodeIds.has(tgtId)) ||
-             (tgtId === focusNodeId && relatedNodeIds.has(srcId))
+      const srcId =
+        typeof l.source === 'string' ? l.source : (l.source as any).id
+      const tgtId =
+        typeof l.target === 'string' ? l.target : (l.target as any).id
+      return (
+        (srcId === focusNodeId && relatedNodeIds.has(tgtId)) ||
+        (tgtId === focusNodeId && relatedNodeIds.has(srcId))
+      )
     })
   }, [focusNodeId, allLinks, relatedNodeIds])
 
-  // 聚焦/取消聚焦时的节点位置安排、摄像机移动与力配置
   useEffect(() => {
     if (!fgRef.current || !enabled) return
     const fg = fgRef.current
@@ -118,8 +133,12 @@ export default function CounterGraph3DPage() {
       const centerY = targetNode.y || 0
       const centerZ = targetNode.z || 0
 
-      const topNodes = counterPartIds.map(id => allNodes.find(n => n.id === id)!).filter(Boolean)
-      const bottomNodes = counteredPartIds.map(id => allNodes.find(n => n.id === id)!).filter(Boolean)
+      const topNodes = counterPartIds
+        .map(id => allNodes.find(n => n.id === id)!)
+        .filter(Boolean)
+      const bottomNodes = counteredPartIds
+        .map(id => allNodes.find(n => n.id === id)!)
+        .filter(Boolean)
 
       const spacing = 35
       const verticalOffset = 60
@@ -176,7 +195,6 @@ export default function CounterGraph3DPage() {
     }
   }, [focusNodeId, allNodes, counterPartIds, counteredPartIds, enabled])
 
-  // 窗口大小调整
   useEffect(() => {
     function handleResize() {
       setDimensions({ width: window.innerWidth, height: window.innerHeight - 80 })
@@ -186,7 +204,6 @@ export default function CounterGraph3DPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // 节点精灵
   const getNodeSprite = useCallback(
     (node: GraphNode) => {
       const isFocused = !!focusNodeId
@@ -196,7 +213,7 @@ export default function CounterGraph3DPage() {
       const img = new Image()
       img.src = node.imageUrl
       const texture = new THREE.Texture(img)
-      img.onload = () => texture.needsUpdate = true
+      img.onload = () => (texture.needsUpdate = true)
       img.onerror = () => {
         const canvas = document.createElement('canvas')
         canvas.width = 64
@@ -247,29 +264,70 @@ export default function CounterGraph3DPage() {
     setFocusNodeId(null)
   }, [])
 
-  if (allNodes.length === 0) {
+  // ===== 加载状态 =====
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-[#1a1a2e]">
-        <p>暂无克制关系数据，请先到数据管理页面配置</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background:
+            'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        }}
+      >
+        <p className="text-white text-lg">加载克制关系数据中...</p>
       </div>
     )
   }
 
+  // 数据加载完成但无节点
+  if (allNodes.length === 0) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center text-white bg-[#1a1a2e] gap-4"
+      >
+        <p>暂无克制关系数据，请先到数据管理页面配置</p>
+        <Link to="/battle-bp">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="mr-1 h-4 w-4" /> 返回武斗赛
+          </Button>
+        </Link>
+      </div>
+    )
+  }
+
+  // ===== 主界面（添加返回按钮） =====
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+      style={{
+        background:
+          'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+      }}
     >
-      <div className="p-4 text-white text-center">
+      <div className="p-4 text-white text-center relative">
+        {/* 左上角返回武斗赛按钮 */}
+        <Link
+          to="/battle-bp"
+          className="absolute left-4 top-1/2 -translate-y-1/2"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:text-primary"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            返回武斗赛
+          </Button>
+        </Link>
+
         <h1 className="text-3xl font-bold text-primary">3D 克制关系图</h1>
-        <p className="text-sm text-gray-300">
+        <p className="text-sm text-gray-300 mt-1">
           {focusNodeId
             ? `聚焦于：${allNodes.find(n => n.id === focusNodeId)?.name || ''}`
             : '红色箭头从克制方指向被克制方 | 拖拽旋转/缩放 | 双击忍者聚焦'}
         </p>
       </div>
 
-      {/* 如果未启用，显示加载按钮 */}
       {!enabled ? (
         <div className="flex-1 flex items-center justify-center">
           <Button size="lg" onClick={() => setEnabled(true)} className="gap-2">
@@ -296,18 +354,32 @@ export default function CounterGraph3DPage() {
                 nodeLabel="name"
                 nodeRelSize={0}
                 nodeThreeObjectExtend={true}
-                nodeThreeObject={(node: any) => getNodeSprite(node as GraphNode)}
+                nodeThreeObject={(node: any) =>
+                  getNodeSprite(node as GraphNode)
+                }
                 onNodeClick={handleNodeClick}
                 linkWidth={focusNodeId ? 1.5 : 0.6}
-                linkColor={focusNodeId ? 'rgba(255, 80, 80, 0.9)' : 'rgba(255,255,255,0.4)'}
+                linkColor={
+                  focusNodeId
+                    ? 'rgba(255, 80, 80, 0.9)'
+                    : 'rgba(255,255,255,0.4)'
+                }
                 linkOpacity={0.8}
                 linkDirectionalArrowLength={focusNodeId ? 12 : 3.5}
                 linkDirectionalArrowRelPos={0.95}
-                linkDirectionalArrowColor={() => focusNodeId ? 'rgba(255, 30, 30, 1)' : 'rgba(255, 60, 60, 0.9)'}
+                linkDirectionalArrowColor={() =>
+                  focusNodeId
+                    ? 'rgba(255, 30, 30, 1)'
+                    : 'rgba(255, 60, 60, 0.9)'
+                }
                 linkDirectionalParticles={focusNodeId ? 3 : 2}
                 linkDirectionalParticleWidth={1.5}
                 linkDirectionalParticleSpeed={0.008}
-                linkDirectionalParticleColor={() => focusNodeId ? 'rgba(255, 80, 80, 1)' : 'rgba(255, 100, 100, 0.9)'}
+                linkDirectionalParticleColor={() =>
+                  focusNodeId
+                    ? 'rgba(255, 80, 80, 1)'
+                    : 'rgba(255, 100, 100, 0.9)'
+                }
                 backgroundColor="#1a1a2e"
               />
             )}

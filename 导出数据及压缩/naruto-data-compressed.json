@@ -420,7 +420,8 @@
         "突进",
         "纯抓",
         "拉扯",
-        "大招特殊情况可接"
+        "大招特殊情况可接",
+        "高机动性"
       ],
       "blindPick": true
     },
@@ -1295,7 +1296,8 @@
         "纯抓",
         "防反",
         "位移",
-        "大招特殊情况可接"
+        "大招特殊情况可接",
+        "破霸体"
       ],
       "blindPick": false,
       "trend": "down"
@@ -2597,13 +2599,13 @@
         "抓取",
         "突进",
         "霸体",
-        "高输出",
         "破霸体",
         "纯抓",
         "大招可接",
         "位移",
         "防反",
-        "瞬发"
+        "瞬发",
+        "高爆发"
       ],
       "imageUrl": "data:image/webp;base64,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",
       "blindPick": false,
@@ -4290,6 +4292,11 @@
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
           "priority": 1
+        },
+        {
+          "scrollId": "1783350105829",
+          "scrollName": "水遁·雾隐之术",
+          "priority": 2
         }
       ]
     },
@@ -5010,6 +5017,11 @@
           "scrollId": "1783350925467",
           "scrollName": "时空间忍术",
           "priority": 1
+        },
+        {
+          "scrollId": "1783611799449",
+          "scrollName": "影分身之术",
+          "priority": 2
         }
       ]
     },
@@ -8218,8 +8230,7 @@
       "counterNinjaIds": [
         "1783309172598",
         "1783309880298",
-        "1783310042732",
-        "1783309096309"
+        "1783310042732"
       ],
       "counterScrollIds": [],
       "counterSummonIds": [
@@ -8308,6 +8319,15 @@
       "counterScrollIds": [
         "10"
       ],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784173397571",
+      "ninjaId": "1783310469533",
+      "counterNinjaIds": [
+        "1783310082543"
+      ],
+      "counterScrollIds": [],
       "counterSummonIds": []
     }
   ]

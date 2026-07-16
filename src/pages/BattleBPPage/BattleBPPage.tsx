@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, X, Swords, Network } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -16,10 +16,25 @@ import { INinja } from '@/data/ninjas'
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 
 export default function BattleBPPage() {
-  const { ninjas, scrolls, summons, counters, blindPickOrder } = useData()
+  const {
+    ninjas, scrolls, summons, counters, blindPickOrder,
+    ensureNinjas, ensureScrolls, ensureSummons, ensureCounters // 新增加载函数
+  } = useData()
+  const [loading, setLoading] = useState(true)
+
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
 
+  useEffect(() => {
+    Promise.all([
+      ensureNinjas(),
+      ensureScrolls(),
+      ensureSummons(),
+      ensureCounters()
+    ]).finally(() => setLoading(false))
+  }, [ensureNinjas, ensureScrolls, ensureSummons, ensureCounters])
+
+  // 原有过滤、分组逻辑不变...
   const filtered = useMemo(() => {
     let list = ninjas
     if (searchKeyword.trim()) {
@@ -57,6 +72,14 @@ export default function BattleBPPage() {
   const getNinjaById = (id: string) => ninjas.find(n => n.id === id)
   const getScrollById = (id: string) => scrolls.find(s => s.id === id)
   const getSummonById = (id: string) => summons.find(s => s.id === id)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">加载武斗赛数据中...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

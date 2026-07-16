@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { RotateCcw, Swords, ScrollText, Link2, Download, Flame, Shield } from 'lucide-react'
+import { RotateCcw, Swords, ScrollText, Download, Flame, Shield } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,10 +13,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import NinjaManageTab from './NinjaManageTab'
-import ScrollManageTab from './ScrollManageTab'
-import RecommendationManageTab from './RecommendationManageTab'
 import SummonManageTab from './SummonManageTab'
 import BattleBPManageTab from './BattleBPManageTab'
+import ScrollAndRecommendManageTab from './ScrollAndRecommendManageTab'
 import { useData } from '@/contexts/DataContext'
 
 export default function DataManagementPage() {
@@ -43,7 +42,7 @@ export default function DataManagementPage() {
             <h1 className="text-3xl font-bold text-foreground mb-1">
               数据<span className="text-primary">管理</span>
             </h1>
-            <p className="text-muted-foreground text-sm">管理忍者、密卷、通灵兽、推荐搭配和武斗赛BP数据</p>
+            <p className="text-muted-foreground text-sm">管理忍者、密卷、通灵兽和武斗赛BP数据</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -67,9 +66,9 @@ export default function DataManagementPage() {
           </div>
         </div>
 
-        {/* 标签页 */}
+        {/* 标签页：4 个主标签 */}
         <Tabs defaultValue="ninjas" className="w-full">
-          <TabsList className="w-full max-w-2xl grid grid-cols-5">
+          <TabsList className="w-full max-w-xl grid grid-cols-4">
             <TabsTrigger value="ninjas" className="gap-1.5">
               <Swords className="size-4" />
               <span className="hidden sm:inline">忍者管理</span>
@@ -82,10 +81,6 @@ export default function DataManagementPage() {
               <Flame className="size-4" />
               <span className="hidden sm:inline">通灵兽管理</span>
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="gap-1.5">
-              <Link2 className="size-4" />
-              <span className="hidden sm:inline">推荐搭配</span>
-            </TabsTrigger>
             <TabsTrigger value="battlebp" className="gap-1.5">
               <Shield className="size-4" />
               <span className="hidden sm:inline">武斗赛BP</span>
@@ -95,15 +90,16 @@ export default function DataManagementPage() {
           <TabsContent value="ninjas" className="mt-6">
             <NinjaManageTab />
           </TabsContent>
+
+          {/* 密卷管理：内部包含“密卷大全”和“忍者密卷适配”两个子标签 */}
           <TabsContent value="scrolls" className="mt-6">
-            <ScrollManageTab />
+            <ScrollAndRecommendManageTab />
           </TabsContent>
+
           <TabsContent value="summons" className="mt-6">
             <SummonManageTab />
           </TabsContent>
-          <TabsContent value="recommendations" className="mt-6">
-            <RecommendationManageTab />
-          </TabsContent>
+
           <TabsContent value="battlebp" className="mt-6">
             <BattleBPManageTab />
           </TabsContent>

@@ -869,6 +869,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
           "priority": 1
+        },
+        {
+          "scrollId": "1783350105829",
+          "scrollName": "水遁·雾隐之术",
+          "priority": 2
         }
       ]
     },
@@ -1589,6 +1594,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350925467",
           "scrollName": "时空间忍术",
           "priority": 1
+        },
+        {
+          "scrollId": "1783611799449",
+          "scrollName": "影分身之术",
+          "priority": 2
         }
       ]
     },

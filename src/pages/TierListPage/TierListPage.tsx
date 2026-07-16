@@ -4,12 +4,19 @@ import NinjaGridSection from './NinjaGridSection'
 import { useData } from '@/contexts/DataContext'
 
 export default function TierListPage() {
-  const { ninjas, ninjaTags } = useData()
+  const { ninjas, ninjaTags, ensureNinjas } = useData() // 新增 ensureNinjas
+  const [loading, setLoading] = useState(true) // 新增 loading 状态
+
   const [activeTier, setActiveTier] = useState('all')
   const [activeRating, setActiveRating] = useState('all')
   const [keyword, setKeyword] = useState('')
   const [tagStatus, setTagStatus] = useState<Record<string, 'include' | 'exclude'>>({})
   const [matchAllTags, setMatchAllTags] = useState(false)
+
+  // 页面挂载时按需加载忍者数据
+  useEffect(() => {
+    ensureNinjas().finally(() => setLoading(false))
+  }, [ensureNinjas])
 
   // 清理无效标签（管理端删除后自动移除）
   useEffect(() => {
@@ -27,7 +34,7 @@ export default function TierListPage() {
     })
   }, [ninjaTags])
 
-  // 标签循环：无 → include → exclude → 无
+  // 标签循环逻辑...
   const handleTagCycle = (tag: string) => {
     setTagStatus(prev => {
       const current = prev[tag]
@@ -56,12 +63,10 @@ export default function TierListPage() {
       const matchTier = activeTier === 'all' || n.tier === activeTier
       const matchRating = activeRating === 'all' || n.rating === activeRating
 
-      // 排除标签：忍者必须不包含所有排除标签（且）
       const matchExclude =
         excludedTags.length === 0 ||
         excludedTags.every(tag => !n.tags?.includes(tag))
 
-      // 包含标签
       let matchInclude = true
       if (includedTags.length > 0) {
         if (matchAllTags) {
@@ -77,6 +82,15 @@ export default function TierListPage() {
       return matchTier && matchRating && matchExclude && matchInclude && matchKeyword
     })
   }, [ninjas, activeTier, activeRating, includedTags, excludedTags, matchAllTags, keyword])
+
+  // 加载中显示占位
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">加载忍者数据中...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

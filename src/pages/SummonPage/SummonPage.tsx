@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ScrollText, Search, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -12,9 +12,15 @@ import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 
 export default function SummonPage() {
-  const { summons } = useData()
+  const { summons, ensureSummons } = useData() // 添加 ensureSummons
+  const [loading, setLoading] = useState(true)
+
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedSummon, setSelectedSummon] = useState<ISummon | null>(null)
+
+  useEffect(() => {
+    ensureSummons().finally(() => setLoading(false))
+  }, [ensureSummons])
 
   const filtered = useMemo(() => {
     if (!searchKeyword.trim()) return summons
@@ -25,6 +31,14 @@ export default function SummonPage() {
       s.description.toLowerCase().includes(kw)
     )
   }, [summons, searchKeyword])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">加载通灵兽数据中...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
