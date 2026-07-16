@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react' // 新增 useEffect
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, X, Swords, ScrollText } from 'lucide-react'
+import { Search, X, Swords, ScrollText, Info } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 export default function ScrollPage() {
   const {
     scrolls, ninjas, recommendations,
-    ensureScrolls, ensureRecommendations, ensureNinjas // 新增三个加载函数
+    ensureScrolls, ensureRecommendations, ensureNinjas
   } = useData()
   const [loading, setLoading] = useState(true)
 
@@ -28,7 +28,6 @@ export default function ScrollPage() {
   const [selectedScroll, setSelectedScroll] = useState<IScroll | null>(null)
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
 
-  // 按需加载三个数据模块
   useEffect(() => {
     Promise.all([
       ensureScrolls(),
@@ -36,8 +35,6 @@ export default function ScrollPage() {
       ensureNinjas()
     ]).finally(() => setLoading(false))
   }, [ensureScrolls, ensureRecommendations, ensureNinjas])
-
-  // ... 原有过滤、分组逻辑完全不变 ...
 
   const filteredScrolls = useMemo(() => {
     if (!searchScroll.trim()) return scrolls
@@ -80,7 +77,6 @@ export default function ScrollPage() {
     return groups
   }, [ninjas, recommendations, searchNinja])
 
-  // 加载中
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -97,6 +93,10 @@ export default function ScrollPage() {
             密卷<span className="text-primary">大全</span>
           </h1>
           <p className="text-muted-foreground text-sm">选密卷看适配忍者，或选忍者看推荐密卷</p>
+          <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+            <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>免责声明：密卷搭配推荐基于个人理解与实战经验，仅供参考。不同对局环境与操作习惯可能导致适配差异，如有不同意见以你为准。</span>
+          </div>
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
@@ -227,7 +227,6 @@ export default function ScrollPage() {
                     <p className="flex items-center gap-1"><span className="font-medium">冷却时间：</span>{selectedScroll.cooldown}</p>
                   </div>
                 </TabsContent>
-                {/* 适配忍者区域：限制高度并滚动 */}
                 <TabsContent value="ninjas" className="mt-4 max-h-[360px] overflow-y-auto">
                   {(() => {
                     const ninjasForScroll = getNinjasForScroll(selectedScroll.id)

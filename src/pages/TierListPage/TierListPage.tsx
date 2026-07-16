@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
+import { Info } from 'lucide-react'
 import FilterBarSection from './FilterBarSection'
 import NinjaGridSection from './NinjaGridSection'
 import { useData } from '@/contexts/DataContext'
 
 export default function TierListPage() {
-  const { ninjas, ninjaTags, ensureNinjas } = useData() // 新增 ensureNinjas
-  const [loading, setLoading] = useState(true) // 新增 loading 状态
+  const { ninjas, ninjaTags, ensureNinjas } = useData()
+  const [loading, setLoading] = useState(true)
 
   const [activeTier, setActiveTier] = useState('all')
   const [activeRating, setActiveRating] = useState('all')
@@ -13,12 +14,10 @@ export default function TierListPage() {
   const [tagStatus, setTagStatus] = useState<Record<string, 'include' | 'exclude'>>({})
   const [matchAllTags, setMatchAllTags] = useState(false)
 
-  // 页面挂载时按需加载忍者数据
   useEffect(() => {
     ensureNinjas().finally(() => setLoading(false))
   }, [ensureNinjas])
 
-  // 清理无效标签（管理端删除后自动移除）
   useEffect(() => {
     const existing = new Set(ninjaTags)
     setTagStatus(prev => {
@@ -34,7 +33,6 @@ export default function TierListPage() {
     })
   }, [ninjaTags])
 
-  // 标签循环逻辑...
   const handleTagCycle = (tag: string) => {
     setTagStatus(prev => {
       const current = prev[tag]
@@ -83,7 +81,6 @@ export default function TierListPage() {
     })
   }, [ninjas, activeTier, activeRating, includedTags, excludedTags, matchAllTags, keyword])
 
-  // 加载中显示占位
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -100,6 +97,10 @@ export default function TierListPage() {
             忍者<span className="text-primary">强度排行</span>
           </h1>
           <p className="text-muted-foreground text-sm">点击图片查看详细信息</p>
+          <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+            <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>免责声明：忍者强度排行基于个人理解与实战经验，仅供参考。每位玩家的打法和理解不同，实际强度可能因操作者而异，如有不同意见以你为准。</span>
+          </div>
         </div>
 
         <FilterBarSection
