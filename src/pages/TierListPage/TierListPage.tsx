@@ -99,7 +99,11 @@ export default function TierListPage() {
           <p className="text-muted-foreground text-sm">点击图片查看详细信息</p>
           <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
             <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>免责声明：忍者强度排行基于个人理解与实战经验，仅供参考。每位玩家的打法和理解不同，实际强度可能因操作者而异，如有不同意见以你为准。</span>
+            <span>
+              免责声明：忍者强度排行基于个人理解与实战经验，仅供参考。每位玩家的打法和理解不同，实际强度可能因操作者而异，如有不同意见以你为准。
+              <br />
+              排行基于忍者最强形态：满奥义点、携带专属通灵兽及最适配密卷。如有依赖条件，均以最优状态评估。
+            </span>
           </div>
         </div>
 
