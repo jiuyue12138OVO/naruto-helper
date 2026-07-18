@@ -1689,6 +1689,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "7",
           "scrollName": "忍体术·御",
           "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
         }
       ]
     },
@@ -3176,6 +3181,35 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349733336",
           "scrollName": "冰遁·燕吹雪",
           "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1784369858615",
+      "ninjaId": "1784343219595",
+      "ninjaName": "药师兜【少年】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1784369888525",
+      "ninjaId": "1784343865068",
+      "ninjaName": "黑绝（附身）",
+      "scrolls": [
+        {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
         }
       ]
     }

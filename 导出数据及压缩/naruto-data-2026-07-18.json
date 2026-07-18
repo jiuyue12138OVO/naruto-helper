@@ -5163,6 +5163,11 @@
           "scrollId": "7",
           "scrollName": "忍体术·御",
           "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
         }
       ]
     },
@@ -6652,6 +6657,35 @@
           "priority": 1
         }
       ]
+    },
+    {
+      "id": "1784369858615",
+      "ninjaId": "1784343219595",
+      "ninjaName": "药师兜【少年】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1784369888525",
+      "ninjaId": "1784343865068",
+      "ninjaName": "黑绝（附身）",
+      "scrolls": [
+        {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
+        }
+      ]
     }
   ],
   "ninjaTags": [
@@ -7236,12 +7270,7 @@
     {
       "id": "1783596221427",
       "ninjaId": "1783591722037",
-      "counterNinjaIds": [
-        "1783309208477",
-        "1783315719485",
-        "1783310494403",
-        "9"
-      ],
+      "counterNinjaIds": [],
       "counterScrollIds": [],
       "counterSummonIds": []
     },
@@ -8377,6 +8406,18 @@
       "ninjaId": "1783310469533",
       "counterNinjaIds": [
         "1783310082543"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784369811865",
+      "ninjaId": "1784343865068",
+      "counterNinjaIds": [
+        "1783310187740",
+        "1783315719485",
+        "1783310494403",
+        "9"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []
