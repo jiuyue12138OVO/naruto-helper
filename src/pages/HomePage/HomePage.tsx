@@ -17,7 +17,7 @@ export default function HomePage() {
         </p>
         {/* 版本号 */}
         <p className="text-xs text-muted-foreground/60 mt-1">
-          数据版本：{DATA_VERSION}
+          版本：{DATA_VERSION}
         </p>
       </div>
 
