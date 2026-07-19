@@ -95,7 +95,7 @@ export default function ScrollPage() {
           <p className="text-muted-foreground text-sm">选密卷看适配忍者，或选忍者看推荐密卷</p>
           <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
             <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>免责声明：密卷搭配推荐基于个人理解与实战经验，仅供参考。不同对局环境与操作习惯可能导致适配差异，如有不同意见以你为准。</span>
+            <span>密卷搭配推荐基于个人理解与实战经验，仅供参考。不同对局环境与操作习惯可能导致适配差异，如有不同意见以你为准。</span>
           </div>
         </div>
 

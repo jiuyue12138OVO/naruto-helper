@@ -1250,8 +1250,8 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 4
         },
         {
-          "scrollId": "12",
-          "scrollName": "火遁·烈焰弹",
+          "scrollId": "1783349379011",
+          "scrollName": "风遁·真空波",
           "priority": 5
         }
       ]
@@ -2640,6 +2640,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 3
+        },
+        {
+          "scrollId": "6",
+          "scrollName": "通灵·护手里剑",
+          "priority": 4
         }
       ]
     },

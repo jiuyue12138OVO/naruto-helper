@@ -4724,8 +4724,8 @@
           "priority": 4
         },
         {
-          "scrollId": "12",
-          "scrollName": "火遁·烈焰弹",
+          "scrollId": "1783349379011",
+          "scrollName": "风遁·真空波",
           "priority": 5
         }
       ]
@@ -5163,6 +5163,11 @@
           "scrollId": "7",
           "scrollName": "忍体术·御",
           "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
         }
       ]
     },
@@ -6109,6 +6114,11 @@
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 3
+        },
+        {
+          "scrollId": "6",
+          "scrollName": "通灵·护手里剑",
+          "priority": 4
         }
       ]
     },
@@ -6650,6 +6660,35 @@
           "scrollId": "1783349733336",
           "scrollName": "冰遁·燕吹雪",
           "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1784369858615",
+      "ninjaId": "1784343219595",
+      "ninjaName": "药师兜【少年】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1784369888525",
+      "ninjaId": "1784343865068",
+      "ninjaName": "黑绝（附身）",
+      "scrolls": [
+        {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 2
         }
       ]
     }
@@ -7236,12 +7275,7 @@
     {
       "id": "1783596221427",
       "ninjaId": "1783591722037",
-      "counterNinjaIds": [
-        "1783309208477",
-        "1783315719485",
-        "1783310494403",
-        "9"
-      ],
+      "counterNinjaIds": [],
       "counterScrollIds": [],
       "counterSummonIds": []
     },
@@ -7657,7 +7691,6 @@
       "id": "1783613319626",
       "ninjaId": "1783309084993",
       "counterNinjaIds": [
-        "1783309148171",
         "10",
         "1783309880298",
         "1783309783866",
@@ -8377,6 +8410,28 @@
       "ninjaId": "1783310469533",
       "counterNinjaIds": [
         "1783310082543"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784369811865",
+      "ninjaId": "1784343865068",
+      "counterNinjaIds": [
+        "1783310187740",
+        "1783315719485",
+        "1783310494403",
+        "9"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784382188732",
+      "ninjaId": "1783310130280",
+      "counterNinjaIds": [
+        "1783309172598",
+        "1783310202753"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []

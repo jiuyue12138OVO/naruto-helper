@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, X, Swords, Network } from 'lucide-react'
+import { Search, X, Swords, Network, Info } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import {
@@ -18,7 +18,7 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 export default function BattleBPPage() {
   const {
     ninjas, scrolls, summons, counters, blindPickOrder,
-    ensureNinjas, ensureScrolls, ensureSummons, ensureCounters // 新增加载函数
+    ensureNinjas, ensureScrolls, ensureSummons, ensureCounters
   } = useData()
   const [loading, setLoading] = useState(true)
 
@@ -34,7 +34,6 @@ export default function BattleBPPage() {
     ]).finally(() => setLoading(false))
   }, [ensureNinjas, ensureScrolls, ensureSummons, ensureCounters])
 
-  // 原有过滤、分组逻辑不变...
   const filtered = useMemo(() => {
     let list = ninjas
     if (searchKeyword.trim()) {
@@ -73,6 +72,19 @@ export default function BattleBPPage() {
   const getScrollById = (id: string) => scrolls.find(s => s.id === id)
   const getSummonById = (id: string) => summons.find(s => s.id === id)
 
+  const getCounteredBy = (ninjaId: string): INinja[] => {
+    const counter = counters.find(c => c.ninjaId === ninjaId)
+    if (!counter) return []
+    return counter.counterNinjaIds.map(id => getNinjaById(id)).filter(Boolean) as INinja[]
+  }
+
+  const getCounters = (ninjaId: string): INinja[] => {
+    return counters
+      .filter(c => c.counterNinjaIds.includes(ninjaId))
+      .map(c => getNinjaById(c.ninjaId))
+      .filter(Boolean) as INinja[]
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -87,9 +99,18 @@ export default function BattleBPPage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-1">武斗赛<span className="text-primary">BP</span></h1>
           <p className="text-muted-foreground text-sm">查看忍者克制关系与盲选位</p>
+          <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+            <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+            <span>
+              以下克制关系基于官方武斗赛赛事 BP 数据及个人理解整理，仅供参考。如有不同意见以你为准。
+              <br />
+              盲选位：即使被克制也有操作空间的忍者；非盲选位（克制位）：后手选择能发挥更好效果的忍者。
+              <br />
+              部分忍者（通常是盲选位）凭借极强的性能可无视克制。
+            </span>
+          </div>
         </div>
 
-        {/* 3D 克制关系图入口 */}
         <div className="flex items-center gap-4">
           <Link to="/counter-graph-3d">
             <Button variant="outline" size="sm" className="gap-1.5">
@@ -156,6 +177,13 @@ export default function BattleBPPage() {
             <DialogHeader><DialogTitle>{selectedNinja?.name}</DialogTitle></DialogHeader>
             {selectedNinja && (() => {
               const counter = getCounterData(selectedNinja.id)
+              const counteredByList = counter ? counter.counterNinjaIds.map(id => getNinjaById(id)).filter(Boolean) : []
+              const counterList = getCounters(selectedNinja.id)
+              const scrollList = counter ? counter.counterScrollIds.map(id => getScrollById(id)).filter(Boolean) : []
+              const summonList = counter ? counter.counterSummonIds.map(id => getSummonById(id)).filter(Boolean) : []
+
+              const hasData = counteredByList.length > 0 || counterList.length > 0 || scrollList.length > 0 || summonList.length > 0
+
               return (
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="sm:w-2/5 shrink-0">
@@ -169,62 +197,68 @@ export default function BattleBPPage() {
                     </div>
                   </div>
                   <div className="flex-1 space-y-4">
-                    {counter ? (
+                    {hasData ? (
                       <>
-                        {counter.counterNinjaIds.length > 0 && (
+                        {counteredByList.length > 0 && (
                           <div>
-                            <span className="text-sm font-medium">克制忍者</span>
+                            <span className="text-sm font-medium">被克制</span>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {counter.counterNinjaIds.map(id => {
-                                const n = getNinjaById(id)
-                                if (!n) return null
-                                return (
-                                  <div key={id} className="flex flex-col items-center w-14">
-                                    <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                      <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                              {counteredByList.map(n => (
+                                <div key={n.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                                   </div>
-                                )
-                              })}
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
-                        {counter.counterScrollIds.length > 0 && (
+
+                        {counterList.length > 0 && (
                           <div>
-                            <span className="text-sm font-medium">克制密卷</span>
+                            <span className="text-sm font-medium">克制</span>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {counter.counterScrollIds.map(id => {
-                                const s = getScrollById(id)
-                                if (!s) return null
-                                return (
-                                  <div key={id} className="flex flex-col items-center w-14">
-                                    <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                      <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{s.name}</span>
+                              {counterList.map(n => (
+                                <div key={n.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                                   </div>
-                                )
-                              })}
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
-                        {counter.counterSummonIds.length > 0 && (
+
+                        {scrollList.length > 0 && (
                           <div>
-                            <span className="text-sm font-medium">克制通灵</span>
+                            <span className="text-sm font-medium">密卷</span>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {counter.counterSummonIds.map(id => {
-                                const sm = getSummonById(id)
-                                if (!sm) return null
-                                return (
-                                  <div key={id} className="flex flex-col items-center w-14">
-                                    <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                      <Image src={sm.imageUrl} alt={sm.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{sm.name}</span>
+                              {scrollList.map(s => (
+                                <div key={s.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
                                   </div>
-                                )
-                              })}
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{s.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {summonList.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium">通灵</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {summonList.map(sm => (
+                                <div key={sm.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={sm.imageUrl} alt={sm.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{sm.name}</span>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}

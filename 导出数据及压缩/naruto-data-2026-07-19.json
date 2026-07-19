@@ -4724,8 +4724,8 @@
           "priority": 4
         },
         {
-          "scrollId": "12",
-          "scrollName": "火遁·烈焰弹",
+          "scrollId": "1783349379011",
+          "scrollName": "风遁·真空波",
           "priority": 5
         }
       ]
@@ -6114,6 +6114,11 @@
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 3
+        },
+        {
+          "scrollId": "6",
+          "scrollName": "通灵·护手里剑",
+          "priority": 4
         }
       ]
     },
@@ -7686,7 +7691,6 @@
       "id": "1783613319626",
       "ninjaId": "1783309084993",
       "counterNinjaIds": [
-        "1783309148171",
         "10",
         "1783309880298",
         "1783309783866",
@@ -8418,6 +8422,16 @@
         "1783315719485",
         "1783310494403",
         "9"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784382188732",
+      "ninjaId": "1783310130280",
+      "counterNinjaIds": [
+        "1783309172598",
+        "1783310202753"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []
