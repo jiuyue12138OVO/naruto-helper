@@ -129,7 +129,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "瞬发",
         "乱闪",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "格挡",
@@ -453,7 +453,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "抓取",
         "突进",
         "霸体",
-        "飞行",
+        "高空优势",
         "高爆发",
         "高输出",
         "破霸体",
@@ -495,7 +495,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "瞬发",
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "低真空期",
@@ -510,7 +510,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "imageUrl": "data:image/webp;base64,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",
       "rating": "S",
       "tags": [
-        "飞行",
+        "高空优势",
         "无敌",
         "隐身",
         "高爆发",
@@ -639,7 +639,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "格挡",
         "无敌",
         "高爆发",
-        "飞行"
+        "高空优势"
       ],
       "blindPick": false
     },
@@ -776,7 +776,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "拉扯",
@@ -936,7 +936,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "抓取",
         "乱闪",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "低真空期",
         "防反",
@@ -1222,7 +1222,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -1284,7 +1284,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -1822,7 +1822,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "低真空期",
@@ -1842,7 +1842,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "瞬发",
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "突进",
         "格挡",
@@ -1876,7 +1876,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "破霸体",
@@ -1896,7 +1896,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "拉扯",
         "高机动性",
@@ -1930,7 +1930,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "大招可接",
@@ -2068,7 +2068,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "imageUrl": "data:image/webp;base64,UklGRooLAABXRUJQVlA4IH4LAABQOwCdASqTAJcAPm0skkWkIqGW6j7wQAbEoIkYwAL/UdG0/o6kH5T8D/jcbzjjzXXv/9762P01vcvNP5qnp4/ue/jb0xab7ZrWr9d5nma+0v+YfnaND5NKoqucTIHRYlwCb0aiyb2qFViMBkSNFrKmuETFoyrvQ8JOYpG7582879Ieb5VH/HP0U7T2Wjw0wA4WF3F2CVxqq5NcaQS6cFLedaYSLYEz0/CxOjVElVE3jgLsXjOCzwpCdijdPl5nTlW78KpW7nhsTmKek59BsdZAXU0xEWCAMpf8R0M2dq5kwh2CdiDySN9lkF9OCVsmMpnErM5u6faNfOaFRYL7hyRVWfOLOOfLQ2CvrqLZcWtdpCgk8xWZCioJbiVY/G31v5mamypE9NHK/8t1MOWu+aGPPvm5fDPkHSkCYF+4PSs5UOoid4qKKCYZwSi//TqZrKh2cQw2xhPtry+rL42ThSQjg8/DcFC1tHyQ7GveyWuxwseAj506ub/DoWD/OwXvRbntVmHySkI9VcfyWbnMvWU25wtSX49mQQq/vlFOLopkGpEF241MgSilaOz8ft63SXpRvl8GEE1B2Gen0JN63ozZNlDJwR7d6o1Kx8VPpDxu/Mjz+nR1zH2vS9yVjguYc6IsKAAA/vr+LU85VmjQN6hj6SliRn3AbHK3yw1RIGR6Ro95UmMbSJQq2R8mH68isiipRa1ewlr244yCeObivBUwCuEMCQ+e8OBF/F0koapfGBRC5RUC5ljdOL5kzcXhU02iawMHlVSdNBy/i12Z7H0lh+lGIhu6VjG1UZeQ5gyoHRWX1hJdPMpQbMsX0wrvuEnlwmcxth+Ak9KKJzaj+01f29ZekcmHpNhFrsTqDyMpq9najdhxZVrb8DQdinKH0GTVTooOYG6lL4d3H7G2GtUVK+b6QZ7lxDBFLAu4xVK6CDbcCnt7qN78cK+4ONraEhRqAuRLCX9714HgTJ+TgZiMRaOGKjmQD2PTrsLDRPtcj1PSxQ8wEVmFJoo35Rm/WZGU36gT1ztLSiRmK2YSQ5FEh0tq5Vvi1K0fRXF49dgyhIkkjOftL6rURlzYmrt3ABITf8/tmW/ghpWHoXbNoxLw2krzvQOFO3n9p1fkDNoQcNM0Ri926Quiu6pv7QPIUFQpW+GcEmWetJz+EC1TiEgBK7w5dmehsd7CH4wGderJMHS53FUtG6hL+mz4LjICQJohOHEFVdtNYNz0G3Q2JfdKPFgPrv33p+K0N5zwmtPwlDUeQm8qtv+35w7d2JarR0R0g8+NxMRO8yn4/ysWUf38UtEk2CoDJIl/c9qpg0e751LBeGm8o3SFMnApHICXuj5JeAApsf4uADdNwHwIF+/64MI8VjceohzNdAzdTVOIxBwmRujhRWQ8KNESJS72xhB3RL7jO5uJD0FdlziAAkbex0e1LQMqhTPIkjTz3Hcg/1uZIZ2ZaQzExJO//X1r97sxO4tufkjNV1oLsZa1JjP8QPgtDXw93KNjfuJwGgQcqkSO8Vba30qcP1Weok7gw+O+57ALVeuF3uLmNomWfv9rCnFY1qkZ8ZSziF/qo+/iiWqlNvNdOD8bDQrUPmzuL5y8QdHEhR72HmPI1/3Prwer54KeGzSAgWwPBFga2qxj1YLeBOXLdwWTgQ6bzeeL0JhWGEIeEmj/EHpQ2sd7uxsylJPCRMd847D7OmLorcBvP1IjuRFmvIe4OJ1dD16NNP1fu/auK9EWl0eJKFc42aARY+ebIhU23T2Ay1t/kdJJrh0VguyvUcg5oDflxVPSVOSaw0EUNcW+HhrsNa16TeykM+0o/BlXScwBzCJJHRBcSN1YjbU+yf4sRRK8rvJry06XfwF9LyYmLnEr+MZzxILP6a/XDUQGPXIJraKIMP+w4me5Ed32ukswGpR5QyxDmGqKs6whL4UEgzb/s3VjLLKrE6C/QqKKfv6Ief6+lvDYt1CTygJkyo8+DBX2kMlKgE6zJF0TyuRYvg9hYDOqck5AtfSy97O2PcPrv6btA9FCd29g0AQVNCu9+McFO66weDir7oRpba58lnmxn+1S07/oqqPEVZb5BFqRrpO8EE2ayZmajV7Ib+G1DEbf6IqtR4L2HrEM4/mS++AWdarjYp7lJghWVKPjtxlNV5g5xHD1r0BpsBcsa9tQtgG/bBOXBFLYlB1cOhuoTMR/Q1v5XreCJDdzV+XGJOSSrqwhiB3UECMh/qymYSFoOyeCy/uFOhZv2kh1U9UteikYq0kihh6ShRNlunA52OadqBs+Ume6MViHyoG+5LWCF+ViDxJGBQ2I4U/MuK67Ln8kOjWKU44ZdZAtNp8JmHqouS/MTJQfo0zAyOBxQkE7mXl6QsdbSXNhRXl8yfCKk6WQeGEUV0BaIYYw4EMT/u/yhI8AmzRAZVK+UEdg/mkPzs0TTt1r1bg0Nj8flA+ZJSuJxaGuJNda8dyArDlX2u1UlrzY/KcIVg/DgAxEfoA3yEpVzg/AFrNSoOIDRjc9ZW27pxj14SdrQueC/dP9TWMdchEHayPcJX/NPLcd7OM8Ji40N37ugSL8PalNTw9fhJ7RwJshGcCNOV3ugo6CkFn8shuthQVuIvk8PoBiozpZgFWMERpBe5wq8efYQsxWFPn153vKcMnump7mO54JoXWQ5DdWyECfIdtTsBLNe8yx/48rr3lq8WakHCL1Vum9RPCSS2nwkIvHD4uObLXViYwLk69KIVOcbf8LsbleAbWmM4tMn7VUkM2RwGJOasyqP0QFZ8dN1k0BHc2KTuIzXRX+j69UTXfxXKwhzCif5mKToFqQn8tzBl0KqpV/X6Ipov1jROg7L+XOixJiOwoPD/a1Ytscd+7Vo2EF6o/5HOZU6LPclyC9EyO1988WYHCj3TQBfQyj1d00PEXoAVbAzVjZNfqPv7Ru72jih0zeh0qnLTOo2rkpVXcbOzXvlg0q9bFW28f4OkBRLHM0VYHTO3lP9ODmzqHjjlHE/Uad/eBJWZQvpwV9zTe4blH2wLTBQQWWaZLvYupQC4JhSG0D9/LtKbTjRsBrFiVUTvMbP4QreT3VVRv/SPMDqZhrKN/pP4kr/p7D8jPtcWe+3iPTAdO6DsvPIu9FBplTqZJa8JPK5bHVrOvQSB/UYUGAlMB8iXwwxki37vNm7FEmRhCC3aUjqUvmM2W0jfFw7/xZFcz4fchwXxeVzsq3oeeuaqNSIKKlGjLPVGWiWFlw3vEiXhfP6Qx3E+rPlPUL/8PgJw+ws8bknDZ5bb1++zE+U10EJAlDOVaqqN89yb8iKJHkvbP2XPPzMU9dUhmLyQo50ur8XG3IusZ4urKDn6GbtYmNv8diMF7lwFrrOOvEKVunKLIAfPy+u9BJoUyzmNfMyijbw7kvyXR+XWSAzyvZ+hL30asIdmyky3NChhJFRFJeigRB/4RBy/eiOVYre9DpG1a59e8Jzn17hCGX3985IRz1R5IeLYErJ7ef4O3IX/AQEqjYPWK78ZOVye9kGixulQOxUQyVB8FT0ujlMg/z2f+PeCRthe0l8xbN7jUW0TyoMyFI+nlDQuVwoxlQFyFRvHGzm9n08DupcbObLOPju+RAwRi2MdiXuH44gdq2P3NxE6xoYubLTv2iVVuGq7kXlxGT38sQQimcocS3LXud0PCOG5ijpvDLetzGw63It4vowNrVsBgIGusIMjN2U39x8ESPapNpQ0542ahGELBp1tWWdr6DcsoIVHdyotA0Yzgn8YmmEk6dv2SNPvY9nbhs8+MrRUqs/AY7olUBo3W4fSCYdYPoEu8bECl9fcNu4q2tYj9+SX1QWbwtEYg5vd9PWjRdRFlmPkovxp1dsadIhg2TZPDdFay8rtMzIulF77GfgoGn/zaWB4mYNqLWPfVjawQ8oTz6ZiczY+b6PChdqFPHg7aao6oAAA==",
       "rating": "B",
       "tags": [
-        "飞行"
+        "高空优势"
       ],
       "blindPick": false
     },
@@ -2128,7 +2128,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高爆发",
         "高输出",
         "拉扯",
@@ -2223,7 +2223,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "霸体",
-        "飞行",
+        "高空优势",
         "高输出",
         "低真空期",
         "拉扯",
@@ -2323,7 +2323,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "C",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "低真空期",
@@ -2416,7 +2416,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -2819,7 +2819,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "霸体",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "拉扯",
@@ -2863,7 +2863,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "抓取",
         "突进",
         "霸体",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "低真空期"
@@ -2878,7 +2878,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高爆发",
         "高输出",
@@ -2925,7 +2925,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "破霸体",
@@ -2981,7 +2981,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tier": "t0下",
       "rating": "A",
       "tags": [
-        "飞行",
+        "高空优势",
         "无敌",
         "大招可接",
         "拉扯",
@@ -3017,7 +3017,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "格挡",
         "纯抓",
