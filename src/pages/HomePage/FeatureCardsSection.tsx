@@ -35,6 +35,14 @@ const FEATURES = [
     gradient: 'from-blue-500/20 to-indigo-600/20',
     iconBg: 'bg-blue-500/10 text-blue-500',
   },
+  {
+    title: '娱乐',
+    description: '随机忍者 · 更多玩法即将上线',
+    icon: '🎮',
+    path: '/entertainment',
+    gradient: 'from-purple-500/20 to-pink-600/20',
+    iconBg: 'bg-purple-500/10 text-purple-500',
+  },
 ]
 
 export default function FeatureCardsSection() {

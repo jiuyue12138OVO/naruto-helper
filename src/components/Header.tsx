@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { path: '/scrolls', label: '密卷', icon: '📜' },
   { path: '/summons', label: '通灵兽', icon: '🐶' },
   { path: '/battle-bp', label: '武斗赛', icon: '🏆' },
+  { path: '/entertainment', label: '娱乐', icon: '🎮' },
 ]
 
 export default function Header() {

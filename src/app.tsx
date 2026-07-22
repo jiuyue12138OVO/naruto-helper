@@ -14,6 +14,7 @@ const SummonPage = lazy(() => import("@/pages/SummonPage/SummonPage"));
 const BattleBPPage = lazy(() => import("@/pages/BattleBPPage/BattleBPPage"));
 const CounterGraph3DPage = lazy(() => import("@/pages/CounterGraph3DPage/CounterGraph3DPage"));
 const DataManagementPage = lazy(() => import("@/pages/DataManagementPage/DataManagementPage"));
+const EntertainmentPage = lazy(() => import("@/pages/EntertainmentPage/EntertainmentPage"));
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="summons" element={<Suspense fallback={null}><SummonPage /></Suspense>} />
           <Route path="battle-bp" element={<Suspense fallback={null}><BattleBPPage /></Suspense>} />
           <Route path="counter-graph-3d" element={<Suspense fallback={null}><CounterGraph3DPage /></Suspense>} />
+          <Route path="entertainment" element={<Suspense fallback={null}><EntertainmentPage /></Suspense>} />
           <Route path="644064643989" element={<Suspense fallback={null}><DataManagementPage /></Suspense>} />
         </Route>
       </Route>
