@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Shuffle, Dice5, ChevronDown, ChevronUp, Settings, X, Search } from 'lucide-react'
+import { Shuffle, Dice5, ChevronDown, ChevronUp, Settings, X, Search, Info } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -38,7 +38,7 @@ export default function RandomTab() {
 
   // 随机结果
   const [result, setResult] = useState<INinja | null>(null)
-  const [resultScroll, setResultScroll] = useState<string | null>(null) // 随机到的密卷ID
+  const [resultScroll, setResultScroll] = useState<string | null>(null)
   const [isRolling, setIsRolling] = useState(false)
 
   // 设置弹窗
@@ -77,15 +77,12 @@ export default function RandomTab() {
     localStorage.setItem(DISABLED_SCROLLS_KEY, JSON.stringify([...disabledScrollIds]))
   }, [disabledScrollIds])
 
-  // 搜索
   const [settingsSearch, setSettingsSearch] = useState('')
   const [teamMode, setTeamMode] = useState<'shared' | 'individual'>('shared')
   const [activeResultTab, setActiveResultTab] = useState('random-ninja')
-
-  // 随机密卷开关
   const [randomScrollEnabled, setRandomScrollEnabled] = useState(false)
 
-  // 用于设置弹窗的忍者/密卷分组
+  // 过滤设置中的忍者/密卷
   const filteredSettingsNinjas = useMemo(() => {
     if (!settingsSearch.trim()) return ninjas
     const kw = settingsSearch.toLowerCase()
@@ -150,7 +147,6 @@ export default function RandomTab() {
     [recommendations]
   )
 
-  // 符合条件的忍者
   const eligibleNinjas = useMemo(() => {
     return ninjas.filter(n => {
       if (disabledNinjaIds.has(n.id)) return false
@@ -169,7 +165,6 @@ export default function RandomTab() {
     })
   }, [ninjas, disabledNinjaIds, includedTiers, excludedTiers, includedRatings, excludedRatings, includedTags, excludedTags, includedScrolls, excludedScrolls, getNinjaScrollIds])
 
-  // 随机忍者
   const handleRandom = useCallback(() => {
     if (eligibleNinjas.length === 0) return
     setIsRolling(true)
@@ -256,7 +251,6 @@ export default function RandomTab() {
     <div className="space-y-6">
       {showFilterCard && (
         <Card className="p-4 md:p-6 space-y-4">
-          {/* ... 筛选条件卡片内容保持不变 ... */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">筛选条件</h2>
@@ -355,6 +349,12 @@ export default function RandomTab() {
         </Card>
       )}
 
+      {/* 免责声明 */}
+      <div className="bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+        <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        <span>随机结果仅供娱乐，不构成强度参考。实际对局请根据阵容灵活选择。</span>
+      </div>
+
       {/* 随机结果区域 */}
       <div className="flex items-center justify-between">
         <Tabs value={activeResultTab} onValueChange={setActiveResultTab} className="flex-1">
@@ -364,7 +364,6 @@ export default function RandomTab() {
           </TabsList>
         </Tabs>
         <div className="flex items-center gap-2">
-          {/* 随机密卷开关 */}
           <label className="flex items-center gap-1.5 text-sm cursor-pointer select-none">
             <input
               type="checkbox"

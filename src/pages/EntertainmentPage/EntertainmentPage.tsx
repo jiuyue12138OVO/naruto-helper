@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Info } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useData } from '@/contexts/DataContext'
 import RandomTab from './RandomTab'
@@ -32,10 +31,6 @@ export default function EntertainmentPage() {
             娱乐<span className="text-primary">模式</span>
           </h1>
           <p className="text-muted-foreground text-sm">放松一下，随机探索你的本命忍者</p>
-          <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
-            <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>随机结果仅供娱乐，不构成强度参考。实际对局请根据阵容灵活选择。</span>
-          </div>
         </div>
 
         <Tabs defaultValue="random">
@@ -44,6 +39,7 @@ export default function EntertainmentPage() {
               <span className="text-base leading-none">🎲</span>
               随机
             </TabsTrigger>
+            {/* 后续新增 Tab 在此添加 */}
           </TabsList>
 
           <TabsContent value="random" className="mt-6">
