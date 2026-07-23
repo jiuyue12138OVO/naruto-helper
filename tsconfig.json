@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "files": [],
   "references": [
