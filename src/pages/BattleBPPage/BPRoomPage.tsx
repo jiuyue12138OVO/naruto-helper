@@ -172,12 +172,18 @@ export default function BPRoomPage() {
     }
   }, [roomId])
 
+  // 离开房间：清空自己ID，若双方都空则删除房间
   const leaveRoom = useCallback(async () => {
     if (!roomId || !myRole || !roomState) return
-    if (myRole === '1P') {
-      await updateRoom({ player1PId: '' as any })
-    } else {
-      await updateRoom({ player2PId: null as any })
+    const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: '' as any } : { player2PId: null as any }
+    await updateRoom(updates)
+    // 检查是否房间已空
+    const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+    if (data) {
+      const state = data.state as RoomState
+      if (!state.player1PId && !state.player2PId) {
+        await supabase.from('rooms').delete().eq('id', roomId)
+      }
     }
     setRoomId(null)
     setMyRole(null)
@@ -195,6 +201,7 @@ export default function BPRoomPage() {
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
 
+  // 加入房间：修复2P加入时写入正确状态
   const joinRoom = async () => {
     const id = joinRoomId.trim().toUpperCase()
     if (!id) return
@@ -204,9 +211,10 @@ export default function BPRoomPage() {
     if (state.player2PId) { setError('房间已满'); return }
     if (state.phase !== 'ban' || state.gameNumber !== 1) { setError('对局已开始，无法加入'); return }
     const newPlayerId = generatePlayerId()
-    setRoomId(id); setMyRole('2P'); setRoomState({ ...state, player2PId: newPlayerId })
-    lastStateRef.current = `${state.phase}-${state.banStep}-${state.pickStep}-${state.currentPlayer}-${state.scrollsConfirmed1P}-${state.scrollsConfirmed2P}-${state.summonsConfirmed1P}-${state.summonsConfirmed2P}`
-    await supabase.from('rooms').upsert({ id, state: { ...state, player2PId: newPlayerId } })
+    const newState = { ...state, player2PId: newPlayerId }
+    setRoomId(id); setMyRole('2P'); setRoomState(newState)
+    lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
+    await supabase.from('rooms').upsert({ id, state: newState })
     setError('')
   }
 
@@ -244,6 +252,17 @@ export default function BPRoomPage() {
       updateRoom(myRole === '1P' ? { summons1P: newSummons, summonsConfirmed1P: true } : { summons2P: newSummons, summonsConfirmed2P: true })
     }
   }, [roomState, myRole, isMyTurn, availableNinjas, scrolls, summons, updateRoom])
+
+  // 倒计时 + 页面可见性同步
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!roomState?.deadline || document.hidden) return
+      const diff = Math.max(0, Math.floor((roomState.deadline - Date.now()) / 1000))
+      setRemainingSeconds(diff)
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [roomState?.deadline])
 
   useEffect(() => {
     if (!roomState?.deadline) { setRemainingSeconds(COUNTDOWN_SECONDS); return }
@@ -335,8 +354,11 @@ export default function BPRoomPage() {
     }
   }, [roomState?.phase, roomState?.banStep, roomState?.pickStep, roomState?.scrollsConfirmed1P, roomState?.scrollsConfirmed2P, roomState?.summonsConfirmed1P, roomState?.summonsConfirmed2P])
 
+  // 下一局：交换玩家位置
   const nextGame = () => {
     if (!roomState || !myRole) return
+    const swappedPlayer1PId = roomState.player2PId || ''
+    const swappedPlayer2PId = roomState.player1PId
     const mySH = myRole === '1P' ? [...(roomState.myScrollHistory || []), ...roomState.scrolls1P.filter(Boolean) as string[]] : [...(roomState.opponentScrollHistory || []), ...roomState.scrolls2P.filter(Boolean) as string[]]
     const opSH = myRole === '1P' ? [...(roomState.opponentScrollHistory || []), ...roomState.scrolls2P.filter(Boolean) as string[]] : [...(roomState.myScrollHistory || []), ...roomState.scrolls1P.filter(Boolean) as string[]]
     const mySuH = myRole === '1P' ? [...(roomState.mySummonHistory || []), ...roomState.summons1P.filter(Boolean) as string[]] : [...(roomState.opponentSummonHistory || []), ...roomState.summons2P.filter(Boolean) as string[]]
@@ -345,6 +367,8 @@ export default function BPRoomPage() {
     updateRoom({
       gameNumber: roomState.gameNumber + 1,
       firstPlayer: roomState.firstPlayer === '1P' ? '2P' : '1P',
+      player1PId: swappedPlayer1PId,
+      player2PId: swappedPlayer2PId || null,
       phase: 'ban', banStep: 0, pickStep: 0,
       ban1P: [null, null], ban2P: [null, null],
       team1P: [null, null, null], team2P: [null, null, null],
@@ -357,6 +381,8 @@ export default function BPRoomPage() {
       myScrollHistory: mySH, opponentScrollHistory: opSH,
       mySummonHistory: mySuH, opponentSummonHistory: opSuH,
     })
+    // 交换角色
+    setMyRole(prev => prev === '1P' ? '2P' : '1P')
   }
 
   const groupedNinjas = useMemo(() => {
