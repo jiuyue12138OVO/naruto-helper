@@ -42,7 +42,7 @@ interface RoomState {
   opponentScrollHistory?: string[]
   mySummonHistory?: string[]
   opponentSummonHistory?: string[]
-  player1PId: string | null    // 改为可 null，空位表示无人
+  player1PId: string | null
   player2PId: string | null
   deadline: number | null
   currentPlayer: '1P' | '2P' | null
@@ -93,7 +93,7 @@ export default function BPRoomPage() {
   const { ninjas, scrolls, summons } = useData()
 
   const [roomId, setRoomId] = useState<string | null>(null)
-  const [myPlayerId, setMyPlayerId] = useState<string | null>(null)  // 本地玩家 ID
+  const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   const [roomState, setRoomState] = useState<RoomState | null>(null)
   const [joinRoomId, setJoinRoomId] = useState('')
   const [error, setError] = useState('')
@@ -104,7 +104,7 @@ export default function BPRoomPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastStateRef = useRef<string>('')
 
-  // 根据当前房间状态和 myPlayerId 自动计算我的角色
+  // 根据本地玩家ID和房间状态动态计算角色
   const myRole = useMemo(() => {
     if (!roomState || !myPlayerId) return null
     if (roomState.player1PId === myPlayerId) return '1P'
@@ -133,6 +133,7 @@ export default function BPRoomPage() {
     return () => { supabase.removeChannel(channel) }
   }, [roomId])
 
+  // 初次加载（加入时使用）
   useEffect(() => {
     if (!roomId || roomState) return
     const load = async () => {
@@ -146,25 +147,20 @@ export default function BPRoomPage() {
     load()
   }, [roomId])
 
-  // 乐观更新房间
+  // 核心修改：更新房间前先获取最新状态，再合并本地修改，避免覆盖他人数据
   const updateRoom = useCallback(async (updates: Partial<RoomState>) => {
     if (!roomId) return
-    setRoomState(prev => {
-      if (!prev) return prev
-      let changed = false
-      const newState: RoomState = { ...prev }
-      const keys = Object.keys(updates) as (keyof RoomState)[]
-      for (const key of keys) {
-        if ((updates as any)[key] !== undefined && (updates as any)[key] !== prev[key]) {
-          changed = true
-          ;(newState as any)[key] = (updates as any)[key]
-        }
-      }
-      if (!changed) return prev
-      supabase.from('rooms').upsert({ id: roomId, state: newState }).then()
-      lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
-      return newState
-    })
+    // 从数据库获取最新完整状态
+    const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+    if (!data) return
+    const latestState = data.state as RoomState
+    // 合并本地修改
+    const newState: RoomState = { ...latestState, ...updates }
+    // 写回数据库
+    await supabase.from('rooms').upsert({ id: roomId, state: newState })
+    // 乐观更新本地
+    setRoomState(newState)
+    lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
   }, [roomId])
 
   const fetchLatestState = useCallback(async () => {
@@ -180,23 +176,24 @@ export default function BPRoomPage() {
     }
   }, [roomId])
 
-  // 离开房间：将对应 ID 设为 null，若双方都空则删除房间
+  // 离开房间：将对应ID设为null，若双方都空则删除房间
   const leaveRoom = useCallback(async () => {
     if (!roomId || !myRole || !roomState) return
     const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: null } : { player2PId: null }
-    await updateRoom(updates)
-    // 检查房间是否已空
+    // 使用新的更新方式，会先读取最新状态再合并，保证不会误删
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
     if (data) {
-      const state = data.state as RoomState
-      if (!state.player1PId && !state.player2PId) {
+      const latestState = data.state as RoomState
+      const newState = { ...latestState, ...updates }
+      await supabase.from('rooms').upsert({ id: roomId, state: newState })
+      if (!newState.player1PId && !newState.player2PId) {
         await supabase.from('rooms').delete().eq('id', roomId)
       }
     }
     setRoomId(null)
     setRoomState(null)
     setMyPlayerId(null)
-  }, [roomId, myRole, roomState, updateRoom])
+  }, [roomId, myRole, roomState])
 
   const generatePlayerId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 6)
 
@@ -209,7 +206,6 @@ export default function BPRoomPage() {
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
 
-  // 加入房间：写入正确的 player2PId，并设置 myPlayerId
   const joinRoom = async () => {
     const id = joinRoomId.trim().toUpperCase()
     if (!id) return
@@ -261,7 +257,7 @@ export default function BPRoomPage() {
     }
   }, [roomState, myRole, isMyTurn, availableNinjas, scrolls, summons, updateRoom])
 
-  // 倒计时 + 页面可见性同步
+  // 倒计时与可见性同步
   useEffect(() => {
     const handleVisibility = () => {
       if (!roomState?.deadline || document.hidden) return
@@ -362,11 +358,10 @@ export default function BPRoomPage() {
     }
   }, [roomState?.phase, roomState?.banStep, roomState?.pickStep, roomState?.scrollsConfirmed1P, roomState?.scrollsConfirmed2P, roomState?.summonsConfirmed1P, roomState?.summonsConfirmed2P])
 
-  // 下一局：交换玩家 ID，历史池跟随玩家不动（字段语义不变）
+  // 下一局：交换玩家ID和历史池
   const nextGame = () => {
     if (!roomState || !myRole || !myPlayerId) return
-    const curRole = roomState.player1PId === myPlayerId ? '1P' : '2P'
-    // 根据当前角色确定哪些历史属于我，哪些属于对手
+    const curRole = myRole
     const myNewScrollHistory = curRole === '1P'
       ? [...(roomState.myScrollHistory || []), ...roomState.scrolls1P.filter(Boolean) as string[]]
       : [...(roomState.myScrollHistory || []), ...roomState.scrolls2P.filter(Boolean) as string[]]
@@ -380,10 +375,9 @@ export default function BPRoomPage() {
       ? [...(roomState.opponentSummonHistory || []), ...roomState.summons2P.filter(Boolean) as string[]]
       : [...(roomState.opponentSummonHistory || []), ...roomState.summons1P.filter(Boolean) as string[]]
 
-    // 交换 ID，先后手不变（因为玩家互换了位置，1P 变为原 2P）
     updateRoom({
       gameNumber: roomState.gameNumber + 1,
-      firstPlayer: curRole === '1P' ? '2P' : '1P',   // 对方变为先手
+      firstPlayer: curRole === '1P' ? '2P' : '1P',
       player1PId: roomState.player2PId,
       player2PId: roomState.player1PId,
       phase: 'ban', banStep: 0, pickStep: 0,
@@ -400,7 +394,6 @@ export default function BPRoomPage() {
       mySummonHistory: myNewSummonHistory,
       opponentSummonHistory: opponentNewSummonHistory,
     })
-    // 注意：这里不再手动 setMyRole，因为 playerId 已交换，myRole 会自动由 myPlayerId 计算出新值
   }
 
   const groupedNinjas = useMemo(() => {
