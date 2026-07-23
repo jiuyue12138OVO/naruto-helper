@@ -30,7 +30,7 @@ export default function EntertainmentPage() {
           <h1 className="text-3xl font-bold text-foreground mb-1">
             娱乐<span className="text-primary">模式</span>
           </h1>
-          <p className="text-muted-foreground text-sm">放松一下，随机探索你的本命忍者</p>
+          <p className="text-muted-foreground text-sm">放松一下</p>
         </div>
 
         <Tabs defaultValue="random">
