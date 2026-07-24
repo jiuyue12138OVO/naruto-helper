@@ -17,7 +17,7 @@ import type { INinja } from '@/data/ninjas'
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 const COUNTDOWN_SECONDS = 60
 
-type Phase = 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
+type Phase = 'waiting' | 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
 
 interface RoomState {
   phase: Phase
@@ -65,7 +65,7 @@ const PICK_STEPS = [
 ] as const
 
 const emptyRoomState = (player1PId: string): RoomState => ({
-  phase: 'ban',
+  phase: 'waiting',
   gameNumber: 1,
   firstPlayer: '1P',
   banStep: 0,
@@ -85,8 +85,8 @@ const emptyRoomState = (player1PId: string): RoomState => ({
   summonsConfirmed2P: false,
   player1PId,
   player2PId: null,
-  deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
-  currentPlayer: '1P',
+  deadline: null,
+  currentPlayer: null,
 })
 
 export default function BPRoomPage() {
@@ -102,7 +102,6 @@ export default function BPRoomPage() {
   const [pendingSelection, setPendingSelection] = useState<string | null>(null)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const lastStateRef = useRef<string>('')
 
   // 根据本地玩家ID和房间状态动态计算角色
   const myRole = useMemo(() => {
@@ -112,7 +111,7 @@ export default function BPRoomPage() {
     return null
   }, [roomState, myPlayerId])
 
-  // 实时监听房间状态
+  // 实时监听房间状态（现在直接接受任何新状态，不跳过）
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
@@ -121,11 +120,7 @@ export default function BPRoomPage() {
         (payload) => {
           if (payload.new) {
             const newState = (payload.new as any).state as RoomState
-            const key = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
-            if (key !== lastStateRef.current) {
-              lastStateRef.current = key
-              setRoomState(newState)
-            }
+            setRoomState(newState)
           }
         }
       )
@@ -138,49 +133,32 @@ export default function BPRoomPage() {
     if (!roomId || roomState) return
     const load = async () => {
       const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
-      if (data) {
-        const newState = data.state as RoomState
-        setRoomState(newState)
-        lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
-      }
+      if (data) setRoomState(data.state as RoomState)
     }
     load()
   }, [roomId])
 
-  // 核心修改：更新房间前先获取最新状态，再合并本地修改，避免覆盖他人数据
+  // 更新房间前先获取最新状态，合并后写入，确保不丢失其他客户端的修改
   const updateRoom = useCallback(async (updates: Partial<RoomState>) => {
     if (!roomId) return
-    // 从数据库获取最新完整状态
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
     if (!data) return
     const latestState = data.state as RoomState
-    // 合并本地修改
     const newState: RoomState = { ...latestState, ...updates }
-    // 写回数据库
     await supabase.from('rooms').upsert({ id: roomId, state: newState })
-    // 乐观更新本地
     setRoomState(newState)
-    lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
   }, [roomId])
 
   const fetchLatestState = useCallback(async () => {
     if (!roomId) return
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
-    if (data) {
-      const newState = data.state as RoomState
-      const key = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
-      if (key !== lastStateRef.current) {
-        lastStateRef.current = key
-        setRoomState(newState)
-      }
-    }
+    if (data) setRoomState(data.state as RoomState)
   }, [roomId])
 
-  // 离开房间：将对应ID设为null，若双方都空则删除房间
+  // 离开房间
   const leaveRoom = useCallback(async () => {
     if (!roomId || !myRole || !roomState) return
     const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: null } : { player2PId: null }
-    // 使用新的更新方式，会先读取最新状态再合并，保证不会误删
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
     if (data) {
       const latestState = data.state as RoomState
@@ -202,7 +180,6 @@ export default function BPRoomPage() {
     const playerId = generatePlayerId()
     const init = emptyRoomState(playerId)
     setRoomId(id); setMyPlayerId(playerId); setRoomState(init)
-    lastStateRef.current = `${init.phase}-${init.banStep}-${init.pickStep}-${init.currentPlayer}-${init.scrollsConfirmed1P}-${init.scrollsConfirmed2P}-${init.summonsConfirmed1P}-${init.summonsConfirmed2P}`
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
 
@@ -213,17 +190,29 @@ export default function BPRoomPage() {
     if (!data) { setError('房间不存在'); return }
     const state = data.state as RoomState
     if (state.player2PId) { setError('房间已满'); return }
-    if (state.phase !== 'ban' || state.gameNumber !== 1) { setError('对局已开始，无法加入'); return }
+    if (state.phase !== 'waiting') { setError('对局已开始，无法加入'); return }
     const newPlayerId = generatePlayerId()
     const newState = { ...state, player2PId: newPlayerId }
     setRoomId(id); setMyPlayerId(newPlayerId); setRoomState(newState)
-    lastStateRef.current = `${newState.phase}-${newState.banStep}-${newState.pickStep}-${newState.currentPlayer}-${newState.scrollsConfirmed1P}-${newState.scrollsConfirmed2P}-${newState.summonsConfirmed1P}-${newState.summonsConfirmed2P}`
     await supabase.from('rooms').upsert({ id, state: newState })
     setError('')
   }
 
+  // 1P 开始对局
+  const startGame = async () => {
+    if (!roomState || myRole !== '1P') return
+    if (!roomState.player1PId || !roomState.player2PId) return
+    await updateRoom({
+      phase: 'ban',
+      banStep: 0,
+      deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+      currentPlayer: BAN_STEPS[0].player,
+    })
+  }
+
   const isMyTurn = useMemo(() => {
     if (!roomState || !myRole) return false
+    if (roomState.phase === 'waiting') return false
     if (roomState.phase === 'ban' || roomState.phase === 'pick') return roomState.currentPlayer === myRole
     if (roomState.phase === 'scrolls') return !(myRole === '1P' ? roomState.scrollsConfirmed1P : roomState.scrollsConfirmed2P)
     if (roomState.phase === 'summons') return !(myRole === '1P' ? roomState.summonsConfirmed1P : roomState.summonsConfirmed2P)
@@ -358,7 +347,6 @@ export default function BPRoomPage() {
     }
   }, [roomState?.phase, roomState?.banStep, roomState?.pickStep, roomState?.scrollsConfirmed1P, roomState?.scrollsConfirmed2P, roomState?.summonsConfirmed1P, roomState?.summonsConfirmed2P])
 
-  // 下一局：交换玩家ID和历史池
   const nextGame = () => {
     if (!roomState || !myRole || !myPlayerId) return
     const curRole = myRole
@@ -425,6 +413,36 @@ export default function BPRoomPage() {
   }
 
   if (!roomState || !myRole) return <p className="text-center">加载中...</p>
+
+  // 等待开始阶段
+  if (roomState.phase === 'waiting') {
+    const bothReady = roomState.player1PId && roomState.player2PId
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">房间 {roomId}</Badge>
+            <Badge variant="secondary">你当前是 {myRole}</Badge>
+            <Badge variant={roomState.player1PId ? 'default' : 'secondary'}>1P {roomState.player1PId ? '✓' : '空'}</Badge>
+            <Badge variant={roomState.player2PId ? 'default' : 'secondary'}>2P {roomState.player2PId ? '✓' : '空'}</Badge>
+          </div>
+          <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
+        </div>
+        <Card className="p-6">
+          <div className="text-center space-y-4">
+            <h3 className="font-semibold text-lg">等待双方就位...</h3>
+            {!bothReady && <p className="text-muted-foreground">等待对方加入</p>}
+            {bothReady && myRole === '1P' && (
+              <Button onClick={startGame}>开始 BP</Button>
+            )}
+            {bothReady && myRole !== '1P' && (
+              <p className="text-muted-foreground">等待 1P 开始对局</p>
+            )}
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   const scrollHistory1P = new Set<string>(roomState.myScrollHistory || [])
   const scrollHistory2P = new Set<string>(roomState.opponentScrollHistory || [])

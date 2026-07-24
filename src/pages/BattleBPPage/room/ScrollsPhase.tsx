@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Image } from '@/components/ui/image'
@@ -30,6 +30,7 @@ export default function ScrollsPhase({
   ninjas, scrolls, order, search, setSearch, onSelectScrollSlot, onConfirm, isConfirmed,
 }: ScrollsPhaseProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [pendingScrolls, setPendingScrolls] = useState<Record<number, string | null>>({})
 
   if (isConfirmed) {
     return <p className="text-center text-muted-foreground">已确认密卷，等待对手...</p>
@@ -42,30 +43,60 @@ export default function ScrollsPhase({
   const available = scrolls.filter(s => !myHistory.has(s.id) && !used.has(s.id))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
-  const handleSelectScroll = (scrollId: string) => {
-    if (activeIndex !== null) {
-      onSelectScrollSlot(activeIndex, scrollId)
-      setActiveIndex(null)
-    }
-  }
-
   const toggleActive = (index: number) => {
     if (activeIndex === index) {
       setActiveIndex(null)
-      onSelectScrollSlot(index, null)
+      setPendingScrolls(prev => {
+        const next = { ...prev }
+        delete next[index]
+        return next
+      })
     } else {
       setActiveIndex(index)
     }
   }
 
+  const handleSelectFromGrid = (scrollId: string) => {
+    if (activeIndex === null) return
+    setPendingScrolls(prev => ({ ...prev, [activeIndex]: scrollId }))
+  }
+
+  const confirmCurrentSlot = () => {
+    if (activeIndex !== null && pendingScrolls[activeIndex]) {
+      onSelectScrollSlot(activeIndex, pendingScrolls[activeIndex]!)
+      setPendingScrolls(prev => {
+        const next = { ...prev }
+        delete next[activeIndex]
+        return next
+      })
+      setActiveIndex(null)
+    }
+  }
+
+  const allFilled = order.every(i => myScrolls[i] || pendingScrolls[i])
+
   return (
     <div className="space-y-4">
       <h3 className="text-center font-semibold">选择密卷</h3>
+
+      <div className="flex justify-center gap-3">
+        {activeIndex !== null && pendingScrolls[activeIndex] && (
+          <Button onClick={confirmCurrentSlot} className="gap-2">
+            <Check className="h-4 w-4" /> 确认当前密卷
+          </Button>
+        )}
+        <Button onClick={onConfirm} disabled={!allFilled}>
+          确认密卷配置
+        </Button>
+      </div>
+
       <div className="flex justify-center gap-4">
-        {order.map((i, idx) => {
+        {order.map((i) => {
           const ninja = ninjas.find(n => n.id === myTeam[i])
           const isActive = activeIndex === i
-          const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
+          const isConfirmed = !!myScrolls[i]   // 数据库中已确认的密卷
+          const displayScrollId = myScrolls[i] || pendingScrolls[i]
+          const scroll = displayScrollId ? scrolls.find(s => s.id === displayScrollId) : null
           return (
             <div key={i} className="flex flex-col items-center gap-1">
               <div className="w-16 h-16 border rounded overflow-hidden">
@@ -73,7 +104,9 @@ export default function ScrollsPhase({
               </div>
               <div className="flex gap-1">
                 <div
-                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${isActive ? 'border-primary ring-2 ring-primary' : ''}`}
+                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${
+                    isActive ? 'border-primary ring-2 ring-primary' : ''
+                  } ${isConfirmed ? 'bg-red-500/20 border-red-500' : ''}`}
                   onClick={() => toggleActive(i)}
                 >
                   {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">+</span>}
@@ -96,12 +129,12 @@ export default function ScrollsPhase({
       {activeIndex !== null && (
         <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-64 overflow-y-auto">
           {filtered.map(scroll => {
-            const isUsed = myScrolls.includes(scroll.id)
+            const isUsed = myScrolls.includes(scroll.id) || Object.values(pendingScrolls).includes(scroll.id)
             return (
               <div
                 key={scroll.id}
                 className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg ${isUsed ? 'opacity-50' : 'hover:bg-muted/50'}`}
-                onClick={() => !isUsed && handleSelectScroll(scroll.id)}
+                onClick={() => !isUsed && handleSelectFromGrid(scroll.id)}
               >
                 <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
                   <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
@@ -112,10 +145,6 @@ export default function ScrollsPhase({
           })}
         </div>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Button onClick={onConfirm} disabled={myScrolls.some(s => !s)}>确认密卷</Button>
-      </div>
     </div>
   )
 }

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useData } from '@/contexts/DataContext'
 import CounterTab from './CounterTab'
-import SimulateBPTab from './SimulateBPTab'
-import BPRoomPage from './BPRoomPage'
+import SimulateBPTab from './simulate/SimulateBPTab'
+import BPRoomPage from './room/BPRoomPage'
 
 export default function BattleBPPage() {
   const { ensureNinjas, ensureScrolls, ensureSummons, ensureCounters } = useData()

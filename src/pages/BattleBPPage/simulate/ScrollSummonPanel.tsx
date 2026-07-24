@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
-import BPRecommendation from './BPRecommendation'
+import BPRecommendation from '../BPRecommendation'
 import type { INinja } from '@/data/ninjas'
 import type { IScroll } from '@/data/scrolls'
 import type { ISummon } from '@/data/summons'
@@ -86,85 +86,11 @@ export default function ScrollSummonPanel({
     setPendingItem(null)
   }
 
-  const handleSlotClick = (player: '1P' | '2P', index: number, type: 'scroll' | 'summon') => {
-    setPendingItem(null)
-    onSlotClick(player, index, type)
-  }
-
-  const renderTeamSlots = (player: '1P' | '2P') => {
-    const team = player === '1P' ? team1P : team2P
-    const order = player === '1P' ? [2, 1, 0] : [0, 1, 2]
-    const scrollsData = player === '1P' ? currentScrolls1P : currentScrolls2P
-    const summonsData = player === '1P' ? currentSummons1P : currentSummons2P
-
-    return (
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-sm text-muted-foreground">{player} 阵容</p>
-        <div className="flex gap-2">
-          {order.map(i => {
-            const ninja = team[i]
-            const isActive = activeSlot?.player === player && activeSlot?.index === i
-            return (
-              <div key={i} className="flex flex-col items-center">
-                <div
-                  onClick={() => handleSlotClick(player, i, isScrolls ? 'scroll' : 'summon')}
-                  className={`w-16 h-16 rounded-lg border-2 overflow-hidden cursor-pointer transition-colors ${
-                    isActive ? 'border-primary' : 'border-border hover:border-muted-foreground/50'
-                  }`}
-                >
-                  {ninja ? (
-                    <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>
-                  )}
-                </div>
-                <span className="text-xs mt-1">{ninja?.name || '待选'}</span>
-                {ninja && (
-                  <div className="flex gap-1 mt-1 items-center">
-                    {/* 左侧密卷 */}
-                    <div className="w-5 h-5 rounded overflow-hidden border border-border/40 bg-card flex items-center justify-center">
-                      {scrollsData[i] ? (
-                        <Image
-                          src={scrolls.find(s => s.id === scrollsData[i])!.imageUrl}
-                          className="w-full h-full object-cover"
-                          alt=""
-                        />
-                      ) : (
-                        <span className="text-[10px] text-muted-foreground">-</span>
-                      )}
-                    </div>
-                    {/* 右侧通灵 */}
-                    <div className="w-5 h-5 rounded overflow-hidden border border-border/40 bg-card flex items-center justify-center">
-                      {summonsData[i] ? (
-                        <Image
-                          src={summons.find(s => s.id === summonsData[i])!.imageUrl}
-                          className="w-full h-full object-cover"
-                          alt=""
-                        />
-                      ) : (
-                        <span className="text-[10px] text-muted-foreground">-</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
-
   const pendingScrollId = isScrolls ? pendingItem?.itemId : undefined
   const pendingSummonId = !isScrolls ? pendingItem?.itemId : undefined
 
   return (
     <div className="space-y-4 mt-4">
-      <div className="flex justify-center gap-8 mb-4">
-        {renderTeamSlots('1P')}
-        {renderTeamSlots('2P')}
-      </div>
-
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`搜索${isScrolls ? '密卷' : '通灵'}...`} className="pl-9 pr-9" />
@@ -198,9 +124,12 @@ export default function ScrollSummonPanel({
 
       {currentPlayer && (
         <>
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-center gap-3 mt-2">
             <Button onClick={confirmCurrentSlot} disabled={!pendingItem} className="gap-2">
               <Check className="h-4 w-4" /> 确认当前{isScrolls ? '密卷' : '通灵'}
+            </Button>
+            <Button onClick={onConfirm} disabled={!isComplete}>
+              确认{isScrolls ? '密卷' : '通灵'}配置
             </Button>
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-64 overflow-y-auto">
@@ -224,12 +153,6 @@ export default function ScrollSummonPanel({
           </div>
         </>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Button onClick={onConfirm} disabled={!isComplete}>
-          确认{isScrolls ? '密卷' : '通灵'}配置
-        </Button>
-      </div>
     </div>
   )
 }

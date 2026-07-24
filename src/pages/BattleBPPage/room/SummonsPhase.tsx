@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Image } from '@/components/ui/image'
@@ -35,6 +35,7 @@ export default function SummonsPhase({
   ninjas, summons, scrolls, order, search, setSearch, onSelectSummonSlot, onConfirm, isConfirmed,
 }: SummonsPhaseProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [pendingSummons, setPendingSummons] = useState<Record<number, string | null>>({})
 
   if (isConfirmed) {
     return <p className="text-center text-muted-foreground">已确认通灵，等待对手...</p>
@@ -48,31 +49,61 @@ export default function SummonsPhase({
   const available = summons.filter(s => !mySummonHistory.has(s.id) && !used.has(s.id))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
-  const handleSelectSummon = (summonId: string) => {
-    if (activeIndex !== null) {
-      onSelectSummonSlot(activeIndex, summonId)
-      setActiveIndex(null)
-    }
-  }
-
   const toggleActive = (index: number) => {
     if (activeIndex === index) {
       setActiveIndex(null)
-      onSelectSummonSlot(index, null)
+      setPendingSummons(prev => {
+        const next = { ...prev }
+        delete next[index]
+        return next
+      })
     } else {
       setActiveIndex(index)
     }
   }
 
+  const handleSelectFromGrid = (summonId: string) => {
+    if (activeIndex === null) return
+    setPendingSummons(prev => ({ ...prev, [activeIndex]: summonId }))
+  }
+
+  const confirmCurrentSlot = () => {
+    if (activeIndex !== null && pendingSummons[activeIndex]) {
+      onSelectSummonSlot(activeIndex, pendingSummons[activeIndex]!)
+      setPendingSummons(prev => {
+        const next = { ...prev }
+        delete next[activeIndex]
+        return next
+      })
+      setActiveIndex(null)
+    }
+  }
+
+  const allFilled = order.every(i => mySummons[i] || pendingSummons[i])
+
   return (
     <div className="space-y-4">
       <h3 className="text-center font-semibold">选择通灵</h3>
+
+      <div className="flex justify-center gap-3">
+        {activeIndex !== null && pendingSummons[activeIndex] && (
+          <Button onClick={confirmCurrentSlot} className="gap-2">
+            <Check className="h-4 w-4" /> 确认当前通灵
+          </Button>
+        )}
+        <Button onClick={onConfirm} disabled={!allFilled}>
+          确认通灵配置
+        </Button>
+      </div>
+
       <div className="flex justify-center gap-4">
-        {order.map((i, idx) => {
+        {order.map((i) => {
           const ninja = ninjas.find(n => n.id === myTeam[i])
           const isActive = activeIndex === i
           const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
-          const summon = mySummons[i] ? summons.find(s => s.id === mySummons[i]) : null
+          const isConfirmed = !!mySummons[i]   // 数据库中已确认的通灵
+          const displaySummonId = mySummons[i] || pendingSummons[i]
+          const summon = displaySummonId ? summons.find(s => s.id === displaySummonId) : null
           return (
             <div key={i} className="flex flex-col items-center gap-1">
               <div className="w-16 h-16 border rounded overflow-hidden">
@@ -83,7 +114,9 @@ export default function SummonsPhase({
                   {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
                 </div>
                 <div
-                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${isActive ? 'border-primary ring-2 ring-primary' : ''}`}
+                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${
+                    isActive ? 'border-primary ring-2 ring-primary' : ''
+                  } ${isConfirmed ? 'bg-red-500/20 border-red-500' : ''}`}
                   onClick={() => toggleActive(i)}
                 >
                   {summon ? <Image src={summon.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">+</span>}
@@ -103,12 +136,12 @@ export default function SummonsPhase({
       {activeIndex !== null && (
         <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-64 overflow-y-auto">
           {filtered.map(summon => {
-            const isUsed = mySummons.includes(summon.id)
+            const isUsed = mySummons.includes(summon.id) || Object.values(pendingSummons).includes(summon.id)
             return (
               <div
                 key={summon.id}
                 className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg ${isUsed ? 'opacity-50' : 'hover:bg-muted/50'}`}
-                onClick={() => !isUsed && handleSelectSummon(summon.id)}
+                onClick={() => !isUsed && handleSelectFromGrid(summon.id)}
               >
                 <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
                   <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover" />
@@ -119,10 +152,6 @@ export default function SummonsPhase({
           })}
         </div>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Button onClick={onConfirm} disabled={mySummons.some(s => !s)}>确认通灵</Button>
-      </div>
     </div>
   )
 }

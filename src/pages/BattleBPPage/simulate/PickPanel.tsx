@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
-import BPRecommendation from './BPRecommendation'
+import BPRecommendation from '../BPRecommendation'
 import type { INinja } from '@/data/ninjas'
 
 interface PickPanelProps {

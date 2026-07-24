@@ -1,11 +1,11 @@
-import { Search, X } from 'lucide-react'
+import { Search, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
 import type { INinja } from '@/data/ninjas'
 
-interface PickPhaseProps {
+interface BanPhaseProps {
   search: string
   setSearch: (v: string) => void
   groupedNinjas: { tier: string; ninjas: INinja[] }[]
@@ -15,17 +15,28 @@ interface PickPhaseProps {
   onConfirm: (ninjaId: string) => void
 }
 
-export default function PickPhase({
+export default function BanPhase({
   search, setSearch, groupedNinjas, isMyTurn, pendingSelection, setPendingSelection, onConfirm,
-}: PickPhaseProps) {
+}: BanPhaseProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-center font-semibold">选用忍者 {isMyTurn ? '' : '（等待对手操作）'}</h3>
+      <h3 className="text-center font-semibold">禁用忍者 {isMyTurn ? '' : '（等待对手操作）'}</h3>
+
+      {/* 确认按钮在上方 */}
+      {isMyTurn && pendingSelection && (
+        <div className="flex justify-center mt-2">
+          <Button onClick={() => onConfirm(pendingSelection)} className="gap-2">
+            <Check className="h-4 w-4" /> 确认禁选
+          </Button>
+        </div>
+      )}
+
       <div className="relative max-w-md mx-auto">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索忍者..." className="pl-9 pr-9" />
         {search && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSearch('')}><X className="h-4 w-4" /></Button>}
       </div>
+
       <div className="max-h-80 overflow-y-auto space-y-4">
         {groupedNinjas.map(group => (
           <div key={group.tier}>
@@ -47,11 +58,6 @@ export default function PickPhase({
           </div>
         ))}
       </div>
-      {isMyTurn && pendingSelection && (
-        <div className="flex justify-center mt-4">
-          <Button onClick={() => onConfirm(pendingSelection)}>确认选用</Button>
-        </div>
-      )}
     </div>
   )
 }

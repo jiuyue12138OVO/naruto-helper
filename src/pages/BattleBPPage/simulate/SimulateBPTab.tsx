@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { RotateCcw, Check, History } from 'lucide-react'
+import { RotateCcw, Check, History, Info } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -285,20 +285,57 @@ export default function SimulateBPTab() {
   const renderPickSlot = (player: '1P' | '2P', index: number) => {
     const ninja = (player === '1P' ? team1P : team2P)[index]
     const isActive = phase !== 'done' && currentActiveSlotInfo?.player === player && currentActiveSlotInfo?.index === index
+    const isScrolls = phase === 'scrolls'
+    const isSummons = phase === 'summons'
+    const activeScrollSlot = scrollSummonActiveSlot?.type === 'scroll' && scrollSummonActiveSlot.player === player && scrollSummonActiveSlot.index === index
+    const activeSummonSlot = scrollSummonActiveSlot?.type === 'summon' && scrollSummonActiveSlot.player === player && scrollSummonActiveSlot.index === index
+
+    const scrollId = player === '1P' ? currentScrolls1P[index] : currentScrolls2P[index]
+    const summonId = player === '1P' ? currentSummons1P[index] : currentSummons2P[index]
+
     return (
-      <div className={`w-20 h-20 sm:w-24 sm:h-24 border-2 rounded-lg flex items-center justify-center ${
-        isActive ? 'border-primary' : 'border-muted-foreground/30'
-      }`}>
-        {ninja ? (
-          <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover rounded-lg" />
-        ) : (
-          <span className="text-xs text-muted-foreground">空</span>
+      <div className="flex flex-col items-center gap-1">
+        <div className={`w-20 h-20 sm:w-24 sm:h-24 border-2 rounded-lg flex items-center justify-center ${
+          isActive ? 'border-primary' : 'border-muted-foreground/30'
+        }`}>
+          {ninja ? (
+            <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover rounded-lg" />
+          ) : (
+            <span className="text-xs text-muted-foreground">空</span>
+          )}
+        </div>
+        {(isScrolls || isSummons) && ninja && (
+          <div className="flex gap-1 mt-1">
+            <div
+              onClick={() => handleScrollSummonSlotClick(player, index, 'scroll')}
+              className={`w-8 h-8 rounded border flex items-center justify-center cursor-pointer hover:border-primary ${
+                activeScrollSlot ? 'ring-2 ring-primary' : 'border-border/40'
+              } ${!isScrolls ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {scrollId ? (
+                <Image src={scrolls.find(s => s.id === scrollId)!.imageUrl} className="w-full h-full object-cover rounded" alt="" />
+              ) : (
+                <span className="text-xs text-muted-foreground">{isScrolls ? '+' : '-'}</span>
+              )}
+            </div>
+            <div
+              onClick={() => handleScrollSummonSlotClick(player, index, 'summon')}
+              className={`w-8 h-8 rounded border flex items-center justify-center cursor-pointer hover:border-primary ${
+                activeSummonSlot ? 'ring-2 ring-primary' : 'border-border/40'
+              } ${!isSummons ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {summonId ? (
+                <Image src={summons.find(s => s.id === summonId)!.imageUrl} className="w-full h-full object-cover rounded" alt="" />
+              ) : (
+                <span className="text-xs text-muted-foreground">{isSummons ? '+' : '-'}</span>
+              )}
+            </div>
+          </div>
         )}
       </div>
     )
   }
 
-  // 对齐布局：忍者图 + 密卷（左）通灵（右）
   const renderAlignedSlot = (ninja: INinja | null, scrollId: string | null, summonId: string | null) => (
     <div className="flex flex-col items-center w-24">
       <div className="w-20 h-20 sm:w-24 sm:h-24 border-2 rounded-lg flex items-center justify-center border-muted-foreground/30">
@@ -381,8 +418,18 @@ export default function SimulateBPTab() {
         </div>
       </div>
 
+      <div className="bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+        <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        <span>
+          · 忍者「黑绝（附身）」仅推荐在一号位选择。<br />
+          · 密卷推荐目前侧重克制对手，部分强化自身类的密卷尚未完全纳入。<br />
+          · 推荐仅供参考，请根据实际对局需求灵活选择。
+        </span>
+      </div>
+
       <Card className="p-6">
-        {phase === 'ban' && (
+        {/* 禁用区域：仅在非完成阶段显示 */}
+        {phase !== 'done' && (
           <div className="mb-8">
             <h3 className="font-semibold text-lg mb-3 text-center">禁用忍者</h3>
             <div className="flex justify-center gap-12 sm:gap-20">
@@ -399,29 +446,34 @@ export default function SimulateBPTab() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center gap-4 mt-4">
-              {pendingBanNinja && (
-                <Button onClick={confirmBanSelection} className="gap-2">
-                  <Check className="h-4 w-4" /> 确认选择
-                </Button>
-              )}
-              {isBanComplete && (
-                <Button onClick={confirmBan} disabled={!isBanComplete}>确认禁用</Button>
-              )}
-            </div>
-            <BanPanel
-              myRole={myRole!}
-              currentSlot={currentActiveSlotInfo}
-              usedNinjas={usedNinjas}
-              banned1P={ban1P}
-              banned2P={ban2P}
-              onSelect={handleBanSelect}
-              pendingNinjaId={pendingBanNinja?.id}
-            />
+            {phase === 'ban' && (
+              <>
+                <div className="flex justify-center gap-4 mt-4">
+                  {pendingBanNinja && (
+                    <Button onClick={confirmBanSelection} className="gap-2">
+                      <Check className="h-4 w-4" /> 确认选择
+                    </Button>
+                  )}
+                  {isBanComplete && (
+                    <Button onClick={confirmBan} disabled={!isBanComplete}>确认禁用</Button>
+                  )}
+                </div>
+                <BanPanel
+                  myRole={myRole!}
+                  currentSlot={currentActiveSlotInfo}
+                  usedNinjas={usedNinjas}
+                  banned1P={ban1P}
+                  banned2P={ban2P}
+                  onSelect={handleBanSelect}
+                  pendingNinjaId={pendingBanNinja?.id}
+                />
+              </>
+            )}
           </div>
         )}
 
-        {phase === 'pick' && (
+        {/* 选用区域：ban之后且非完成阶段显示 */}
+        {phase !== 'ban' && phase !== 'done' && (
           <div className="mb-8">
             <h3 className="font-semibold text-lg mb-3 text-center">选用忍者</h3>
             <div className="flex justify-center gap-12 sm:gap-20">
@@ -438,69 +490,56 @@ export default function SimulateBPTab() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center gap-4 mt-4">
-              {pendingPickNinja && (
-                <Button onClick={confirmPickSelection} className="gap-2">
-                  <Check className="h-4 w-4" /> 确认选择
-                </Button>
-              )}
-              {isPickComplete && (
-                <Button onClick={confirmPick} disabled={!isPickComplete}>确认阵容</Button>
-              )}
-            </div>
-            <PickPanel
-              myRole={myRole!}
-              currentSlot={currentActiveSlotInfo}
-              team1P={team1P}
-              team2P={team2P}
-              usedNinjas={usedNinjas}
-              banned1P={ban1P}
-              banned2P={ban2P}
-              onSelect={handlePickSelect}
-              pendingNinjaId={pendingPickNinja?.id}
-            />
+            {phase === 'pick' && (
+              <>
+                <div className="flex justify-center gap-4 mt-4">
+                  {pendingPickNinja && (
+                    <Button onClick={confirmPickSelection} className="gap-2">
+                      <Check className="h-4 w-4" /> 确认选择
+                    </Button>
+                  )}
+                  {isPickComplete && (
+                    <Button onClick={confirmPick} disabled={!isPickComplete}>确认阵容</Button>
+                  )}
+                </div>
+                <PickPanel
+                  myRole={myRole!}
+                  currentSlot={currentActiveSlotInfo}
+                  team1P={team1P}
+                  team2P={team2P}
+                  usedNinjas={usedNinjas}
+                  banned1P={ban1P}
+                  banned2P={ban2P}
+                  onSelect={handlePickSelect}
+                  pendingNinjaId={pendingPickNinja?.id}
+                />
+              </>
+            )}
+            {(phase === 'scrolls' || phase === 'summons') && (
+              <ScrollSummonPanel
+                phase={phase}
+                myRole={myRole!}
+                team1P={team1P}
+                team2P={team2P}
+                currentScrolls1P={currentScrolls1P}
+                currentScrolls2P={currentScrolls2P}
+                currentSummons1P={currentSummons1P}
+                currentSummons2P={currentSummons2P}
+                myScrollHistory={myScrollHistory}
+                opponentScrollHistory={opponentScrollHistory}
+                mySummonHistory={mySummonHistory}
+                opponentSummonHistory={opponentSummonHistory}
+                activeSlot={scrollSummonActiveSlot}
+                onSlotClick={handleScrollSummonSlotClick}
+                onConfirmSlot={handleConfirmSlot}
+                onConfirm={phase === 'scrolls' ? confirmScrolls : confirmSummons}
+                isComplete={phase === 'scrolls' ? isScrollsComplete : isSummonsComplete}
+              />
+            )}
           </div>
         )}
 
-        {(phase === 'scrolls' || phase === 'summons') && (
-          <div className="mb-8">
-            <h3 className="font-semibold text-lg mb-3 text-center">选用忍者</h3>
-            <div className="flex justify-center gap-12 sm:gap-20">
-              <div>
-                <p className="text-sm text-muted-foreground mb-2 text-center">1P 阵容</p>
-                <div className="flex gap-2">
-                  {renderOrder1P.map(i => renderPickSlot('1P', i))}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-2 text-center">2P 阵容</p>
-                <div className="flex gap-2">
-                  {renderOrder2P.map(i => renderPickSlot('2P', i))}
-                </div>
-              </div>
-            </div>
-            <ScrollSummonPanel
-              phase={phase}
-              myRole={myRole!}
-              team1P={team1P}
-              team2P={team2P}
-              currentScrolls1P={currentScrolls1P}
-              currentScrolls2P={currentScrolls2P}
-              currentSummons1P={currentSummons1P}
-              currentSummons2P={currentSummons2P}
-              myScrollHistory={myScrollHistory}
-              opponentScrollHistory={opponentScrollHistory}
-              mySummonHistory={mySummonHistory}
-              opponentSummonHistory={opponentSummonHistory}
-              activeSlot={scrollSummonActiveSlot}
-              onSlotClick={handleScrollSummonSlotClick}
-              onConfirmSlot={handleConfirmSlot}
-              onConfirm={phase === 'scrolls' ? confirmScrolls : confirmSummons}
-              isComplete={phase === 'scrolls' ? isScrollsComplete : isSummonsComplete}
-            />
-          </div>
-        )}
-
+        {/* 完成界面：单独展示最终结果 */}
         {phase === 'done' && (
           <div className="space-y-8">
             <div>
@@ -520,7 +559,6 @@ export default function SimulateBPTab() {
                 </div>
               </div>
             </div>
-
             <div>
               <h3 className="font-semibold text-lg mb-3 text-center">选用忍者</h3>
               <div className="flex justify-center gap-12 sm:gap-20">
@@ -542,7 +580,6 @@ export default function SimulateBPTab() {
                 </div>
               </div>
             </div>
-
             <div className="text-center space-y-4">
               <p className="text-lg font-semibold text-primary">本局 BP 完成！</p>
               <Button onClick={nextGame}>进入下一局</Button>
