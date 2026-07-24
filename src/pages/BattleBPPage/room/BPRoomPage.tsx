@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
 import { Input } from '@/components/ui/input'
-import { Clock } from 'lucide-react'
+import { Clock, Search, X } from 'lucide-react'
 import { useData } from '@/contexts/DataContext'
 import BanPhase from './BanPhase'
 import PickPhase from './PickPhase'
@@ -16,6 +16,7 @@ import type { INinja } from '@/data/ninjas'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 const COUNTDOWN_SECONDS = 60
+const MAX_PUBLIC_BAN = 2
 
 type Phase = 'waiting' | 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
 
@@ -46,6 +47,9 @@ interface RoomState {
   player2PId: string | null
   deadline: number | null
   currentPlayer: '1P' | '2P' | null
+  publicBan: string[]
+  nextGameConfirmed1P: boolean
+  nextGameConfirmed2P: boolean
 }
 
 const BAN_STEPS = [
@@ -87,6 +91,9 @@ const emptyRoomState = (player1PId: string): RoomState => ({
   player2PId: null,
   deadline: null,
   currentPlayer: null,
+  publicBan: [],
+  nextGameConfirmed1P: false,
+  nextGameConfirmed2P: false,
 })
 
 export default function BPRoomPage() {
@@ -100,6 +107,7 @@ export default function BPRoomPage() {
   const [search, setSearch] = useState('')
   const [remainingSeconds, setRemainingSeconds] = useState(COUNTDOWN_SECONDS)
   const [pendingSelection, setPendingSelection] = useState<string | null>(null)
+  const [publicBanSearch, setPublicBanSearch] = useState('')
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -111,7 +119,55 @@ export default function BPRoomPage() {
     return null
   }, [roomState, myPlayerId])
 
-  // 实时监听房间状态（现在直接接受任何新状态，不跳过）
+  // 存储房间信息到 localStorage（仅在成功加入后）
+  useEffect(() => {
+    if (roomId && myPlayerId) {
+      localStorage.setItem('bp_room_id', roomId)
+      localStorage.setItem('bp_player_id', myPlayerId)
+    }
+    // 注意：不在这里清除，只在主动退出时清除
+  }, [roomId, myPlayerId])
+
+  // 自动重连：仅在组件挂载且尚未有房间连接时执行
+  useEffect(() => {
+    const savedRoomId = localStorage.getItem('bp_room_id')
+    const savedPlayerId = localStorage.getItem('bp_player_id')
+    if (savedRoomId && savedPlayerId && !roomId) {
+      const reconnect = async () => {
+        const { data } = await supabase.from('rooms').select('state').eq('id', savedRoomId).single()
+        if (data) {
+          const state = data.state as RoomState
+          const is1P = state.player1PId === savedPlayerId
+          const is2P = state.player2PId === savedPlayerId
+          if (is1P || is2P) {
+            // 还在原来的位置，直接恢复
+            setRoomId(savedRoomId)
+            setMyPlayerId(savedPlayerId)
+            setRoomState(state)
+          } else if (!state.player1PId || !state.player2PId) {
+            // 有空位，但自己的 ID 不在，接管空位（保持原 ID）
+            const roleToTake = !state.player1PId ? '1P' : '2P'
+            const newState = { ...state, [roleToTake === '1P' ? 'player1PId' : 'player2PId']: savedPlayerId }
+            await supabase.from('rooms').upsert({ id: savedRoomId, state: newState })
+            setRoomId(savedRoomId)
+            setMyPlayerId(savedPlayerId) // 自己的 ID 不变
+            setRoomState(newState)
+          } else {
+            // 房间满且自己不在，无法重连，清理记录
+            localStorage.removeItem('bp_room_id')
+            localStorage.removeItem('bp_player_id')
+          }
+        } else {
+          // 房间不存在，清理记录
+          localStorage.removeItem('bp_room_id')
+          localStorage.removeItem('bp_player_id')
+        }
+      }
+      reconnect()
+    }
+  }, []) // 仅在首次挂载时执行，依赖为空
+
+  // 实时监听房间状态
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
@@ -138,7 +194,7 @@ export default function BPRoomPage() {
     load()
   }, [roomId])
 
-  // 更新房间前先获取最新状态，合并后写入，确保不丢失其他客户端的修改
+  // 更新房间前先获取最新状态，合并后写入
   const updateRoom = useCallback(async (updates: Partial<RoomState>) => {
     if (!roomId) return
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
@@ -155,7 +211,7 @@ export default function BPRoomPage() {
     if (data) setRoomState(data.state as RoomState)
   }, [roomId])
 
-  // 离开房间
+  // 离开房间（主动退出，才清除 localStorage）
   const leaveRoom = useCallback(async () => {
     if (!roomId || !myRole || !roomState) return
     const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: null } : { player2PId: null }
@@ -171,6 +227,8 @@ export default function BPRoomPage() {
     setRoomId(null)
     setRoomState(null)
     setMyPlayerId(null)
+    localStorage.removeItem('bp_room_id')
+    localStorage.removeItem('bp_player_id')
   }, [roomId, myRole, roomState])
 
   const generatePlayerId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 6)
@@ -189,16 +247,18 @@ export default function BPRoomPage() {
     const { data } = await supabase.from('rooms').select('state').eq('id', id).single()
     if (!data) { setError('房间不存在'); return }
     const state = data.state as RoomState
-    if (state.player2PId) { setError('房间已满'); return }
-    if (state.phase !== 'waiting') { setError('对局已开始，无法加入'); return }
+    const roleToTake1 = state.player1PId ? null : '1P'
+    const roleToTake2 = state.player2PId ? null : '2P'
+    const availableRole = roleToTake1 || roleToTake2
+    if (!availableRole) { setError('房间已满'); return }
+
     const newPlayerId = generatePlayerId()
-    const newState = { ...state, player2PId: newPlayerId }
+    const newState = { ...state, [availableRole === '1P' ? 'player1PId' : 'player2PId']: newPlayerId }
     setRoomId(id); setMyPlayerId(newPlayerId); setRoomState(newState)
     await supabase.from('rooms').upsert({ id, state: newState })
     setError('')
   }
 
-  // 1P 开始对局
   const startGame = async () => {
     if (!roomState || myRole !== '1P') return
     if (!roomState.player1PId || !roomState.player2PId) return
@@ -208,6 +268,16 @@ export default function BPRoomPage() {
       deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
       currentPlayer: BAN_STEPS[0].player,
     })
+  }
+
+  const togglePublicBan = async (ninjaId: string) => {
+    if (!roomState || myRole !== '1P' || roomState.phase !== 'waiting') return
+    const current = roomState.publicBan || []
+    if (current.includes(ninjaId)) {
+      await updateRoom({ publicBan: current.filter(id => id !== ninjaId) })
+    } else if (current.length < MAX_PUBLIC_BAN) {
+      await updateRoom({ publicBan: [...current, ninjaId] })
+    }
   }
 
   const isMyTurn = useMemo(() => {
@@ -221,32 +291,103 @@ export default function BPRoomPage() {
 
   const availableNinjas = useMemo(() => {
     if (!roomState) return []
+    const publicBanSet = new Set(roomState.publicBan || [])
     const banned = new Set([...roomState.ban1P.filter(Boolean), ...roomState.ban2P.filter(Boolean)])
-    return ninjas.filter(n => !roomState.usedNinjas.includes(n.id) && !banned.has(n.id))
+    return ninjas.filter(n => !roomState.usedNinjas.includes(n.id) && !banned.has(n.id) && !publicBanSet.has(n.id))
   }, [roomState, ninjas])
 
   const handleTimeout = useCallback(() => {
-    if (!roomState || !myRole) return
-    if ((roomState.phase === 'ban' || roomState.phase === 'pick') && isMyTurn) {
-      const pool = availableNinjas
-      if (pool.length === 0) return
-      confirmSelection(pool[Math.floor(Math.random() * pool.length)].id)
-    } else if (roomState.phase === 'scrolls' && !(myRole === '1P' ? roomState.scrollsConfirmed1P : roomState.scrollsConfirmed2P)) {
-      const current = myRole === '1P' ? [...roomState.scrolls1P] : [...roomState.scrolls2P]
-      const history = myRole === '1P' ? new Set(roomState.myScrollHistory) : new Set(roomState.opponentScrollHistory)
-      const pool = scrolls.filter(s => !history.has(s.id) && !current.includes(s.id))
-      const newScrolls = current.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
-      updateRoom(myRole === '1P' ? { scrolls1P: newScrolls, scrollsConfirmed1P: true } : { scrolls2P: newScrolls, scrollsConfirmed2P: true })
-    } else if (roomState.phase === 'summons' && !(myRole === '1P' ? roomState.summonsConfirmed1P : roomState.summonsConfirmed2P)) {
-      const current = myRole === '1P' ? [...roomState.summons1P] : [...roomState.summons2P]
-      const history = myRole === '1P' ? new Set(roomState.mySummonHistory) : new Set(roomState.opponentSummonHistory)
-      const pool = summons.filter(s => !history.has(s.id) && !current.includes(s.id))
-      const newSummons = current.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
-      updateRoom(myRole === '1P' ? { summons1P: newSummons, summonsConfirmed1P: true } : { summons2P: newSummons, summonsConfirmed2P: true })
+    if (!roomState || !roomId) return
+    const { phase } = roomState
+    if (phase === 'ban' || phase === 'pick') {
+      const currentPlayer = roomState.currentPlayer
+      if (!currentPlayer) return
+      const playerId = currentPlayer === '1P' ? roomState.player1PId : roomState.player2PId
+      if (!playerId) {
+        const pool = availableNinjas
+        if (pool.length === 0) return
+        const randomNinja = pool[Math.floor(Math.random() * pool.length)]
+        if (phase === 'ban') {
+          const step = BAN_STEPS[roomState.banStep]
+          const newBan = step.player === '1P' ? [...roomState.ban1P] : [...roomState.ban2P]
+          newBan[step.index] = randomNinja.id
+          const nextStep = roomState.banStep + 1
+          updateRoom({
+            [step.player === '1P' ? 'ban1P' : 'ban2P']: newBan,
+            banStep: nextStep,
+            deadline: nextStep < 4 ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+            currentPlayer: nextStep < 4 ? BAN_STEPS[nextStep].player : null,
+          })
+        } else {
+          const step = PICK_STEPS[roomState.pickStep]
+          const newTeam = step.player === '1P' ? [...roomState.team1P] : [...roomState.team2P]
+          newTeam[step.index] = randomNinja.id
+          const nextStep = roomState.pickStep + 1
+          updateRoom({
+            [step.player === '1P' ? 'team1P' : 'team2P']: newTeam,
+            usedNinjas: [...roomState.usedNinjas, randomNinja.id],
+            pickStep: nextStep,
+            deadline: nextStep < 6 ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+            currentPlayer: nextStep < 6 ? PICK_STEPS[nextStep].player : null,
+          })
+        }
+        return
+      }
+      if (isMyTurn) {
+        const pool = availableNinjas
+        if (pool.length === 0) return
+        confirmSelection(pool[Math.floor(Math.random() * pool.length)].id)
+      }
+      return
+    }
+
+    if (phase === 'scrolls') {
+      const iAm1P = myRole === '1P'
+      const myConfirmed = iAm1P ? roomState.scrollsConfirmed1P : roomState.scrollsConfirmed2P
+      if (!myConfirmed) {
+        const current = iAm1P ? [...roomState.scrolls1P] : [...roomState.scrolls2P]
+        const history = iAm1P ? new Set(roomState.myScrollHistory) : new Set(roomState.opponentScrollHistory)
+        const pool = scrolls.filter(s => !history.has(s.id) && !current.includes(s.id))
+        const newScrolls = current.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
+        updateRoom(iAm1P ? { scrolls1P: newScrolls, scrollsConfirmed1P: true } : { scrolls2P: newScrolls, scrollsConfirmed2P: true })
+      }
+      const opponentRole = iAm1P ? '2P' : '1P'
+      const opponentId = opponentRole === '1P' ? roomState.player1PId : roomState.player2PId
+      const opponentConfirmed = opponentRole === '1P' ? roomState.scrollsConfirmed1P : roomState.scrollsConfirmed2P
+      if (!opponentId && !opponentConfirmed) {
+        const oppScrolls = opponentRole === '1P' ? [...roomState.scrolls1P] : [...roomState.scrolls2P]
+        const oppHistory = opponentRole === '1P' ? new Set(roomState.myScrollHistory) : new Set(roomState.opponentScrollHistory)
+        const pool = scrolls.filter(s => !oppHistory.has(s.id) && !oppScrolls.includes(s.id))
+        const newScrolls = oppScrolls.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
+        updateRoom(opponentRole === '1P' ? { scrolls1P: newScrolls, scrollsConfirmed1P: true } : { scrolls2P: newScrolls, scrollsConfirmed2P: true })
+      }
+      return
+    }
+
+    if (phase === 'summons') {
+      const iAm1P = myRole === '1P'
+      const myConfirmed = iAm1P ? roomState.summonsConfirmed1P : roomState.summonsConfirmed2P
+      if (!myConfirmed) {
+        const current = iAm1P ? [...roomState.summons1P] : [...roomState.summons2P]
+        const history = iAm1P ? new Set(roomState.mySummonHistory) : new Set(roomState.opponentSummonHistory)
+        const pool = summons.filter(s => !history.has(s.id) && !current.includes(s.id))
+        const newSummons = current.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
+        updateRoom(iAm1P ? { summons1P: newSummons, summonsConfirmed1P: true } : { summons2P: newSummons, summonsConfirmed2P: true })
+      }
+      const opponentRole = iAm1P ? '2P' : '1P'
+      const opponentId = opponentRole === '1P' ? roomState.player1PId : roomState.player2PId
+      const opponentConfirmed = opponentRole === '1P' ? roomState.summonsConfirmed1P : roomState.summonsConfirmed2P
+      if (!opponentId && !opponentConfirmed) {
+        const oppSummons = opponentRole === '1P' ? [...roomState.summons1P] : [...roomState.summons2P]
+        const oppHistory = opponentRole === '1P' ? new Set(roomState.mySummonHistory) : new Set(roomState.opponentSummonHistory)
+        const pool = summons.filter(s => !oppHistory.has(s.id) && !oppSummons.includes(s.id))
+        const newSummons = oppSummons.map(s => s || (pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].id : null))
+        updateRoom(opponentRole === '1P' ? { summons1P: newSummons, summonsConfirmed1P: true } : { summons2P: newSummons, summonsConfirmed2P: true })
+      }
+      return
     }
   }, [roomState, myRole, isMyTurn, availableNinjas, scrolls, summons, updateRoom])
 
-  // 倒计时与可见性同步
   useEffect(() => {
     const handleVisibility = () => {
       if (!roomState?.deadline || document.hidden) return
@@ -330,7 +471,59 @@ export default function BPRoomPage() {
     fetchLatestState()
   }
 
-  // 阶段自动推进
+  const doNextGame = useCallback((state: RoomState, currentRole: '1P' | '2P') => {
+    const curRole = currentRole
+    const myNewScrollHistory = curRole === '1P'
+      ? [...(state.myScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
+      : [...(state.myScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
+    const opponentNewScrollHistory = curRole === '1P'
+      ? [...(state.opponentScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
+      : [...(state.opponentScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
+    const myNewSummonHistory = curRole === '1P'
+      ? [...(state.mySummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
+      : [...(state.mySummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
+    const opponentNewSummonHistory = curRole === '1P'
+      ? [...(state.opponentSummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
+      : [...(state.opponentSummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
+
+    updateRoom({
+      gameNumber: state.gameNumber + 1,
+      firstPlayer: curRole === '1P' ? '2P' : '1P',
+      player1PId: state.player2PId,
+      player2PId: state.player1PId,
+      phase: 'ban', banStep: 0, pickStep: 0,
+      ban1P: [null, null], ban2P: [null, null],
+      team1P: [null, null, null], team2P: [null, null, null],
+      scrolls1P: [null, null, null], scrolls2P: [null, null, null],
+      scrollsConfirmed1P: false, scrollsConfirmed2P: false,
+      summons1P: [null, null, null], summons2P: [null, null, null],
+      summonsConfirmed1P: false, summonsConfirmed2P: false,
+      deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+      currentPlayer: BAN_STEPS[0].player,
+      myScrollHistory: myNewScrollHistory,
+      opponentScrollHistory: opponentNewScrollHistory,
+      mySummonHistory: myNewSummonHistory,
+      opponentSummonHistory: opponentNewSummonHistory,
+      nextGameConfirmed1P: false,
+      nextGameConfirmed2P: false,
+      publicBan: state.publicBan,
+    })
+  }, [updateRoom])
+
+  const confirmNextGame = useCallback(() => {
+    if (!myRole || !roomState || roomState.phase !== 'done') return
+    const key = myRole === '1P' ? 'nextGameConfirmed1P' : 'nextGameConfirmed2P'
+    const updatedState = { ...roomState, [key]: true }
+    setRoomState(updatedState)
+    supabase.from('rooms').upsert({ id: roomId, state: updatedState }).then()
+    
+    const otherRole = myRole === '1P' ? '2P' : '1P'
+    const otherConfirmed = otherRole === '1P' ? updatedState.nextGameConfirmed1P : updatedState.nextGameConfirmed2P
+    if (otherConfirmed) {
+      doNextGame(updatedState, myRole)
+    }
+  }, [myRole, roomState, roomId, doNextGame])
+
   useEffect(() => {
     if (!roomState) return
     if (roomState.phase === 'ban' && roomState.banStep >= 4) {
@@ -347,42 +540,18 @@ export default function BPRoomPage() {
     }
   }, [roomState?.phase, roomState?.banStep, roomState?.pickStep, roomState?.scrollsConfirmed1P, roomState?.scrollsConfirmed2P, roomState?.summonsConfirmed1P, roomState?.summonsConfirmed2P])
 
-  const nextGame = () => {
-    if (!roomState || !myRole || !myPlayerId) return
-    const curRole = myRole
-    const myNewScrollHistory = curRole === '1P'
-      ? [...(roomState.myScrollHistory || []), ...roomState.scrolls1P.filter(Boolean) as string[]]
-      : [...(roomState.myScrollHistory || []), ...roomState.scrolls2P.filter(Boolean) as string[]]
-    const opponentNewScrollHistory = curRole === '1P'
-      ? [...(roomState.opponentScrollHistory || []), ...roomState.scrolls2P.filter(Boolean) as string[]]
-      : [...(roomState.opponentScrollHistory || []), ...roomState.scrolls1P.filter(Boolean) as string[]]
-    const myNewSummonHistory = curRole === '1P'
-      ? [...(roomState.mySummonHistory || []), ...roomState.summons1P.filter(Boolean) as string[]]
-      : [...(roomState.mySummonHistory || []), ...roomState.summons2P.filter(Boolean) as string[]]
-    const opponentNewSummonHistory = curRole === '1P'
-      ? [...(roomState.opponentSummonHistory || []), ...roomState.summons2P.filter(Boolean) as string[]]
-      : [...(roomState.opponentSummonHistory || []), ...roomState.summons1P.filter(Boolean) as string[]]
-
-    updateRoom({
-      gameNumber: roomState.gameNumber + 1,
-      firstPlayer: curRole === '1P' ? '2P' : '1P',
-      player1PId: roomState.player2PId,
-      player2PId: roomState.player1PId,
-      phase: 'ban', banStep: 0, pickStep: 0,
-      ban1P: [null, null], ban2P: [null, null],
-      team1P: [null, null, null], team2P: [null, null, null],
-      scrolls1P: [null, null, null], scrolls2P: [null, null, null],
-      scrollsConfirmed1P: false, scrollsConfirmed2P: false,
-      summons1P: [null, null, null], summons2P: [null, null, null],
-      summonsConfirmed1P: false, summonsConfirmed2P: false,
-      deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
-      currentPlayer: BAN_STEPS[0].player,
-      myScrollHistory: myNewScrollHistory,
-      opponentScrollHistory: opponentNewScrollHistory,
-      mySummonHistory: myNewSummonHistory,
-      opponentSummonHistory: opponentNewSummonHistory,
+  const publicBanNinjas = useMemo(() => {
+    const searchTerm = publicBanSearch.toLowerCase()
+    const bannedIds = new Set(roomState?.publicBan || [])
+    let list = ninjas.filter(n => !bannedIds.has(n.id))
+    if (searchTerm) list = list.filter(n => n.name.toLowerCase().includes(searchTerm))
+    const groups: { tier: string; ninjas: INinja[] }[] = []
+    TIER_ORDER.forEach(tier => {
+      const tierNinjas = list.filter(n => n.tier === tier)
+      if (tierNinjas.length > 0) groups.push({ tier, ninjas: tierNinjas })
     })
-  }
+    return groups
+  }, [ninjas, roomState?.publicBan, publicBanSearch])
 
   const groupedNinjas = useMemo(() => {
     const filtered = search ? availableNinjas.filter(n => n.name.toLowerCase().includes(search.toLowerCase())) : availableNinjas
@@ -414,9 +583,9 @@ export default function BPRoomPage() {
 
   if (!roomState || !myRole) return <p className="text-center">加载中...</p>
 
-  // 等待开始阶段
   if (roomState.phase === 'waiting') {
     const bothReady = roomState.player1PId && roomState.player2PId
+    const publicBanList = roomState.publicBan || []
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -428,7 +597,70 @@ export default function BPRoomPage() {
           </div>
           <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
         </div>
-        <Card className="p-6">
+        <Card className="p-6 space-y-4">
+          <div>
+            <h3 className="font-semibold text-center mb-2">公 ban（全局禁用忍者）</h3>
+            <p className="text-sm text-muted-foreground text-center mb-3">
+              选择最多 {MAX_PUBLIC_BAN} 名忍者，本局对战全程禁用（仅 1P 可设置）
+            </p>
+            {publicBanList.length > 0 && (
+              <div className="flex justify-center gap-2 mb-3">
+                {publicBanList.map(id => {
+                  const ninja = ninjas.find(n => n.id === id)
+                  return ninja ? (
+                    <div key={id} className="relative group">
+                      <div className="w-14 h-14 border rounded overflow-hidden">
+                        <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                      </div>
+                      {myRole === '1P' && (
+                        <div
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => togglePublicBan(id)}
+                        >
+                          ✕
+                        </div>
+                      )}
+                    </div>
+                  ) : null
+                })}
+              </div>
+            )}
+            {myRole === '1P' && publicBanList.length < MAX_PUBLIC_BAN && (
+              <div className="relative max-w-md mx-auto">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={publicBanSearch}
+                  onChange={e => setPublicBanSearch(e.target.value)}
+                  placeholder="搜索忍者添加公 ban..."
+                  className="pl-9 pr-9"
+                />
+                {publicBanSearch && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setPublicBanSearch('')}><X className="h-4 w-4" /></Button>}
+              </div>
+            )}
+            {myRole === '1P' && publicBanList.length < MAX_PUBLIC_BAN && (
+              <div className="max-h-48 overflow-y-auto space-y-3 mt-2">
+                {publicBanNinjas.map(group => (
+                  <div key={group.tier}>
+                    <Badge variant="outline" className="mb-1 text-sm font-bold">{group.tier}</Badge>
+                    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                      {group.ninjas.map(ninja => (
+                        <div
+                          key={ninja.id}
+                          className="cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-muted/50 transition-colors"
+                          onClick={() => togglePublicBan(ninja.id)}
+                        >
+                          <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                            <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="text-center space-y-4">
             <h3 className="font-semibold text-lg">等待双方就位...</h3>
             {!bothReady && <p className="text-muted-foreground">等待对方加入</p>}
@@ -611,7 +843,12 @@ export default function BPRoomPage() {
           />
         )
       case 'done':
-        return <DonePhase onNextGame={nextGame} />
+        return (
+          <DonePhase
+            onConfirmNextGame={confirmNextGame}
+            myConfirmed={myRole === '1P' ? roomState.nextGameConfirmed1P : roomState.nextGameConfirmed2P}
+          />
+        )
       default:
         return null
     }
