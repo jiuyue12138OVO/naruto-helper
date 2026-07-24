@@ -114,7 +114,7 @@
         "瞬发",
         "乱闪",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "格挡",
@@ -438,7 +438,7 @@
         "抓取",
         "突进",
         "霸体",
-        "飞行",
+        "高空优势",
         "高爆发",
         "高输出",
         "破霸体",
@@ -480,7 +480,7 @@
       "tags": [
         "瞬发",
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "低真空期",
@@ -495,7 +495,7 @@
       "imageUrl": "data:image/webp;base64,UklGRvgOAABXRUJQVlA4IOwOAADQRwCdASqUAJQAPmUokEWkIqGYy89cQAZEoIkCWUY/vl6jys7t/nOHeOva/9Kfin9QDzG/tf1bPQP/yHVO+ir0w/lY3jni+5x/fWgrkj7FdR35j+FsjbND5U6jXuDgPQFWb0dgJLTmG7pEqqX2x0/4lzWe2bbmY/9CbmQSVrsomn7qh2cpx1eUKIbPXopB8rp0zpL9cTaC0BPx5lI/Gv1oel3z2WXqlSPV9FnHWe0xsWHcosum3hadq3sSQyXVc/Ok6ykcbLzFD5kOLMSDfFPn0+Vl8boKmGEajt0jk/q2Fo9pXJLL1ZQsqqmQ7pnA0Gx1DN0ar4uZoSqkX2+TYc0shcSVBR2KwO/UG1f9wdSEcxWy6ullBsRwRdyS4PPHkAX4RTvadPs6QC0780g9f/ON6FfeknsDBCQRPWODI0AX6f3Hty+1fj8SvgNF7G2D8azB+nBkpO6Yyu+FatzcE15tjwsgLyxUe48L9EJPnO8lTSAT2VtdD/YnM6uMfPQusXVQP8cfKnq08KkSVSRqGfGy9juN+ButV2dX5vozETHQUc8ue/5Y4ew8FLXdKhAfuTGVOUcjcSwNP9JOy7EI0QKnhGCFvZcZlZ1YyeLxboyXws9g3zclrRg2UeC4nwD2wjxNc15tFJNjGiLJ0OyXP/C3BhXZNzxC+Gz+igkogUxx90zps22XgCWtZNKnPccdIyGhcB5ipODBW06ENy2dCW+rEhC6Iir2/mmbSYwZIeMHTs/WStOFneLtv8RQrHwjO8W/joY61gOAAP74m3io21N6rTt0LEGLaidnNbXkFi2eAsnx4jfu2/zUh6kh+HhhPkc5saoQeLae2xmD0M86rMcsI5U6bt/E9DgP9YVmw5XolntN68Eix1tDWRUloiQ/3KdwTIhGJ+f3qhd6QvXXFMydkY8ABE0MEr+OfOSo2YooyT8/qY+TfutplFXmOAzbG7KKuFtvW91CZKVK57zf9NPWsu0I6XgXCQpfCNwv4WdKBa1b2nNCjVcjIjiBC7Kf7ifawVg+JbpOyEWowZd3OEcrUbUQggKv3sJzKDoALBiEglCW4Vcc70DKptX9XaDWnHNC/jL7XVPWbuwipKXEr4sKuCuf5z8ADy1Pwo6VcX5YwryA+NvD6F9oO5pmG4YmRgbolbMsq8ufk2Tux/osnH3Fw9+oac+l/bjyUjWvKNICgCEz1Zi2wGisiv/LNlO5HdJVppmV3qk5G0ZzndC4Lx5X9eNwN/0at2i5zk+bSQJtzvKsN1YAbJhCAYC5RKkHjjOBZdoWRfkzgacOEYWbiLjGOo1dX6xwZiCY71uDRzHtxjrrL3WV+WYKQThCYFQWfKYgtsDXsNH7Yd7OiWkMYEbAbediPglyRCrcGpycBBlfPaCLhhlMGqxpgbJqNvCaNxVpXiRb9BsK+4ig0VL74J+OARoC3G9mASPQSJ7I79GObrOs7Ee9PsPeTWAKrfqKuuT9ZTZakjjtNvRCKRtw7QPVi16N3oPCs7Vha0hD0goH977EAZ1I1k0uddIa1HZQyKRwWxY++kp4bFjuGKeMQr2V9TD/Hl45avAsJ0IB2nZk24j37Tga2ShC0tu6Et8IsOPDBIsO8TuqI6oZW2zBXvHYKP8DZo2sHyFjT8UX3I2spgcs4HboLc1yxty0qxxe2vYuuBUBkKDVjCAAM8Nc5HnJD2wj2MDFE3fFTaMaZdteX9KE8wC5plHNzhkbH7ii+fAT3LkW7ESJXwUraoroJEYBm8cS1fO8alE/31FPgEnqluNiebQta37vRqN6uuj4QcQfqy4B7uwoRenLKEyrUP3lsNW10Mvtn+Xyj6bzXIRTKNHjoNe4V/l+kpd1t485eBct0D4nSYm6VGxcT3i9WSD4OwQaoHwXbqbO+lIzS8yT/COwPrYFZHyInn0+ix//yrAXs4176tFXGjSt+Y9HmlOYPHFHc8HyW2XPZnVnc81kLhUly2ELvG2ujPbro8SLqDcEiL8r1e40w+YnL4LCxkS5HUMfci4JkVvdnSRpxaAItEAja9jUQdJSaYFddu5rY4HaQ++8YQKUij2Psvof/O/iYPdNVhM8rxXzSewJoA1XbPejzUg1x/4tJKJaN6FlROSmwE+jbi09A7EENXuSwgiRDM/e0nX3Ie+Q1AkUVxxS3jkmVuk0G5UnAWNaUgu7qBuDFyVgEb7+iS5bK5buJMwZFSCr61ES7TCGQ5bJPkF2ew6/5ZJH41CZLlwEs8+onWHnEy0GTLeAzbzfcPghKhdsqmJEn2WzGphBQQFQnJa+y28JbWFLk6sB6KC/LY3qGey0ueQucS6YFt8K/TdJGn6fH4ESUgHdYxhGGDlhKnUEOE4HHxgOP57J4Td2F6eyC7MWxi/UmxvtQwYpjReLcXg7xv0cPnf0eEB5XqJDx8geu42Nd3wNK+93cbv0oOcKp5H0179OvTO7KReuGb+psCHNmTqT6eFUiLrM2TcuuQqOMMdkI6qaF+Uv/FCSuNurb2qEPLHpTukBWSjcms3J0P/Dm2TXxOlqlKug55EygP+uaN6isAcKZ4q5mFkuj6GsnLGnKdb+SboUtKR+ZlMGco1NMz2kwMG8Hx7tuBqRUxC6IMp+SvIZZiLYlrUUIVgOL1IKIQuM9fdrJ1UMEn/qErndjVN7M7r6iqIpJ15kTlttpPgMBD10gATBBDYBYT/JbJ7ShhxBVf0HVm0aUtiWGxrNWQV2Pipdiss6KoEhcQMYIpXln28rQZIpamI9Ft/wnHnhPJXebA6yu9kek4isvbDoIjJfp7Oyqy5EenQfBs151QqAcghLiDdwIKqsocqfV/kVx4lBRqo0FjoCvr9fit4x3cBMElcgFPheUshBqEoApkAgcmBnU9iYUq5SIqIIAQoIiCkOQU7FckAdVZISzuprvet4X+znnVkBxy2d1oOm9vEJRykmvW/GFH8LzTo3ykP/LjdNrqFuvLgKoorZc3RtvZJpTtJDhPsqKfVjJwR2I5c4ScxCuJqFdilUO4oGfSzeTSB0pdwC9ACGxr33+qUK5Dyp1I3WEVM/giibdy+vSV7oAVSWUELEP/0RTTvtBRaWGZgnZpkFSFZfFlHPFxFIDs3zKE3KP6PLyBCglnF2QhVFLmPwpBG/8zUaTMNHPYj6zGJ6KbzBntaGV+5OqrDbZaBTynmjCvkOWZilUJXsLisTv00EeQnc3Uuo1hUkSEkbzgwISfLO0KA2Kp2zxyhTlr6nQzkUoQYsT0rHep0idmp5d+kWjpJe90qBzr5sCc1sJ+iTShwBhRm3hLbTAaYvMZPWU8mqXd/rUFqXr9+qjRiPZxx072kMd620hEE00zqJ2KNX3v5RA2KK2JcDHjteAP71771ifvm4UStG5luKw46DCS2HK4v8jsk5KVdB1DyTyYdFEclxgN2p5azVLqK6uhnb5gumY/bzbIVgjXA85djyygpgUEzkvh5+dQrNCzvi6MC04dKqmeLNMnPrQbblCcC0mDdE8q7O4UlVpeWhmsfVTr0xWPTEhJ0UsA3vPiITkZdFOk+kJHLDE0pw47wqMpgRESUM72qO1BMDfhFEfirP7tOwS6q+4El2j0nuvZE2x7j/rdAJkKzPXbRP8HAHdMUmbET7yBTrsBdAjYLJosLFhpkFqi+BEr9QuS5omoLcygtOz6G0iE8oqUmvmGQxOhgtLKbwpiGvVdlGyd0hZT1xSe9qeBjVWIo3iL4jarrNOK4nS0TeN6QCRTXqd6bPe4Fr0LWgZXgJjtNKz0osCFILzTd+6SpVZHUubb6b7rRuOhEbVqIsblBVlTZlBherohgjuVDbXuUOX8YekXzUQAnJeYZXzT/xywOpI8MP22ZsFnppZ107tWyr+c2P50arDkQv5dO+VVITVtg+7BkqdpqUQooiYrvSr+MBENTCP8lla3Jc9NSDuVscKJYfz9JpUvw4RgLrgZpq73NqonESdiLNp3a+mf5QN2EnsgSnqCg0abvhUcxp7bMCulWcTy8oxVQqcXnyXzEF2CtEYt2KjQXk1JtJjoj9x7oRtV+mnCW7jrKAXkNy01lxFOfH28OjWIyVfaCcBw6y6tsfIY2+BtfjayiMxO4ouW48BbT70O5A3pmvFBxEBCwOr1dcO+ZsWwf+XCokQO5o1IDwsWvUCT4qNRKx59lBXLskmhEjAcYqBTICLvpyX3fcT91ng0rZeAVoOHXgYd1MSMAg9m5HzHj0dIp6N5woPg7UcE+cfzbVuWKkjvat6VaehcV48b8bhDHAPzw4ATSFwS9B5PleB+8iDCyrK6VaxZqi3MyE95XsghAsDw0SXd6UsSeV6/Uv+qcTozobb2to7k68Y2j65PrRCOqtv1UTmO2Kg6NCrGItim7g4jhz7jdLX03TCMJ4igPBpObHi6Xb2Is0xSfuEKWlT3Z7R/Vuz6G/a2vwCjX8QqPKmX/wf9o6CSwySuabe7MZZForEj3NhDLvlytKHybc4S2IwxDyCoS/UBIoaT1+3KkspoSVZtLh4TAC3mxwE2N9VtHE3g6+7G5uXnwH3P/07znRwD5u6g69dWztUmHISA0KPTf863ed5MvJ7T5l+gyG64PNwZTEr3wlv5M4U23nAzOuLndrxOUIA/vOpLElCNtvex+cxOdRc1Pic+KK9uQW7wDxwGiJCgMeTmbphLH2cQniKZHBsCImX6P3iOeLJc00loOz9Lms1vCZCXlYlNdLQ01LsXnOkoDnSixLm4y3ycIqLUy1mLaxbf/vOZhCJHAmATZB0a08gnTOTIajLr+XYfwG3QBvDYBxnWSbIqprpKmOATbDT3hXjYGSHckz7yt4myJKg0GUd6bd2hyQMbDK+khR3+BKWux2RzCg6cJZk6dCCJMF1TzCUFwVQoM4EsBsZUosMShmDrIhXoMgz7CPCgj9UgxXeR1lkQ4o6vodfb1qN+9Mj1zdBZ9xphGcgj6V3qh/8ka6Df8EsDarQdtDOFRV6zcFpzkuEFpicQeilwmERthkJrHeWlc/BSVL5HboArPLgqdkurYzwnyc4OQcKNmu2DosE87+GFVY3kEFA8vp9KxeYf+iYL8abcQcjMbqQkFyh4l9tsRi3JcZzkSNdDjWqA3AAAAA",
       "rating": "S",
       "tags": [
-        "飞行",
+        "高空优势",
         "无敌",
         "隐身",
         "高爆发",
@@ -624,7 +624,7 @@
         "格挡",
         "无敌",
         "高爆发",
-        "飞行"
+        "高空优势"
       ],
       "blindPick": false
     },
@@ -761,7 +761,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "拉扯",
@@ -921,7 +921,7 @@
         "抓取",
         "乱闪",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "低真空期",
         "防反",
@@ -1207,7 +1207,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -1269,7 +1269,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -1807,7 +1807,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "低真空期",
@@ -1827,7 +1827,7 @@
       "tags": [
         "瞬发",
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "突进",
         "格挡",
@@ -1861,7 +1861,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "破霸体",
@@ -1881,7 +1881,7 @@
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "拉扯",
         "高机动性",
@@ -1915,7 +1915,7 @@
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "大招可接",
@@ -2053,7 +2053,7 @@
       "imageUrl": "data:image/webp;base64,UklGRooLAABXRUJQVlA4IH4LAABQOwCdASqTAJcAPm0skkWkIqGW6j7wQAbEoIkYwAL/UdG0/o6kH5T8D/jcbzjjzXXv/9762P01vcvNP5qnp4/ue/jb0xab7ZrWr9d5nma+0v+YfnaND5NKoqucTIHRYlwCb0aiyb2qFViMBkSNFrKmuETFoyrvQ8JOYpG7582879Ieb5VH/HP0U7T2Wjw0wA4WF3F2CVxqq5NcaQS6cFLedaYSLYEz0/CxOjVElVE3jgLsXjOCzwpCdijdPl5nTlW78KpW7nhsTmKek59BsdZAXU0xEWCAMpf8R0M2dq5kwh2CdiDySN9lkF9OCVsmMpnErM5u6faNfOaFRYL7hyRVWfOLOOfLQ2CvrqLZcWtdpCgk8xWZCioJbiVY/G31v5mamypE9NHK/8t1MOWu+aGPPvm5fDPkHSkCYF+4PSs5UOoid4qKKCYZwSi//TqZrKh2cQw2xhPtry+rL42ThSQjg8/DcFC1tHyQ7GveyWuxwseAj506ub/DoWD/OwXvRbntVmHySkI9VcfyWbnMvWU25wtSX49mQQq/vlFOLopkGpEF241MgSilaOz8ft63SXpRvl8GEE1B2Gen0JN63ozZNlDJwR7d6o1Kx8VPpDxu/Mjz+nR1zH2vS9yVjguYc6IsKAAA/vr+LU85VmjQN6hj6SliRn3AbHK3yw1RIGR6Ro95UmMbSJQq2R8mH68isiipRa1ewlr244yCeObivBUwCuEMCQ+e8OBF/F0koapfGBRC5RUC5ljdOL5kzcXhU02iawMHlVSdNBy/i12Z7H0lh+lGIhu6VjG1UZeQ5gyoHRWX1hJdPMpQbMsX0wrvuEnlwmcxth+Ak9KKJzaj+01f29ZekcmHpNhFrsTqDyMpq9najdhxZVrb8DQdinKH0GTVTooOYG6lL4d3H7G2GtUVK+b6QZ7lxDBFLAu4xVK6CDbcCnt7qN78cK+4ONraEhRqAuRLCX9714HgTJ+TgZiMRaOGKjmQD2PTrsLDRPtcj1PSxQ8wEVmFJoo35Rm/WZGU36gT1ztLSiRmK2YSQ5FEh0tq5Vvi1K0fRXF49dgyhIkkjOftL6rURlzYmrt3ABITf8/tmW/ghpWHoXbNoxLw2krzvQOFO3n9p1fkDNoQcNM0Ri926Quiu6pv7QPIUFQpW+GcEmWetJz+EC1TiEgBK7w5dmehsd7CH4wGderJMHS53FUtG6hL+mz4LjICQJohOHEFVdtNYNz0G3Q2JfdKPFgPrv33p+K0N5zwmtPwlDUeQm8qtv+35w7d2JarR0R0g8+NxMRO8yn4/ysWUf38UtEk2CoDJIl/c9qpg0e751LBeGm8o3SFMnApHICXuj5JeAApsf4uADdNwHwIF+/64MI8VjceohzNdAzdTVOIxBwmRujhRWQ8KNESJS72xhB3RL7jO5uJD0FdlziAAkbex0e1LQMqhTPIkjTz3Hcg/1uZIZ2ZaQzExJO//X1r97sxO4tufkjNV1oLsZa1JjP8QPgtDXw93KNjfuJwGgQcqkSO8Vba30qcP1Weok7gw+O+57ALVeuF3uLmNomWfv9rCnFY1qkZ8ZSziF/qo+/iiWqlNvNdOD8bDQrUPmzuL5y8QdHEhR72HmPI1/3Prwer54KeGzSAgWwPBFga2qxj1YLeBOXLdwWTgQ6bzeeL0JhWGEIeEmj/EHpQ2sd7uxsylJPCRMd847D7OmLorcBvP1IjuRFmvIe4OJ1dD16NNP1fu/auK9EWl0eJKFc42aARY+ebIhU23T2Ay1t/kdJJrh0VguyvUcg5oDflxVPSVOSaw0EUNcW+HhrsNa16TeykM+0o/BlXScwBzCJJHRBcSN1YjbU+yf4sRRK8rvJry06XfwF9LyYmLnEr+MZzxILP6a/XDUQGPXIJraKIMP+w4me5Ed32ukswGpR5QyxDmGqKs6whL4UEgzb/s3VjLLKrE6C/QqKKfv6Ief6+lvDYt1CTygJkyo8+DBX2kMlKgE6zJF0TyuRYvg9hYDOqck5AtfSy97O2PcPrv6btA9FCd29g0AQVNCu9+McFO66weDir7oRpba58lnmxn+1S07/oqqPEVZb5BFqRrpO8EE2ayZmajV7Ib+G1DEbf6IqtR4L2HrEM4/mS++AWdarjYp7lJghWVKPjtxlNV5g5xHD1r0BpsBcsa9tQtgG/bBOXBFLYlB1cOhuoTMR/Q1v5XreCJDdzV+XGJOSSrqwhiB3UECMh/qymYSFoOyeCy/uFOhZv2kh1U9UteikYq0kihh6ShRNlunA52OadqBs+Ume6MViHyoG+5LWCF+ViDxJGBQ2I4U/MuK67Ln8kOjWKU44ZdZAtNp8JmHqouS/MTJQfo0zAyOBxQkE7mXl6QsdbSXNhRXl8yfCKk6WQeGEUV0BaIYYw4EMT/u/yhI8AmzRAZVK+UEdg/mkPzs0TTt1r1bg0Nj8flA+ZJSuJxaGuJNda8dyArDlX2u1UlrzY/KcIVg/DgAxEfoA3yEpVzg/AFrNSoOIDRjc9ZW27pxj14SdrQueC/dP9TWMdchEHayPcJX/NPLcd7OM8Ji40N37ugSL8PalNTw9fhJ7RwJshGcCNOV3ugo6CkFn8shuthQVuIvk8PoBiozpZgFWMERpBe5wq8efYQsxWFPn153vKcMnump7mO54JoXWQ5DdWyECfIdtTsBLNe8yx/48rr3lq8WakHCL1Vum9RPCSS2nwkIvHD4uObLXViYwLk69KIVOcbf8LsbleAbWmM4tMn7VUkM2RwGJOasyqP0QFZ8dN1k0BHc2KTuIzXRX+j69UTXfxXKwhzCif5mKToFqQn8tzBl0KqpV/X6Ipov1jROg7L+XOixJiOwoPD/a1Ytscd+7Vo2EF6o/5HOZU6LPclyC9EyO1988WYHCj3TQBfQyj1d00PEXoAVbAzVjZNfqPv7Ru72jih0zeh0qnLTOo2rkpVXcbOzXvlg0q9bFW28f4OkBRLHM0VYHTO3lP9ODmzqHjjlHE/Uad/eBJWZQvpwV9zTe4blH2wLTBQQWWaZLvYupQC4JhSG0D9/LtKbTjRsBrFiVUTvMbP4QreT3VVRv/SPMDqZhrKN/pP4kr/p7D8jPtcWe+3iPTAdO6DsvPIu9FBplTqZJa8JPK5bHVrOvQSB/UYUGAlMB8iXwwxki37vNm7FEmRhCC3aUjqUvmM2W0jfFw7/xZFcz4fchwXxeVzsq3oeeuaqNSIKKlGjLPVGWiWFlw3vEiXhfP6Qx3E+rPlPUL/8PgJw+ws8bknDZ5bb1++zE+U10EJAlDOVaqqN89yb8iKJHkvbP2XPPzMU9dUhmLyQo50ur8XG3IusZ4urKDn6GbtYmNv8diMF7lwFrrOOvEKVunKLIAfPy+u9BJoUyzmNfMyijbw7kvyXR+XWSAzyvZ+hL30asIdmyky3NChhJFRFJeigRB/4RBy/eiOVYre9DpG1a59e8Jzn17hCGX3985IRz1R5IeLYErJ7ef4O3IX/AQEqjYPWK78ZOVye9kGixulQOxUQyVB8FT0ujlMg/z2f+PeCRthe0l8xbN7jUW0TyoMyFI+nlDQuVwoxlQFyFRvHGzm9n08DupcbObLOPju+RAwRi2MdiXuH44gdq2P3NxE6xoYubLTv2iVVuGq7kXlxGT38sQQimcocS3LXud0PCOG5ijpvDLetzGw63It4vowNrVsBgIGusIMjN2U39x8ESPapNpQ0542ahGELBp1tWWdr6DcsoIVHdyotA0Yzgn8YmmEk6dv2SNPvY9nbhs8+MrRUqs/AY7olUBo3W4fSCYdYPoEu8bECl9fcNu4q2tYj9+SX1QWbwtEYg5vd9PWjRdRFlmPkovxp1dsadIhg2TZPDdFay8rtMzIulF77GfgoGn/zaWB4mYNqLWPfVjawQ8oTz6ZiczY+b6PChdqFPHg7aao6oAAA==",
       "rating": "B",
       "tags": [
-        "飞行"
+        "高空优势"
       ],
       "blindPick": false
     },
@@ -2113,7 +2113,7 @@
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高爆发",
         "高输出",
         "拉扯",
@@ -2208,7 +2208,7 @@
       "rating": "A",
       "tags": [
         "霸体",
-        "飞行",
+        "高空优势",
         "高输出",
         "低真空期",
         "拉扯",
@@ -2227,7 +2227,8 @@
         "抓取",
         "突进",
         "破霸体",
-        "纯抓"
+        "纯抓",
+        "拉扯"
       ],
       "blindPick": false
     },
@@ -2308,7 +2309,7 @@
       "rating": "C",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "纯抓",
         "低真空期",
@@ -2401,7 +2402,7 @@
       "rating": "A",
       "tags": [
         "抓取",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "纯抓",
@@ -2804,7 +2805,7 @@
       "tags": [
         "抓取",
         "霸体",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "拉扯",
@@ -2848,7 +2849,7 @@
         "抓取",
         "突进",
         "霸体",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "低真空期"
@@ -2863,7 +2864,7 @@
       "rating": "A",
       "tags": [
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高爆发",
         "高输出",
@@ -2910,7 +2911,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "无敌",
         "高输出",
         "破霸体",
@@ -2966,7 +2967,7 @@
       "tier": "t0下",
       "rating": "A",
       "tags": [
-        "飞行",
+        "高空优势",
         "无敌",
         "大招可接",
         "拉扯",
@@ -3002,7 +3003,7 @@
       "tags": [
         "抓取",
         "突进",
-        "飞行",
+        "高空优势",
         "高输出",
         "格挡",
         "纯抓",
@@ -3074,7 +3075,8 @@
         "高爆发"
       ],
       "imageUrl": "data:image/webp;base64,UklGRqINAABXRUJQVlA4IJYNAACwQACdASqTAJkAPmUqkUWkIqYXqlesYAZEoAxNZr3P9d/SZG7zD5if3uRHz/TLuDOdd07HeqvJmrHHOz7o/c/3T9hjKP16ajvb3/K8+fBv5ZZUt+3UwDeAM9ay6x1BZgfpULB+3JsqJ3//K2xgaKD//Oz+qD2/fIgbr3Tn/hqRz920NDx8y7Ssd4lZQLIHG5a9OxvnxsBp53GKA+WbKsI4UzJRIVnOWI1X0jPl6BCvlDvBdN7jtXgkhnnnPykHljTIzNMM7ffHl8b8hhrC2NlOGgbcwJo1ePtH8i24xcocRJs+4fS+2CFrdds9uJQMP3UXX5zSib198K5EMtPMJkzbfA3uIkQEgJGC6U7VwKeD6WPJFqaPpkPShiNYrx2dr4aHQGhACiJeUjGLIwDG8hhC6EbTH/pGH0eu3Ctj3Hs4Ar9vGZ3o/KBWUieAeD8n46750CT7YZ6FGL9mqk3mmx7N1CrvSK+CtFrowqne9fFbnUFeKN+d4QI4RyOB4PPIKgi/mW9EuBExpP54Gb8oU1izBtQv2E4YRAGJk70/v9/K3rshgnHJssCnzBIr0xPIZXTvFhg/s4mw63mfXf9/Zrn9JJu+UWqQn68zlqiFZ5pLL8izi9nngqD0FcErrMwytofmSgt7LvkFxKZIwuwnZx54nEgQjPndbO9crgPZw7GK3jowaDATIcmp0glXwhAAAP77/WXjT4XXKWk7G++VbEi3EXVUtNGZ/zmx2pR8+GyS/G0qhu9mpvdLWMVD95dxwh70uhv0Onhgh9dflPbeRwzSZLUWV6Jqo29PCHRWH8xOt5PgF1ooXoYbV6iO1W7Yw9YnVNbRZ/CUsrJarT87/Am0y5kwrpzMFKP3nA0Ru4782vWyoDtdmc90iXMGcSpxb26Hhl2ld3oQ+7F/P8WJFHqCV0+pt4yVgoA2v5ZsTb5cV4lvBBtSv3T66rjiXPjbWbslTwOA/nuRUJSvFKtQ1vRJSMZUAZ02XF/MUxdUloJDcP+kkGYwlVVY3JiY4MXlCwTlp4WolW8FAnb5MKE6EjjlYtkwVdJ80Wg6hwF2JO1v9sd+n2z+uvbaQlejzKAmdfdZBZIvrx8L+j0HD4kzIzGThBK3Y6JxpNcdJm2a5DNiUzMb+QZ4WwluCQBaSSFfHY8mrq0acW9B6BOEHtxGw+q7bzOzyXsQigBd+3J3x58a86z+Eb5v4ANrOTj/7BYJeTtNucIz+oIaMFo/CJlmJG/ANjQAAafb4DKwbmSUnhfDUSEb7HCaMelI2eoyTA2mmKlx0YqJXzI5APRTIDKjUWM2AGsJdrd6WyittlPqWex7z8e1zlq0qvxgAP624zTpNS6eX72DubK5uUcnFVVBpocwxlbGGBNm8VZzu4VoLgg3rUCFMy4w9UC4+tMNGKL1GOxiy1Eg0LTIDbMmGnEhq61AFw39rajMEzIbrcrRmFhBpJEHOgE7vKFFT8FaGJeiFVUQE9F6dLVJ/HOdpdi+BxOz1Tk7XiWfFFZpzu9KofADCePY7z+TjEHAdVi4LD4kARP9kH/IB1lRwHbzZalTh66/3Rey/YI1k6RsHW7tqLmKX7DQNAfN1fDNaQL3Y9UAJ/VAfWl6tacVmQ8LdCHTrZw8IDQYB8hY5xaRTY0wfaJoDbNCGo6SLw98uKkE9jgNmDYRUmUID6HvbXYiEhHrb087YLyUFpddj/N+mPec/TRUB8HvGy66XJczl9gWnOoefHyHTlOr+PVhvNMSw31H3Wy51PUwnZcfccuVMsuvQ13bN00ZnpComOP6n0Nc6CJykqP/6MXJha43CsMU91s+v+z0LqcxiWhjPLCz+i9v/M75e6lIPlfN3A8xyA443PQtOXMN6Iaz9VwrmrJskFIUaaGa/kArZdm0nXP2ahWvwYvtEs1YMjh3Oc9tBHa4KYf+18q0QQfH5LqylQULCZTlankVnS835MUUXK930J+xFspSpP96pUqKdpD7Cjn11VcslRJwz/B5ye71/yo01LLOj60rVhPFiVcGGpOMwmop15pG877CUqXbg3iem+f4ZfSziKfPR7hKd8MLZasN+nvhHfrp0Iy0MWKgeCJHHxXG58xkID7kT8Ih9A8TJRiBweqkOC2EuZ+Kbjek7eWlwR9YxDPHKcZmq5H0mdMVTaLujhjrYwFBl+SXpIljTSOK0ZGx3KxvemMoIJy5gjIvh7Mhf7yGrKjcSRN4y6UzJ36fkp1xTgMbLodInmy6NmYq/oZKjjkhwhGIu8T/gUOAUgpL6XPw7vCLsK1x0UMWRoYxRKyhHUAYzGSl0aWKaWgDnJt36NIYv2zpDLVBSNasAuC/PTTqh0RiBpKCTaYx5H0FRZwuIV4D42dfFqzluWFKyF/YQ84jozZ0Dsfty1XPoiWMhVsVLNFrok2G1v13UDDBUPMV2/oZ3B4eo99p73NNEiOokzW+iqzN2P5WHJTPy1Z74mo29mIrpQegV3Qgu3DBGU/8TnI65jjTDuSZm4tLNEsHvVuj1NWLgbOvIW9gYjjo5Si7uLEesR7emdrHy0K48smcIuojW8oY+AYr5BuGWnAMx7rTg8I+Z8cGat47dZb+WO2tXGKp6RuUtPky1boLhYpFcj7M2Rj32RrBChPQ/c5j0LqYGf2+SE3tCC8YTwGs813Zvuy2fu11qDhzENKuxTvaRZ0FKb04NLPpd6w/VOx0AjscRUxlN/obg7XJFnYP1osKtBuVHE0STVIlK5OGpSMC6YQ+Ty9gknHgbDOdkmTa0s14ig/WsrkUQwGKHzo3Ct7JgFPR2WJi+QV2IqIca6gXZW1DoAbjkggomf8Kk3eOwbruw+XSveWOKpfjRMFx8mj022nwK+d7ka/3e+IAfjRTKwxtZDsvhPdeZSJOj/V35dNCwSUGviV8+zNSpqhN6+8x0wJuuRJjUTukM9qCGd+3UGzurXSEFdO7HfUvWVOCh4goL0FlJntdv6ysH1EX9axqrRL1JW20CaymW3G6PTwMXgpDEI9i/F+5bv8bAyAS5/vh+nBI9uepsNXWFGUUsTtjDfxn5HUOWX48Oo0g83tFCOxJaxmuzIsSOubA5vUtdiNiPqmZiErXnSYjEksAHFUxvIMMv9VzF8yI6gVIzceUndFFtdZEYKrz8URru704YQEbbkgUPogxozimj6CmIPuyQsVEeaKz9c7jJ9ocTxrec4Z+yGjJtMOzM054ymhv52gARaBzMcfARlUG7/GGHj8BiJVI1asKDd10sb0Km9b1Ym4YPMQtiPs5nu87PuiSKTFOuBEWlViv4gNfwUUA8f+GH0LWxuG0o5JIQI1TJWw9iO7Zz3OItefU+BuBGZ7YQsxaQtZ8EQ03JUwtwj37ct5hDdLOXbjOonr0DkaaEeaJ4UhLYDhz+aYIGw3l1dpdeCL3vpFj9r7F5U2A6luo3vzLARocYQah+9H8R+ncso4/muT48zt9UmRTBjypIjeOwq1eL/uzkX0GGYUSPOAMXF4cVqiDvILa76dDt9MeKIkzoqlrIdNKVz8vRa+2TQdoXHY25hIcuEVWF3dvtCD2aR3FSzEUnWiZ2olI1jqX2g6BwG2Aa/rD+Yyut46+fx6gMHlUyaWMQhzgyyWyNT+Jcn8yccpP+GQ2tgYDr5KizDn28hiP96IDxLvoZN0CnXnJF1LBPwY84HyJOb9zl3IS6wbXBdWNt6MkPg7kNWk4w8+bxBuN5iyUKR3VExNTnvrZPQL3fcLAcmPwIwOu/v7X0IiErToILmkMQmX4ggTzgeONG9PVB9akKXSQb60BDORkylSuZkAOdYf9i/XanL9HVujQCtrP7rsvCcdRPekfZBVcTPG5WXWX0fsCdkkuYUx9ilriyjA9KnfqtJT5/Yq2o4HFFTPID7UOJ52nfu3usFei9T480v2eeZmjXKKeHve4EW9Ai73yY4FJRLDhg+i7feBL/L7zz8LJcrozSFB2r61IrUiPJ3e6beuYgG8e2zdPcFAnhfa+s1Tl5PRAqdgGktmvsbiy0fkZIQ73cBL1Bljvr/nlAhMfma3JQ/ABsTKLtcvjl/EYugM+0p4aJKIN1HfEw/5G3qVNl/AOYLiyd+UKHZOLgsVm2Y+kcaUbc/ncFfO9yOZe9uYvkEcgHdW9oi0L6bOArQ1mO83HN31euc7kjm0P+z9TiA17xKD/gXD89SCsye/6DXttHi4d2yuCMCnb12n0p5Emo8wuvZM9wB84w1VZuSaqF+9AFt6Xf6CfnUzm6TaVg7V05L0sHlw/K9Xv+K3RvV3fKf9s029Aon3Sl9fp9K3qu3RDY9t/GnQ7XJSexGh080l8InP9M9O3HhXoZp42SJkZNG6SFdviPeHszLrP0b8YHyd/w+Vs5Nxwrsf/SiYAZbzFv71+HFBTakCpZn/pcs4znNTZYSLV/FyoXygcFpUA/y3uGPcCc9Jl4zy1YjKGv9wybUDvPF1cNBPMPEGtSqWkWX4/f8hlH+4EBG65m5YpEgyIAFK1BLdSjlwvEw3cac3Q5ggxx8xTIz3xvsnfDu6mFgeJL4K/8O1qUwp4QyFBDkM7/Xj8nc40feED1zAy8YiyFawYHM1FEWNAtZ+Ue2gYGx8hGNyjkxI022PIEH8Of7s5jtJJ6S4tA4OvntAe0Dwrspt4n22Dgy+/tsTggAAA",
-      "trend": "up"
+      "trend": "up",
+      "blindPick": false
     },
     {
       "id": "1784343865068",
@@ -3089,6 +3091,26 @@
       ],
       "imageUrl": "data:image/webp;base64,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",
       "blindPick": true
+    },
+    {
+      "id": "1784889021640",
+      "name": "波风水门【侠影江湖】",
+      "tier": "t0中",
+      "rating": "A",
+      "tags": [
+        "抓取",
+        "乱闪",
+        "突进",
+        "高空优势",
+        "无敌",
+        "大招可接",
+        "位移",
+        "高机动性",
+        "破霸体",
+        "纯抓"
+      ],
+      "imageUrl": "data:image/webp;base64,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",
+      "trend": "up"
     }
   ],
   "scrolls": [
@@ -4983,6 +5005,11 @@
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
           "priority": 1
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
         }
       ]
     },
@@ -6691,6 +6718,23 @@
           "priority": 2
         }
       ]
+    },
+    {
+      "id": "1784904671253",
+      "ninjaId": "1784889021640",
+      "ninjaName": "波风水门【侠影江湖】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
+        }
+      ]
     }
   ],
   "ninjaTags": [
@@ -6699,7 +6743,7 @@
     "突进",
     "隐身",
     "霸体",
-    "飞行",
+    "高空优势",
     "无敌",
     "高爆发",
     "高输出",
@@ -7830,8 +7874,8 @@
       "counterNinjaIds": [
         "1783309208477",
         "1783308767737",
-        "1783316557259",
         "1783310586721",
+        "1783316557259",
         "1783309627781"
       ],
       "counterScrollIds": [
@@ -8432,6 +8476,15 @@
       "counterNinjaIds": [
         "1783309172598",
         "1783310202753"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1784904518996",
+      "ninjaId": "1783310560092",
+      "counterNinjaIds": [
+        "1783309398928"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []

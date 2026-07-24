@@ -143,7 +143,23 @@ export default function SimulateBPTab() {
       setGameHistory(prev => [...prev, record])
     }
     setGameNumber(prev => prev + 1)
-    setMyRole(prev => (prev === '1P' ? '2P' : '1P'))
+
+    // 交换身份
+    const newRole = myRole === '1P' ? '2P' : '1P'
+    setMyRole(newRole)
+
+    // 交换历史池（密卷和通灵池跟随玩家）
+    const oldMyScroll = myScrollHistory
+    const oldOppScroll = opponentScrollHistory
+    setMyScrollHistory(oldOppScroll)
+    setOpponentScrollHistory(oldMyScroll)
+
+    const oldMySummon = mySummonHistory
+    const oldOppSummon = opponentSummonHistory
+    setMySummonHistory(oldOppSummon)
+    setOpponentSummonHistory(oldMySummon)
+
+    // 重置本局状态
     setPhase('ban')
     setBan1P([null, null])
     setBan2P([null, null])

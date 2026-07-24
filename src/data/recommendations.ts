@@ -3222,5 +3222,22 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         }
       ]
+    },
+    {
+      "id": "1784904671253",
+      "ninjaId": "1784889021640",
+      "ninjaName": "波风水门【侠影江湖】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
+        }
+      ]
     }
   ]
