@@ -13,7 +13,7 @@ const FEATURES = [
   },
   {
     title: '密卷',
-    description: '查信息看适配 · 选忍者看推荐',
+    description: '密卷图鉴 · 忍者密卷搭配推荐',
     icon: '📜',
     path: '/scrolls',
     gradient: 'from-amber-500/20 to-orange-600/20',
@@ -21,7 +21,7 @@ const FEATURES = [
   },
   {
     title: '通灵兽',
-    description: '图鉴浏览 · 技能描述速查',
+    description: '通灵兽图鉴 · 技能效果速查',
     icon: '🐶',
     path: '/summons',
     gradient: 'from-yellow-500/20 to-orange-600/20',
@@ -29,7 +29,7 @@ const FEATURES = [
   },
   {
     title: '武斗赛',
-    description: '盲选位 · 克制关系 · 3D关系图',
+    description: 'BP模拟 · 克制关系 · 联机对战',
     icon: '🏆',
     path: '/battle-bp',
     gradient: 'from-blue-500/20 to-indigo-600/20',
@@ -37,7 +37,7 @@ const FEATURES = [
   },
   {
     title: '娱乐',
-    description: '随机忍者 · 更多玩法即将上线',
+    description: '随机忍者 · 随机阵容 · 更多玩法',
     icon: '🎮',
     path: '/entertainment',
     gradient: 'from-purple-500/20 to-pink-600/20',
