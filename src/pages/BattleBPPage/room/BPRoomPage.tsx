@@ -39,8 +39,8 @@ interface RoomState {
   summons2P: (string | null)[]
   summonsConfirmed1P: boolean
   summonsConfirmed2P: boolean
-  myScrollHistory?: string[]
-  opponentScrollHistory?: string[]
+  myScrollHistory?: string[]   // 1P 位置的历史池
+  opponentScrollHistory?: string[] // 2P 位置的历史池
   mySummonHistory?: string[]
   opponentSummonHistory?: string[]
   player1PId: string | null
@@ -111,7 +111,6 @@ export default function BPRoomPage() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // 根据本地玩家ID和房间状态动态计算角色
   const myRole = useMemo(() => {
     if (!roomState || !myPlayerId) return null
     if (roomState.player1PId === myPlayerId) return '1P'
@@ -119,16 +118,13 @@ export default function BPRoomPage() {
     return null
   }, [roomState, myPlayerId])
 
-  // 存储房间信息到 localStorage（仅在成功加入后）
   useEffect(() => {
     if (roomId && myPlayerId) {
       localStorage.setItem('bp_room_id', roomId)
       localStorage.setItem('bp_player_id', myPlayerId)
     }
-    // 注意：不在这里清除，只在主动退出时清除
   }, [roomId, myPlayerId])
 
-  // 自动重连：仅在组件挂载且尚未有房间连接时执行
   useEffect(() => {
     const savedRoomId = localStorage.getItem('bp_room_id')
     const savedPlayerId = localStorage.getItem('bp_player_id')
@@ -140,34 +136,29 @@ export default function BPRoomPage() {
           const is1P = state.player1PId === savedPlayerId
           const is2P = state.player2PId === savedPlayerId
           if (is1P || is2P) {
-            // 还在原来的位置，直接恢复
             setRoomId(savedRoomId)
             setMyPlayerId(savedPlayerId)
             setRoomState(state)
           } else if (!state.player1PId || !state.player2PId) {
-            // 有空位，但自己的 ID 不在，接管空位（保持原 ID）
             const roleToTake = !state.player1PId ? '1P' : '2P'
             const newState = { ...state, [roleToTake === '1P' ? 'player1PId' : 'player2PId']: savedPlayerId }
             await supabase.from('rooms').upsert({ id: savedRoomId, state: newState })
             setRoomId(savedRoomId)
-            setMyPlayerId(savedPlayerId) // 自己的 ID 不变
+            setMyPlayerId(savedPlayerId)
             setRoomState(newState)
           } else {
-            // 房间满且自己不在，无法重连，清理记录
             localStorage.removeItem('bp_room_id')
             localStorage.removeItem('bp_player_id')
           }
         } else {
-          // 房间不存在，清理记录
           localStorage.removeItem('bp_room_id')
           localStorage.removeItem('bp_player_id')
         }
       }
       reconnect()
     }
-  }, []) // 仅在首次挂载时执行，依赖为空
+  }, [])
 
-  // 实时监听房间状态
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
@@ -184,7 +175,6 @@ export default function BPRoomPage() {
     return () => { supabase.removeChannel(channel) }
   }, [roomId])
 
-  // 初次加载（加入时使用）
   useEffect(() => {
     if (!roomId || roomState) return
     const load = async () => {
@@ -194,7 +184,6 @@ export default function BPRoomPage() {
     load()
   }, [roomId])
 
-  // 更新房间前先获取最新状态，合并后写入
   const updateRoom = useCallback(async (updates: Partial<RoomState>) => {
     if (!roomId) return
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
@@ -211,7 +200,6 @@ export default function BPRoomPage() {
     if (data) setRoomState(data.state as RoomState)
   }, [roomId])
 
-  // 离开房间（主动退出，才清除 localStorage）
   const leaveRoom = useCallback(async () => {
     if (!roomId || !myRole || !roomState) return
     const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: null } : { player2PId: null }
@@ -471,14 +459,18 @@ export default function BPRoomPage() {
     fetchLatestState()
   }
 
+  // 核心：下一局逻辑，确保历史池跟随玩家交换
   const doNextGame = useCallback((state: RoomState, currentRole: '1P' | '2P') => {
     const curRole = currentRole
+
+    // 将本局使用的密卷加入各自的历史池
     const myNewScrollHistory = curRole === '1P'
       ? [...(state.myScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
       : [...(state.myScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
     const opponentNewScrollHistory = curRole === '1P'
       ? [...(state.opponentScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
       : [...(state.opponentScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
+
     const myNewSummonHistory = curRole === '1P'
       ? [...(state.mySummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
       : [...(state.mySummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
@@ -516,7 +508,7 @@ export default function BPRoomPage() {
     const updatedState = { ...roomState, [key]: true }
     setRoomState(updatedState)
     supabase.from('rooms').upsert({ id: roomId, state: updatedState }).then()
-    
+
     const otherRole = myRole === '1P' ? '2P' : '1P'
     const otherConfirmed = otherRole === '1P' ? updatedState.nextGameConfirmed1P : updatedState.nextGameConfirmed2P
     if (otherConfirmed) {
