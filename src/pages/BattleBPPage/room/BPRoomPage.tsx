@@ -39,8 +39,8 @@ interface RoomState {
   summons2P: (string | null)[]
   summonsConfirmed1P: boolean
   summonsConfirmed2P: boolean
-  myScrollHistory?: string[]   // 1P 位置的历史池
-  opponentScrollHistory?: string[] // 2P 位置的历史池
+  myScrollHistory?: string[]         // 1P 位置的历史池
+  opponentScrollHistory?: string[]   // 2P 位置的历史池
   mySummonHistory?: string[]
   opponentSummonHistory?: string[]
   player1PId: string | null
@@ -108,6 +108,7 @@ export default function BPRoomPage() {
   const [remainingSeconds, setRemainingSeconds] = useState(COUNTDOWN_SECONDS)
   const [pendingSelection, setPendingSelection] = useState<string | null>(null)
   const [publicBanSearch, setPublicBanSearch] = useState('')
+  const [transitioning, setTransitioning] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -459,62 +460,71 @@ export default function BPRoomPage() {
     fetchLatestState()
   }
 
-  // 核心：下一局逻辑，确保历史池跟随玩家交换
-  const doNextGame = useCallback((state: RoomState, currentRole: '1P' | '2P') => {
-    const curRole = currentRole
+  // 核心：执行下一局，从服务器获取最新状态确保历史池正确
+  const doNextGame = useCallback(async () => {
+    if (!roomId || transitioning) return
+    setTransitioning(true)
+    try {
+      // 获取最新的房间状态
+      const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+      if (!data) return
+      const state = data.state as RoomState
 
-    // 将本局使用的密卷加入各自的历史池
-    const myNewScrollHistory = curRole === '1P'
-      ? [...(state.myScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
-      : [...(state.myScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
-    const opponentNewScrollHistory = curRole === '1P'
-      ? [...(state.opponentScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
-      : [...(state.opponentScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
+      // 确保双方都已确认（冗余检查）
+      if (!state.nextGameConfirmed1P || !state.nextGameConfirmed2P) return
 
-    const myNewSummonHistory = curRole === '1P'
-      ? [...(state.mySummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
-      : [...(state.mySummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
-    const opponentNewSummonHistory = curRole === '1P'
-      ? [...(state.opponentSummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
-      : [...(state.opponentSummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
+      // 将本局各位置使用的密卷/通灵加入历史池
+      const new1PScrollHistory = [...(state.myScrollHistory || []), ...state.scrolls1P.filter(Boolean) as string[]]
+      const new2PScrollHistory = [...(state.opponentScrollHistory || []), ...state.scrolls2P.filter(Boolean) as string[]]
+      const new1PSummonHistory = [...(state.mySummonHistory || []), ...state.summons1P.filter(Boolean) as string[]]
+      const new2PSummonHistory = [...(state.opponentSummonHistory || []), ...state.summons2P.filter(Boolean) as string[]]
 
-    updateRoom({
-      gameNumber: state.gameNumber + 1,
-      firstPlayer: curRole === '1P' ? '2P' : '1P',
-      player1PId: state.player2PId,
-      player2PId: state.player1PId,
-      phase: 'ban', banStep: 0, pickStep: 0,
-      ban1P: [null, null], ban2P: [null, null],
-      team1P: [null, null, null], team2P: [null, null, null],
-      scrolls1P: [null, null, null], scrolls2P: [null, null, null],
-      scrollsConfirmed1P: false, scrollsConfirmed2P: false,
-      summons1P: [null, null, null], summons2P: [null, null, null],
-      summonsConfirmed1P: false, summonsConfirmed2P: false,
-      deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
-      currentPlayer: BAN_STEPS[0].player,
-      myScrollHistory: myNewScrollHistory,
-      opponentScrollHistory: opponentNewScrollHistory,
-      mySummonHistory: myNewSummonHistory,
-      opponentSummonHistory: opponentNewSummonHistory,
-      nextGameConfirmed1P: false,
-      nextGameConfirmed2P: false,
-      publicBan: state.publicBan,
-    })
-  }, [updateRoom])
+      // 交换玩家ID并重置本局数据，历史池跟随玩家位置交换
+      await updateRoom({
+        gameNumber: state.gameNumber + 1,
+        firstPlayer: state.firstPlayer === '1P' ? '2P' : '1P',
+        player1PId: state.player2PId,
+        player2PId: state.player1PId,
+        phase: 'ban', banStep: 0, pickStep: 0,
+        ban1P: [null, null], ban2P: [null, null],
+        team1P: [null, null, null], team2P: [null, null, null],
+        scrolls1P: [null, null, null], scrolls2P: [null, null, null],
+        scrollsConfirmed1P: false, scrollsConfirmed2P: false,
+        summons1P: [null, null, null], summons2P: [null, null, null],
+        summonsConfirmed1P: false, summonsConfirmed2P: false,
+        deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+        currentPlayer: BAN_STEPS[0].player,
+        myScrollHistory: new2PScrollHistory,        // 原2P历史 -> 新1P
+        opponentScrollHistory: new1PScrollHistory,  // 原1P历史 -> 新2P
+        mySummonHistory: new2PSummonHistory,
+        opponentSummonHistory: new1PSummonHistory,
+        nextGameConfirmed1P: false,
+        nextGameConfirmed2P: false,
+        publicBan: state.publicBan,
+      })
+    } finally {
+      setTransitioning(false)
+    }
+  }, [roomId, transitioning, updateRoom])
 
-  const confirmNextGame = useCallback(() => {
+  // 确认下一局：先标记自己确认，若双方都已确认则触发换局
+  const confirmNextGame = useCallback(async () => {
     if (!myRole || !roomState || roomState.phase !== 'done') return
     const key = myRole === '1P' ? 'nextGameConfirmed1P' : 'nextGameConfirmed2P'
-    const updatedState = { ...roomState, [key]: true }
-    setRoomState(updatedState)
-    supabase.from('rooms').upsert({ id: roomId, state: updatedState }).then()
+    // 先写入自己的确认状态
+    await updateRoom({ [key]: true })
 
-    const otherRole = myRole === '1P' ? '2P' : '1P'
-    const otherConfirmed = otherRole === '1P' ? updatedState.nextGameConfirmed1P : updatedState.nextGameConfirmed2P
-    if (otherConfirmed) {
-      doNextGame(updatedState, myRole)
+    // 检查对方是否已确认（从数据库读取最新状态）
+    const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+    if (data) {
+      const latestState = data.state as RoomState
+      const otherRole = myRole === '1P' ? '2P' : '1P'
+      const otherConfirmed = otherRole === '1P' ? latestState.nextGameConfirmed1P : latestState.nextGameConfirmed2P
+      if (otherConfirmed) {
+        doNextGame()
+      }
     }
-  }, [myRole, roomState, roomId, doNextGame])
+  }, [myRole, roomState, roomId, updateRoom, doNextGame])
 
   useEffect(() => {
     if (!roomState) return
@@ -590,6 +600,7 @@ export default function BPRoomPage() {
           <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
         </div>
         <Card className="p-6 space-y-4">
+          {/* 公 ban 区域 */}
           <div>
             <h3 className="font-semibold text-center mb-2">公 ban（全局禁用忍者）</h3>
             <p className="text-sm text-muted-foreground text-center mb-3">
