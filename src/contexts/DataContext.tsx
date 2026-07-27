@@ -6,6 +6,9 @@ import type { IRecommendation } from '@/data/recommendations'
 import type { ISummon } from '@/data/summons'
 import type { IBPCounter } from '@/data/battleBp'
 
+// 新增导入
+import { DEFAULT_BLIND_PICK_ORDER } from '@/data/blindPickOrder'
+
 const NINJAS_KEY = 'naruto_ninjas'
 const SCROLLS_KEY = 'naruto_scrolls'
 const RECS_KEY = 'naruto_recommendations'
@@ -107,9 +110,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     loadFromStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
   )
   const [counters, setCounters] = useState<IBPCounter[]>(() => loadFromStorage(COUNTERS_KEY, []))
-  const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() =>
-    loadFromStorage(BLIND_PICK_ORDER_KEY, [])
-  )
+
+  // 修改初始化：优先读取 localStorage，若无则使用导入的默认值
+  const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() => {
+    const stored = loadFromStorage(BLIND_PICK_ORDER_KEY, null)
+    if (stored !== null) return stored
+    return DEFAULT_BLIND_PICK_ORDER
+  })
 
   const loadingRef = useRef({
     ninjas: false,
@@ -343,15 +350,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSummons([])
     setNinjaTags(DEFAULT_NINJA_TAGS)
     setCounters([])
-    setBlindPickOrder([])
+    setBlindPickOrder(DEFAULT_BLIND_PICK_ORDER)   // 恢复默认值
     saveToStorage(NINJAS_KEY, [])
     saveToStorage(SCROLLS_KEY, [])
     saveToStorage(RECS_KEY, [])
     saveToStorage(SUMMONS_KEY, [])
     saveToStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
     saveToStorage(COUNTERS_KEY, [])
-    saveToStorage(BLIND_PICK_ORDER_KEY, [])
-    // 标记重置，下次进入页面时会重新动态加载
+    saveToStorage(BLIND_PICK_ORDER_KEY, DEFAULT_BLIND_PICK_ORDER) // 保存默认值
     loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false }
   }, [])
 

@@ -19,11 +19,11 @@ import ScrollAndRecommendManageTab from './ScrollAndRecommendManageTab'
 import { useData } from '@/contexts/DataContext'
 
 export default function DataManagementPage() {
-  const { ninjas, scrolls, recommendations, ninjaTags, summons, counters, resetAllData } = useData()
+  const { ninjas, scrolls, recommendations, ninjaTags, summons, counters, blindPickOrder, resetAllData } = useData()
   const [resetOpen, setResetOpen] = useState(false)
 
   const handleExportAll = () => {
-    const data = { ninjas, scrolls, recommendations, ninjaTags, summons, counters }
+    const data = { ninjas, scrolls, recommendations, ninjaTags, summons, counters, blindPickOrder }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { Save, Search, Check, Trash2, ChevronsUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Save, Search, Trash2, ArrowUpDown, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,32 +31,32 @@ export default function BattleBPManageTab() {
     counterNinjaIds: string[]
     counterScrollIds: string[]
     counterSummonIds: string[]
-  }>({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [] })
+    counterNinjaScores: Record<string, number>
+  }>({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [], counterNinjaScores: {} })
 
   const [searchCounterNinja, setSearchCounterNinja] = useState('')
   const [searchCounterScroll, setSearchCounterScroll] = useState('')
   const [searchCounterSummon, setSearchCounterSummon] = useState('')
-
-  // 克制关系配置中忍者搜索关键词
   const [searchConfigNinja, setSearchConfigNinja] = useState('')
-
   const [currentTab, setCurrentTab] = useState('blind-pick')
 
-  // ----- 克制关系相关 -----
+  // 当前忍者对应的克制关系
   const currentCounter = useMemo(() => {
     return counters.find(c => c.ninjaId === selectedNinjaId)
   }, [counters, selectedNinjaId])
 
+  // 初始化表单
   useEffect(() => {
     if (currentCounter) {
       setForm({
         counterNinjaIds: currentCounter.counterNinjaIds || [],
         counterScrollIds: currentCounter.counterScrollIds || [],
         counterSummonIds: currentCounter.counterSummonIds || [],
+        counterNinjaScores: currentCounter.counterNinjaScores || {},
       })
       setSelectedCounterId(currentCounter.id)
     } else {
-      setForm({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [] })
+      setForm({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [], counterNinjaScores: {} })
       setSelectedCounterId('')
     }
     setSearchCounterNinja('')
@@ -64,20 +64,47 @@ export default function BattleBPManageTab() {
     setSearchCounterSummon('')
   }, [currentCounter, selectedNinjaId])
 
-  const moveFormItem = (type: 'ninja' | 'scroll' | 'summon', index: number, direction: 'up' | 'down') => {
+  // 手动排序
+  const handleSortByScore = () => {
     setForm(prev => {
-      const key = type === 'ninja' ? 'counterNinjaIds' : type === 'scroll' ? 'counterScrollIds' : 'counterSummonIds'
-      const arr = [...prev[key]]
-      if (direction === 'up' && index > 0) {
-        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]]
-      } else if (direction === 'down' && index < arr.length - 1) {
-        [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]]
-      }
-      return { ...prev, [key]: arr }
+      const sorted = [...prev.counterNinjaIds].sort((a, b) => (prev.counterNinjaScores[b] ?? 0) - (prev.counterNinjaScores[a] ?? 0))
+      return { ...prev, counterNinjaIds: sorted }
     })
   }
 
-  // ----- 盲选位一体化逻辑 -----
+  // 重置所有分数为0
+  const handleResetScores = () => {
+    setForm(prev => {
+      const newScores: Record<string, number> = {}
+      prev.counterNinjaIds.forEach(id => { newScores[id] = 0 })
+      return { ...prev, counterNinjaScores: newScores }
+    })
+  }
+
+  // 添加/移除忍者
+  const toggleNinja = (id: string) => {
+    setForm(prev => {
+      const exists = prev.counterNinjaIds.includes(id)
+      const newIds = exists ? prev.counterNinjaIds.filter(i => i !== id) : [...prev.counterNinjaIds, id]
+      const newScores = { ...prev.counterNinjaScores }
+      if (exists) {
+        delete newScores[id]
+      } else {
+        newScores[id] = 0
+      }
+      return { ...prev, counterNinjaIds: newIds, counterNinjaScores: newScores }
+    })
+  }
+
+  // 分数改变（滑条或输入框）
+  const handleScoreChange = (id: string, value: number) => {
+    setForm(prev => ({
+      ...prev,
+      counterNinjaScores: { ...prev.counterNinjaScores, [id]: Math.max(-50, Math.min(50, value)) }
+    }))
+  }
+
+  // ----- 盲选位设置（保持不变） -----
   const filteredNinjas = useMemo(() => {
     if (!searchNinja) return ninjas
     return ninjas.filter(n => n.name.toLowerCase().includes(searchNinja.toLowerCase()))
@@ -121,15 +148,15 @@ export default function BattleBPManageTab() {
     }
   }, [updateNinjaBlindPick, ninjas, setBlindPickOrder])
 
-  const handleDragStart = (e: React.DragEvent, ninjaId: string) => {
+  const handleDragStartBlind = (e: React.DragEvent, ninjaId: string) => {
     e.dataTransfer.setData('text/plain', ninjaId)
     e.dataTransfer.effectAllowed = 'move'
   }
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOverBlind = (e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
-  const handleDrop = (e: React.DragEvent, targetId: string, tier: string) => {
+  const handleDropBlind = (e: React.DragEvent, targetId: string, tier: string) => {
     e.preventDefault()
     const draggedId = e.dataTransfer.getData('text/plain')
     if (!draggedId || draggedId === targetId) return
@@ -156,7 +183,7 @@ export default function BattleBPManageTab() {
     })
   }
 
-  // ----- 克制关系配置相关 -----
+  // ----- 克制关系配置相关（忍者选择） -----
   const filteredCounterNinjas = useMemo(() => {
     const list = ninjas.filter(n => n.id !== selectedNinjaId)
     if (!searchCounterNinja) return list
@@ -173,7 +200,6 @@ export default function BattleBPManageTab() {
     return summons.filter(s => s.name.toLowerCase().includes(searchCounterSummon.toLowerCase()))
   }, [summons, searchCounterSummon])
 
-  // 图片墙使用的忍者列表（按梯度分组）
   const groupedNinjasForConfig = useMemo(() => {
     let list = ninjas
     if (searchConfigNinja.trim()) {
@@ -189,12 +215,14 @@ export default function BattleBPManageTab() {
 
   const handleSaveCounter = () => {
     if (!selectedNinjaId) return
+    // 保存时按当前 counterNinjaIds 顺序保存
     const data: IBPCounter = {
       id: selectedCounterId || Date.now().toString(),
       ninjaId: selectedNinjaId,
       counterNinjaIds: form.counterNinjaIds,
       counterScrollIds: form.counterScrollIds,
       counterSummonIds: form.counterSummonIds,
+      counterNinjaScores: form.counterNinjaScores,
     }
     if (selectedCounterId) {
       updateCounter(selectedCounterId, data)
@@ -209,18 +237,10 @@ export default function BattleBPManageTab() {
     if (selectedCounterId) {
       deleteCounter(selectedCounterId)
       setSelectedCounterId('')
-      setForm({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [] })
+      setForm({ counterNinjaIds: [], counterScrollIds: [], counterSummonIds: [], counterNinjaScores: {} })
       setSelectedNinjaId('')
       toast.success('克制关系已删除')
     }
-  }
-
-  const toggleItem = (type: 'ninja' | 'scroll' | 'summon', id: string) => {
-    setForm(prev => {
-      const key = type === 'ninja' ? 'counterNinjaIds' : type === 'scroll' ? 'counterScrollIds' : 'counterSummonIds'
-      const arr = prev[key]
-      return { ...prev, [key]: arr.includes(id) ? arr.filter(i => i !== id) : [...arr, id] }
-    })
   }
 
   return (
@@ -230,7 +250,7 @@ export default function BattleBPManageTab() {
         <TabsTrigger value="counter-config">克制关系配置</TabsTrigger>
       </TabsList>
 
-      {/* ========== 盲选位设置（一体化） ========== */}
+      {/* ========== 盲选位设置 ========== */}
       <TabsContent value="blind-pick" className="mt-6">
         <Card>
           <CardContent className="p-4">
@@ -255,14 +275,13 @@ export default function BattleBPManageTab() {
                           <div
                             key={ninja.id}
                             draggable={ninja.blindPick}
-                            onDragStart={ninja.blindPick ? (e) => handleDragStart(e, ninja.id) : undefined}
-                            onDragOver={ninja.blindPick ? handleDragOver : undefined}
-                            onDrop={ninja.blindPick ? (e) => handleDrop(e, ninja.id, group.tier) : undefined}
+                            onDragStart={ninja.blindPick ? (e) => handleDragStartBlind(e, ninja.id) : undefined}
+                            onDragOver={ninja.blindPick ? handleDragOverBlind : undefined}
+                            onDrop={ninja.blindPick ? (e) => handleDropBlind(e, ninja.id, group.tier) : undefined}
                             className={`relative cursor-pointer group ${ninja.blindPick ? 'cursor-grab active:cursor-grabbing' : ''}`}
                           >
                             <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
                               <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
-                              {/* 盲选位勾选框 + 标识，移至图片内部右下角 */}
                               <div className="absolute bottom-0.5 right-0.5 z-10 flex items-center gap-0.5 bg-background/60 rounded p-0.5 backdrop-blur-sm">
                                 <input
                                   type="checkbox"
@@ -291,13 +310,12 @@ export default function BattleBPManageTab() {
         </Card>
       </TabsContent>
 
-      {/* ========== 克制关系配置（图片墙选择 + 编辑） ========== */}
+      {/* ========== 克制关系配置（分数滑块 + 输入框） ========== */}
       <TabsContent value="counter-config" className="mt-6">
         <Card>
           <CardContent className="p-4 space-y-4">
             {!selectedNinjaId ? (
               <>
-                {/* 搜索框 */}
                 <div className="relative max-w-xs">
                   <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -308,7 +326,6 @@ export default function BattleBPManageTab() {
                   />
                 </div>
 
-                {/* 图片墙 */}
                 {groupedNinjasForConfig.length === 0 ? (
                   <div className="text-sm text-muted-foreground text-center py-12">未找到忍者</div>
                 ) : (
@@ -340,7 +357,6 @@ export default function BattleBPManageTab() {
               </>
             ) : (
               <>
-                {/* 已选忍者编辑界面 */}
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="outline" className="text-sm px-3 py-1 flex items-center gap-2">
                     <Image src={selectedNinja?.imageUrl} alt={selectedNinja?.name} className="w-5 h-5 rounded object-cover" />
@@ -350,9 +366,9 @@ export default function BattleBPManageTab() {
                   <Button variant="destructive" size="sm" onClick={handleDeleteCounter}>删除配置</Button>
                 </div>
 
-                {/* 克制忍者选择 */}
+                {/* 克制忍者：图片墙选择 + 分数设置 */}
                 <div>
-                  <Label>克制该忍者的忍者（可多选）</Label>
+                  <Label>克制该忍者的忍者（点击添加/移除，调节分数）</Label>
                   <div className="relative mt-2 mb-2">
                     <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input value={searchCounterNinja} onChange={e => setSearchCounterNinja(e.target.value)} placeholder="搜索忍者..." className="pl-9" />
@@ -363,7 +379,7 @@ export default function BattleBPManageTab() {
                         key={n.id}
                         variant={form.counterNinjaIds.includes(n.id) ? 'default' : 'outline'}
                         className="cursor-pointer h-auto py-1 px-2 gap-1.5"
-                        onClick={() => toggleItem('ninja', n.id)}
+                        onClick={() => toggleNinja(n.id)}
                       >
                         <div className="w-5 h-5 rounded overflow-hidden shrink-0">
                           <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
@@ -372,22 +388,66 @@ export default function BattleBPManageTab() {
                       </Badge>
                     ))}
                   </div>
+
                   {form.counterNinjaIds.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <Label className="text-xs">已选克制忍者顺序（上下移动）</Label>
-                      {form.counterNinjaIds.map((id, idx) => {
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">已选克制忍者</Label>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={handleResetScores} className="h-7 text-xs">
+                            <RotateCcw className="size-3 mr-1" /> 分数归零
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={handleSortByScore} className="h-7 text-xs">
+                            <ArrowUpDown className="size-3 mr-1" /> 按分数排序
+                          </Button>
+                        </div>
+                      </div>
+                      {form.counterNinjaIds.map((id) => {
                         const nin = ninjas.find(n => n.id === id)
                         if (!nin) return null
+                        const score = form.counterNinjaScores[id] ?? 0
                         return (
-                          <div key={id} className="flex items-center gap-2 bg-muted/40 rounded px-2 py-1">
-                            <div className="flex items-center gap-2 flex-1">
-                              <div className="w-6 h-6 rounded overflow-hidden shrink-0">
+                          <div
+                            key={id}
+                            className="flex items-center gap-3 bg-muted/40 rounded px-3 py-2"
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className="w-8 h-8 rounded overflow-hidden shrink-0 border border-border">
                                 <Image src={nin.imageUrl} alt={nin.name} className="w-full h-full object-cover" />
                               </div>
                               <span className="text-sm truncate">{nin.name}</span>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === 0} onClick={() => moveFormItem('ninja', idx, 'up')}><ArrowUp className="size-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === form.counterNinjaIds.length - 1} onClick={() => moveFormItem('ninja', idx, 'down')}><ArrowDown className="size-4" /></Button>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {/* 范围滑块 */}
+                              <input
+                                type="range"
+                                min={-50}
+                                max={50}
+                                value={score}
+                                onChange={(e) => handleScoreChange(id, Number(e.target.value))}
+                                className="w-32 h-2 accent-primary cursor-pointer"
+                              />
+                              {/* 数字输入框 */}
+                              <Input
+                                type="number"
+                                min={-50}
+                                max={50}
+                                value={score}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value, 10)
+                                  if (!isNaN(val)) handleScoreChange(id, val)
+                                }}
+                                className="w-16 h-7 text-xs text-center [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                              <span
+                                className={`text-xs font-bold w-10 text-right ${
+                                  score > 0 ? 'text-green-500' : score < 0 ? 'text-red-500' : 'text-muted-foreground'
+                                }`}
+                              >
+                                {score > 0 ? `+${score}` : score}
+                              </span>
+                            </div>
                           </div>
                         )
                       })}
@@ -395,7 +455,7 @@ export default function BattleBPManageTab() {
                   )}
                 </div>
 
-                {/* 克制密卷 */}
+                {/* 密卷 / 通灵（保持不变） */}
                 <div>
                   <Label>克制该忍者的密卷（可多选）</Label>
                   <div className="relative mt-2 mb-2">
@@ -408,7 +468,12 @@ export default function BattleBPManageTab() {
                         key={s.id}
                         variant={form.counterScrollIds.includes(s.id) ? 'default' : 'outline'}
                         className="cursor-pointer h-auto py-1 px-2 gap-1.5"
-                        onClick={() => toggleItem('scroll', s.id)}
+                        onClick={() => setForm(prev => ({
+                          ...prev,
+                          counterScrollIds: prev.counterScrollIds.includes(s.id)
+                            ? prev.counterScrollIds.filter(i => i !== s.id)
+                            : [...prev.counterScrollIds, s.id]
+                        }))}
                       >
                         <div className="w-5 h-5 rounded overflow-hidden shrink-0">
                           <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
@@ -417,28 +482,8 @@ export default function BattleBPManageTab() {
                       </Badge>
                     ))}
                   </div>
-                  {form.counterScrollIds.length > 0 && (
-                    <div className="mt-2">
-                      <Label className="text-xs">已选克制密卷</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {form.counterScrollIds.map(id => {
-                          const scr = scrolls.find(s => s.id === id)
-                          if (!scr) return null
-                          return (
-                            <Badge key={id} variant="secondary" className="h-auto py-1 px-2 gap-1.5">
-                              <div className="w-5 h-5 rounded overflow-hidden shrink-0">
-                                <Image src={scr.imageUrl} alt={scr.name} className="w-full h-full object-cover" />
-                              </div>
-                              <span className="text-xs">{scr.name}</span>
-                            </Badge>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* 克制通灵 */}
                 <div>
                   <Label>克制该忍者的通灵兽（可多选）</Label>
                   <div className="relative mt-2 mb-2">
@@ -451,7 +496,12 @@ export default function BattleBPManageTab() {
                         key={s.id}
                         variant={form.counterSummonIds.includes(s.id) ? 'default' : 'outline'}
                         className="cursor-pointer h-auto py-1 px-2 gap-1.5"
-                        onClick={() => toggleItem('summon', s.id)}
+                        onClick={() => setForm(prev => ({
+                          ...prev,
+                          counterSummonIds: prev.counterSummonIds.includes(s.id)
+                            ? prev.counterSummonIds.filter(i => i !== s.id)
+                            : [...prev.counterSummonIds, s.id]
+                        }))}
                       >
                         <div className="w-5 h-5 rounded overflow-hidden shrink-0">
                           <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
@@ -460,25 +510,6 @@ export default function BattleBPManageTab() {
                       </Badge>
                     ))}
                   </div>
-                  {form.counterSummonIds.length > 0 && (
-                    <div className="mt-2">
-                      <Label className="text-xs">已选克制通灵</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {form.counterSummonIds.map(id => {
-                          const sum = summons.find(s => s.id === id)
-                          if (!sum) return null
-                          return (
-                            <Badge key={id} variant="secondary" className="h-auto py-1 px-2 gap-1.5">
-                              <div className="w-5 h-5 rounded overflow-hidden shrink-0">
-                                <Image src={sum.imageUrl} alt={sum.name} className="w-full h-full object-cover" />
-                              </div>
-                              <span className="text-xs">{sum.name}</span>
-                            </Badge>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <Button onClick={handleSaveCounter}>

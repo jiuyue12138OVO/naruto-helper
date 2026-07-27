@@ -43,6 +43,20 @@ const TIER_WEIGHT: Record<string, number> = {
   '天王': 5, '伪天王': 4, 't0顶': 3, 't0上': 2, 't0中': 1, 't0下': 0, '准t0': -1,
 }
 
+/** 根据 BP 顺序和槽位计算盲选位加分 */
+function getBlindPickBonus(player: '1P' | '2P', index: number): number {
+  if (player === '1P') {
+    // 1P 的 C 位 (index 0) 和 A 位 (index 2) 是盲选
+    if (index === 0 || index === 2) return 6
+    return 0
+  } else {
+    // 2P 的 D 位 (index 0) 和 E 位 (index 1) 有一定盲选成分
+    if (index === 0) return 3
+    if (index === 1) return 4
+    return 0
+  }
+}
+
 export default function BPRecommendation({
   myRole, phase, team1P, team2P, usedNinjas, banned1P, banned2P,
   myScrollHistory, opponentScrollHistory, mySummonHistory, opponentSummonHistory,
@@ -55,11 +69,14 @@ export default function BPRecommendation({
   const myTeam = (myRole === '1P' ? team1P : team2P).filter(Boolean) as INinja[]
   const enemyTeam = (myRole === '1P' ? team2P : team1P).filter(Boolean) as INinja[]
 
-  const { ninjaCounters, scrollCounters, summonCounters } = useMemo(() => {
+  // 构建克制索引
+  const { ninjaCounters, scrollCounters, summonCounters, counterDataMap } = useMemo(() => {
     const ninjaMap = new Map<string, string[]>()
     const scrollMap = new Map<string, string[]>()
     const summonMap = new Map<string, string[]>()
+    const dataMap = new Map<string, IBPCounter>()
     counters.forEach((c: IBPCounter) => {
+      dataMap.set(c.ninjaId, c)
       c.counterNinjaIds.forEach(id => {
         if (!ninjaMap.has(id)) ninjaMap.set(id, [])
         ninjaMap.get(id)!.push(c.ninjaId)
@@ -73,23 +90,10 @@ export default function BPRecommendation({
         summonMap.get(id)!.push(c.ninjaId)
       })
     })
-    return { ninjaCounters: ninjaMap, scrollCounters: scrollMap, summonCounters: summonMap }
+    return { ninjaCounters: ninjaMap, scrollCounters: scrollMap, summonCounters: summonMap, counterDataMap: dataMap }
   }, [counters])
 
-  const counterDataMap = useMemo(() => {
-    const map = new Map<string, IBPCounter>()
-    counters.forEach(c => map.set(c.ninjaId, c))
-    return map
-  }, [counters])
-
-  const getCounteredByNinjas = (ninjaId: string) => {
-    const result: string[] = []
-    counters.forEach(c => {
-      if (c.counterNinjaIds.includes(ninjaId)) result.push(c.ninjaId)
-    })
-    return result
-  }
-
+  // ---- 忍者推荐（新算法：全局克制考量 + 对位加权） ----
   const ninjaRecommendations = useMemo(() => {
     if (phase !== 'pick' || !activeSlot || activeSlot.type !== 'pick') return null
     const { player, index } = activeSlot
@@ -98,65 +102,51 @@ export default function BPRecommendation({
       ...banned2P.filter(Boolean).map(n => n!.id),
     ])
     const candidates = ninjas.filter(n =>
-      !usedNinjas.has(n.id) && !bannedIds.has(n.id) && !myTeam.some(m => m.id === n.id) && !enemyTeam.some(e => e.id === n.id)
+      !usedNinjas.has(n.id) && !bannedIds.has(n.id) &&
+      !myTeam.some(m => m.id === n.id) && !enemyTeam.some(e => e.id === n.id)
     )
+
     const enemyIds = enemyTeam.map(e => e.id)
-    const is1P = player === '1P'
+    const directOpponentId = enemyTeam[index]?.id ?? null // 对位敌人
 
     const scored = candidates.map(ninja => {
       let score = 0
-      const myCounter = ninjaCounters.get(ninja.id) || []
-      const counteredBy = getCounteredByNinjas(ninja.id)
 
-      if (is1P) {
-        if (index === 0) {
-          if (ninja.blindPick) score += 6
-          score += (TIER_WEIGHT[ninja.tier] || 0)
-        } else if (index === 1) {
-          const targetE = team2P[1]?.id
-          const targetD = team2P[0]?.id
-          if (targetE && myCounter.includes(targetE)) score += 5
-          if (targetD && myCounter.includes(targetD)) score += 3
-          if (targetE && counteredBy.includes(targetE)) score -= 4
-          if (targetD && counteredBy.includes(targetD)) score -= 2
-          score += (TIER_WEIGHT[ninja.tier] || 0)
-        } else {
-          if (ninja.blindPick) score += 6
-          score += (TIER_WEIGHT[ninja.tier] || 0)
+      // 遍历敌方所有已选忍者，计算克制与被克制
+      enemyIds.forEach(enemyId => {
+        const isDirect = enemyId === directOpponentId
+        const weight = isDirect ? 5 : 3
+
+        // 我方候选忍者克制该敌人
+        const myCounterList = ninjaCounters.get(ninja.id) || []
+        if (myCounterList.includes(enemyId)) {
+          score += weight
         }
-      } else {
-        if (index === 0) {
-          const targetC = team1P[0]?.id
-          if (targetC && myCounter.includes(targetC)) score += 5
-          if (ninja.blindPick) score += 3
-          score += (TIER_WEIGHT[ninja.tier] || 0)
-        } else if (index === 1) {
-          let counterCount = 0
-          const remainingEnemy = team1P.filter(Boolean).map(n => n!.id)
-          remainingEnemy.forEach(id => {
-            const cd = counterDataMap.get(id)
-            if (cd && cd.counterNinjaIds.includes(ninja.id)) counterCount++
-          })
-          score -= counterCount * 3
-          if (ninja.blindPick) score += 4
-          score += (TIER_WEIGHT[ninja.tier] || 0)
-        } else {
-          const targetA = team1P[2]?.id
-          const targetB = team1P[1]?.id
-          const targetC = team1P[0]?.id
-          if (targetA && myCounter.includes(targetA)) score += 5
-          if (targetB && myCounter.includes(targetB)) score += 3
-          if (targetC && counteredBy.includes(targetC)) score -= 5
-          score += (TIER_WEIGHT[ninja.tier] || 0)
+
+        // 该敌人克制我方候选忍者
+        const enemyCounter = counterDataMap.get(enemyId)
+        if (enemyCounter?.counterNinjaIds.includes(ninja.id)) {
+          score -= weight
         }
+      })
+
+      // 盲选位加分
+      if (ninja.blindPick) {
+        score += getBlindPickBonus(player, index)
       }
+
+      // 梯度基础分
+      score += (TIER_WEIGHT[ninja.tier] || 0)
+
       return { ninja, score }
     })
+
     scored.sort((a, b) => b.score - a.score)
-    const filtered = scored.filter(item => item.score > 0).slice(0, 8)
-    return filtered.length > 0 ? filtered : null
+    const positiveOnly = scored.filter(item => item.score > 0)
+    return positiveOnly.length > 0 ? positiveOnly : null
   }, [phase, activeSlot, ninjas, usedNinjas, banned1P, banned2P, myTeam, enemyTeam, team1P, team2P, ninjaCounters, counterDataMap])
 
+  // ---- 密卷推荐（保持原对位逻辑，仅去除数量上限并添加滚动） ----
   const scrollRecommendations = useMemo(() => {
     if (phase !== 'scrolls' || !activeSlot || activeSlot.type !== 'scroll') return null
     const { player, index } = activeSlot
@@ -190,10 +180,11 @@ export default function BPRecommendation({
       return { scroll, score }
     })
     scored.sort((a, b) => b.score - a.score)
-    const filtered = scored.filter(item => item.score > 0).slice(0, 8)
+    const filtered = scored.filter(item => item.score > 0)
     return filtered.length > 0 ? filtered : null
   }, [phase, activeSlot, scrolls, myScrollHistory, opponentScrollHistory, currentScrolls1P, currentScrolls2P, team1P, team2P, scrollCounters])
 
+  // ---- 通灵推荐（同样去上限 + 滚动） ----
   const summonRecommendations = useMemo(() => {
     if (phase !== 'summons' || !activeSlot || activeSlot.type !== 'summon') return null
     const { player, index } = activeSlot
@@ -204,7 +195,6 @@ export default function BPRecommendation({
     const candidates = summons.filter(s => !history.has(s.id) && !usedThisGame.has(s.id))
     const enemySlots = is1P ? team2P : team1P
 
-    // 与密卷相同的对位/邻位逻辑
     const slotMap: Record<number, number[]> = {
       0: [0, 1],
       1: [1, 0, 2],
@@ -228,7 +218,7 @@ export default function BPRecommendation({
       return { summon, score }
     })
     scored.sort((a, b) => b.score - a.score)
-    const filtered = scored.filter(item => item.score > 0).slice(0, 8)
+    const filtered = scored.filter(item => item.score > 0)
     return filtered.length > 0 ? filtered : null
   }, [phase, activeSlot, summons, mySummonHistory, opponentSummonHistory, currentSummons1P, currentSummons2P, team1P, team2P, summonCounters])
 
@@ -241,75 +231,85 @@ export default function BPRecommendation({
         {activeSlot && `（位置 ${activeSlot.index + 1}）`}
       </h3>
 
+      {/* 忍者推荐 - 滚动容器显示所有得分>0的选项 */}
       {phase === 'pick' && ninjaRecommendations && (
-        <div className="flex flex-wrap gap-3">
-          {ninjaRecommendations.map(({ ninja, score }) => {
-            const isPending = pendingNinjaId === ninja.id
-            return (
-              <div
-                key={ninja.id}
-                className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
-                  isPending ? 'border-2 border-red-500' : 'border border-transparent'
-                }`}
-                onClick={() => onSelectNinja?.(ninja)}
-              >
-                <div className="w-14 h-14 rounded-lg overflow-hidden border border-border bg-card">
-                  <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+        <div className="max-h-72 overflow-y-auto scrollbar-thin">
+          <div className="flex flex-wrap gap-3">
+            {ninjaRecommendations.map(({ ninja, score }) => {
+              const isPending = pendingNinjaId === ninja.id
+              return (
+                <div
+                  key={ninja.id}
+                  className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
+                    isPending ? 'border-2 border-red-500' : 'border border-transparent'
+                  }`}
+                  onClick={() => onSelectNinja?.(ninja)}
+                >
+                  <div className="w-14 h-14 rounded-lg overflow-hidden border border-border bg-card">
+                    <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs">{ninja.name}</span>
+                  <Badge variant="secondary" className="text-xs">{score > 0 ? `+${score}` : score}</Badge>
                 </div>
-                <span className="text-xs">{ninja.name}</span>
-                <Badge variant="secondary" className="text-xs">{score > 0 ? `+${score}` : score}</Badge>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       )}
 
+      {/* 密卷推荐 - 滚动容器 */}
       {phase === 'scrolls' && scrollRecommendations && (
-        <div className="flex flex-wrap gap-3">
-          {scrollRecommendations.map(({ scroll, score }) => {
-            const isPending = pendingScrollId === scroll.id
-            return (
-              <div
-                key={scroll.id}
-                className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
-                  isPending ? 'border-2 border-red-500' : 'border border-transparent'
-                }`}
-                onClick={() => onSelectScroll?.(scroll)}
-              >
-                <div className="w-12 h-12 rounded-md overflow-hidden border border-border bg-card">
-                  <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
+        <div className="max-h-72 overflow-y-auto scrollbar-thin">
+          <div className="flex flex-wrap gap-3">
+            {scrollRecommendations.map(({ scroll, score }) => {
+              const isPending = pendingScrollId === scroll.id
+              return (
+                <div
+                  key={scroll.id}
+                  className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
+                    isPending ? 'border-2 border-red-500' : 'border border-transparent'
+                  }`}
+                  onClick={() => onSelectScroll?.(scroll)}
+                >
+                  <div className="w-12 h-12 rounded-md overflow-hidden border border-border bg-card">
+                    <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs">{scroll.name}</span>
+                  <Badge variant="secondary" className="text-xs">{score}</Badge>
                 </div>
-                <span className="text-xs">{scroll.name}</span>
-                <Badge variant="secondary" className="text-xs">{score}</Badge>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       )}
 
+      {/* 通灵推荐 - 滚动容器 */}
       {phase === 'summons' && summonRecommendations && (
-        <div className="flex flex-wrap gap-3">
-          {summonRecommendations.map(({ summon, score }) => {
-            const isPending = pendingSummonId === summon.id
-            return (
-              <div
-                key={summon.id}
-                className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
-                  isPending ? 'border-2 border-red-500' : 'border border-transparent'
-                }`}
-                onClick={() => onSelectSummon?.(summon)}
-              >
-                <div className="w-12 h-12 rounded-md overflow-hidden border border-border bg-card">
-                  <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover" />
+        <div className="max-h-72 overflow-y-auto scrollbar-thin">
+          <div className="flex flex-wrap gap-3">
+            {summonRecommendations.map(({ summon, score }) => {
+              const isPending = pendingSummonId === summon.id
+              return (
+                <div
+                  key={summon.id}
+                  className={`flex flex-col items-center gap-1 cursor-pointer hover:bg-muted/50 rounded-lg p-1 transition-colors ${
+                    isPending ? 'border-2 border-red-500' : 'border border-transparent'
+                  }`}
+                  onClick={() => onSelectSummon?.(summon)}
+                >
+                  <div className="w-12 h-12 rounded-md overflow-hidden border border-border bg-card">
+                    <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs">{summon.name}</span>
+                  <Badge variant="secondary" className="text-xs">{score}</Badge>
                 </div>
-                <span className="text-xs">{summon.name}</span>
-                <Badge variant="secondary" className="text-xs">{score}</Badge>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       )}
 
+      {/* 无推荐提示 */}
       {(phase === 'pick' && !ninjaRecommendations) && (
         <p className="text-sm text-muted-foreground">无推荐</p>
       )}

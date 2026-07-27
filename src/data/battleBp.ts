@@ -1,11 +1,11 @@
-// EXPORTS: IBPCounter, MOCK_COUNTERS
-
 export interface IBPCounter {
-  id: string                   // 唯一标识
-  ninjaId: string              // 被克制的忍者ID
-  counterNinjaIds: string[]    // 克制该忍者的忍者ID列表
-  counterScrollIds: string[]   // 克制该忍者的密卷ID列表
-  counterSummonIds: string[]   // 克制该忍者的通灵兽ID列表
+  id: string
+  ninjaId: string
+  counterNinjaIds: string[]
+  counterScrollIds: string[]
+  counterSummonIds: string[]
+  // 新增：克制忍者的分数映射，ID → 分数（-50 ~ 50），默认 0
+  counterNinjaScores?: Record<string, number>
 }
 
 // 初始为空，后续在管理页面配置
@@ -27,7 +27,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterSummonIds": [
         "1783589344138",
         "1783587234386"
-      ]
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783595220259",
@@ -129,7 +130,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterScrollIds": [
         "1783349488627",
         "1783350043475",
-        "1"
+        "1",
+        "5"
       ],
       "counterSummonIds": [
         "1783587234386",
@@ -179,13 +181,6 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ]
     },
     {
-      "id": "1783596221427",
-      "ninjaId": "1783591722037",
-      "counterNinjaIds": [],
-      "counterScrollIds": [],
-      "counterSummonIds": []
-    },
-    {
       "id": "1783596280435",
       "ninjaId": "15",
       "counterNinjaIds": [
@@ -232,6 +227,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783308944026",
         "1783309348233",
         "1783316484124",
+        "1783316581671",
         "1783317094790"
       ],
       "counterScrollIds": [
@@ -292,12 +288,13 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783596537327",
       "ninjaId": "1783308767737",
       "counterNinjaIds": [
-        "1783308944026",
         "1783309311486",
         "1783316557259",
+        "1783308944026",
         "1783316976705",
         "1783310110175",
         "1783316484124",
+        "1783316581671",
         "1783317094790"
       ],
       "counterScrollIds": [
@@ -307,7 +304,13 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterSummonIds": [
         "1783589300960"
-      ]
+      ],
+      "counterNinjaScores": {
+        "1783309311486": 50,
+        "1783308944026": 40,
+        "1783316557259": 45,
+        "1783316976705": 40
+      }
     },
     {
       "id": "1783596584983",
@@ -1347,6 +1350,17 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "ninjaId": "1783310560092",
       "counterNinjaIds": [
         "1783309398928"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": []
+    },
+    {
+      "id": "1785159839713",
+      "ninjaId": "1783316581671",
+      "counterNinjaIds": [
+        "1783309774545",
+        "1783310187740",
+        "8"
       ],
       "counterScrollIds": [],
       "counterSummonIds": []

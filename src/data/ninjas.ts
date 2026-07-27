@@ -95,8 +95,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "位移"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "5",
@@ -196,8 +195,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "拉扯"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "10",
@@ -250,8 +248,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "位移"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "13",
@@ -307,8 +304,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高机动性",
         "瞬发"
       ],
-      "blindPick": true,
-      "trend": "down"
+      "blindPick": true
     },
     {
       "id": "17",
@@ -323,8 +319,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "18",
@@ -483,8 +478,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "位移"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783308858692",
@@ -526,7 +520,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "id": "1783308961488",
       "name": "宇智波带土【暴怒】",
       "tier": "t0顶",
-      "imageUrl": "data:image/webp;base64,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",
+      "imageUrl": "data:image/webp;base64,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",
       "rating": "A",
       "tags": [
         "抓取",
@@ -591,8 +585,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "拉扯"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783309084993",
@@ -609,8 +602,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "位移"
       ],
-      "blindPick": true,
-      "trend": "down"
+      "blindPick": true
     },
     {
       "id": "1783309096309",
@@ -705,8 +697,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高机动性",
         "大招特殊情况可接"
       ],
-      "blindPick": true,
-      "trend": "down"
+      "blindPick": true
     },
     {
       "id": "1783309186224",
@@ -800,8 +791,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "纯抓",
         "低真空期"
       ],
-      "blindPick": true,
-      "trend": "down"
+      "blindPick": true
     },
     {
       "id": "1783309398928",
@@ -869,10 +859,11 @@ export const MOCK_NINJAS: INinja[] =  [
         "高爆发",
         "高输出",
         "位移",
-        "大招特殊情况可接"
+        "大招特殊情况可接",
+        "纯抓",
+        "高空优势"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783309602084",
@@ -1136,8 +1127,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "高机动性"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783309947097",
@@ -1169,8 +1159,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "拉扯"
       ],
-      "blindPick": false,
-      "trend": "up"
+      "blindPick": false
     },
     {
       "id": "1783309985981",
@@ -1189,8 +1178,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "位移"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783310025577",
@@ -1229,7 +1217,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "金刚体",
         "位移",
-        "瞬发"
+        "瞬发",
+        "高爆发"
       ],
       "blindPick": true,
       "trend": "up"
@@ -1330,8 +1319,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招特殊情况可接",
         "破霸体"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783310155158",
@@ -1346,8 +1334,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "无敌",
         "防反"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783310175876",
@@ -1450,8 +1437,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "防反"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783310506586",
@@ -1557,8 +1543,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "位移"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783315425090",
@@ -1609,8 +1594,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招特殊情况可接",
         "瞬发"
       ],
-      "blindPick": true,
-      "trend": "up"
+      "blindPick": true
     },
     {
       "id": "1783315611859",
@@ -1631,8 +1615,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "霸体"
       ],
-      "blindPick": false,
-      "trend": "up"
+      "blindPick": false
     },
     {
       "id": "1783315644309",
@@ -1663,8 +1646,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "破霸体",
         "大招可接"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783315694697",
@@ -1684,8 +1666,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "纯抓",
         "低真空期"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783315719485",
@@ -1722,8 +1703,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "防反"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783315995490",
@@ -1756,8 +1736,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783316139532",
@@ -1794,8 +1773,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "金刚体"
       ],
-      "blindPick": false,
-      "trend": "up"
+      "blindPick": false
     },
     {
       "id": "1783316350750",
@@ -1849,8 +1827,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高爆发",
         "高输出"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783316531227",
@@ -1902,8 +1879,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高机动性",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "up"
+      "blindPick": false
     },
     {
       "id": "1783316568177",
@@ -1925,7 +1901,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1783316581671",
       "name": "宇智波止水",
-      "tier": "t0中",
+      "tier": "t0上",
       "imageUrl": "data:image/webp;base64,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",
       "rating": "A",
       "tags": [
@@ -1939,7 +1915,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "瞬发",
         "低真空期"
       ],
-      "blindPick": false
+      "blindPick": false,
+      "trend": "up"
     },
     {
       "id": "1783316598915",
@@ -1995,8 +1972,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "up"
+      "blindPick": false
     },
     {
       "id": "1783316699625",
@@ -2087,8 +2063,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "大招特殊情况可接"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783316859772",
@@ -2198,8 +2173,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783316968545",
@@ -2278,8 +2252,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招特殊情况可接",
         "瞬发"
       ],
-      "blindPick": false,
-      "trend": "down"
+      "blindPick": false
     },
     {
       "id": "1783317048070",
@@ -2328,7 +2301,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "高输出",
         "纯抓",
         "低真空期",
-        "大招特殊情况可接"
+        "大招特殊情况可接",
+        "抓取"
       ],
       "blindPick": false
     },
@@ -2955,7 +2929,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "突进"
       ],
       "imageUrl": "data:image/webp;base64,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",
-      "blindPick": false
+      "blindPick": false,
+      "trend": "up"
     },
     {
       "id": "1784018273482",

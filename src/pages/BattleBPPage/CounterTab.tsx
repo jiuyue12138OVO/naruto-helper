@@ -56,10 +56,14 @@ export default function CounterTab() {
   const getScrollById = (id: string) => scrolls.find(s => s.id === id)
   const getSummonById = (id: string) => summons.find(s => s.id === id)
 
-  const getCounteredBy = (ninjaId: string): INinja[] => {
+  const getCounteredByWithScores = (ninjaId: string): { ninja: INinja; score: number }[] => {
     const counter = counters.find(c => c.ninjaId === ninjaId)
     if (!counter) return []
-    return counter.counterNinjaIds.map(id => getNinjaById(id)).filter(Boolean) as INinja[]
+    const scores = counter.counterNinjaScores || {}
+    return counter.counterNinjaIds
+      .map(id => ({ ninja: getNinjaById(id)!, score: scores[id] ?? 0 }))
+      .filter(item => item.ninja)
+      .sort((a, b) => b.score - a.score)
   }
 
   const getCounters = (ninjaId: string): INinja[] => {
@@ -142,11 +146,13 @@ export default function CounterTab() {
       )}
 
       <Dialog open={!!selectedNinja} onOpenChange={open => !open && setSelectedNinja(null)}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>{selectedNinja?.name}</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>{selectedNinja?.name}</DialogTitle>
+          </DialogHeader>
           {selectedNinja && (() => {
             const counter = getCounterData(selectedNinja.id)
-            const counteredByList = counter ? counter.counterNinjaIds.map(id => getNinjaById(id)).filter(Boolean) : []
+            const counteredByList = counter ? getCounteredByWithScores(selectedNinja.id) : []
             const counterList = getCounters(selectedNinja.id)
             const scrollList = counter ? counter.counterScrollIds.map(id => getScrollById(id)).filter(Boolean) : []
             const summonList = counter ? counter.counterSummonIds.map(id => getSummonById(id)).filter(Boolean) : []
@@ -154,84 +160,89 @@ export default function CounterTab() {
             const hasData = counteredByList.length > 0 || counterList.length > 0 || scrollList.length > 0 || summonList.length > 0
 
             return (
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="sm:w-2/5 shrink-0">
-                  <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                    <Image src={selectedNinja.imageUrl} alt={selectedNinja.name} className="w-full h-full object-cover" />
+              <div className="overflow-y-auto flex-1 -mx-6 px-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="sm:w-2/5 shrink-0">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <Image src={selectedNinja.imageUrl} alt={selectedNinja.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex justify-center mt-2">
+                      <Badge variant={selectedNinja.blindPick ? 'default' : 'secondary'}>
+                        {selectedNinja.blindPick ? '盲选位' : '非盲选'}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex justify-center mt-2">
-                    <Badge variant={selectedNinja.blindPick ? 'default' : 'secondary'}>
-                      {selectedNinja.blindPick ? '盲选位' : '非盲选'}
-                    </Badge>
+                  <div className="flex-1 space-y-4">
+                    {hasData ? (
+                      <>
+                        {counteredByList.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium">被克制</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {counteredByList.map(({ ninja: n, score }) => (
+                                <div key={n.id} className="flex flex-col items-center w-14 relative">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                                  <span className={`text-[10px] font-bold mt-0.5 ${score > 0 ? 'text-green-500' : score < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                    {score > 0 ? `+${score}` : score}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {counterList.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium">克制</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {counterList.map(n => (
+                                <div key={n.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {scrollList.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium">密卷</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {scrollList.map(s => (
+                                <div key={s.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{s.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {summonList.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium">通灵</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {summonList.map(sm => (
+                                <div key={sm.id} className="flex flex-col items-center w-14">
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={sm.imageUrl} alt={sm.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{sm.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">暂无克制数据</p>
+                    )}
                   </div>
-                </div>
-                <div className="flex-1 space-y-4">
-                  {hasData ? (
-                    <>
-                      {counteredByList.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium">被克制</span>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {counteredByList.map(n => (
-                              <div key={n.id} className="flex flex-col items-center w-14">
-                                <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                  <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {counterList.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium">克制</span>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {counterList.map(n => (
-                              <div key={n.id} className="flex flex-col items-center w-14">
-                                <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                  <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {scrollList.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium">密卷</span>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {scrollList.map(s => (
-                              <div key={s.id} className="flex flex-col items-center w-14">
-                                <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                  <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{s.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {summonList.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium">通灵</span>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {summonList.map(sm => (
-                              <div key={sm.id} className="flex flex-col items-center w-14">
-                                <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
-                                  <Image src={sm.imageUrl} alt={sm.name} className="w-full h-full object-cover" />
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{sm.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">暂无克制数据</p>
-                  )}
                 </div>
               </div>
             )

@@ -39,10 +39,10 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
     return acc
   }, {})
 
-  // 每个梯度内部排序：趋势上升的优先，然后无趋势，然后趋势下降的
+  // 每个梯度内部排序：下降趋势优先，无趋势居中，上升趋势最后
   Object.keys(grouped).forEach(tier => {
     grouped[tier].sort((a, b) => {
-      const trendOrder = { up: 0, undefined: 1, down: 2 }
+      const trendOrder = { down: 0, undefined: 1, up: 2 }
       const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
       const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
       return trendA - trendB
