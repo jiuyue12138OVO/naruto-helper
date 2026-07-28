@@ -26,6 +26,7 @@ interface SummonsPhaseProps {
   onSelectSummonSlot: (index: number, summonId: string | null) => void
   onConfirm: () => void
   isConfirmed: boolean
+  disabled?: boolean
 }
 
 export default function SummonsPhase({
@@ -33,12 +34,46 @@ export default function SummonsPhase({
   scrolls1P, scrolls2P,
   summonHistory1P, summonHistory2P,
   ninjas, summons, scrolls, order, search, setSearch, onSelectSummonSlot, onConfirm, isConfirmed,
+  disabled = false,
 }: SummonsPhaseProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [pendingSummons, setPendingSummons] = useState<Record<number, string | null>>({})
 
   if (isConfirmed) {
     return <p className="text-center text-muted-foreground">已确认通灵，等待对手...</p>
+  }
+
+  if (disabled) {
+    const myTeam = myRole === '1P' ? team1P : team2P
+    const myScrolls = myRole === '1P' ? scrolls1P : scrolls2P
+    const mySummons = myRole === '1P' ? summons1P : summons2P
+    return (
+      <div className="space-y-4">
+        <h3 className="text-center font-semibold">通灵配置（观众模式）</h3>
+        <div className="flex justify-center gap-4">
+          {order.map((i) => {
+            const ninja = ninjas.find(n => n.id === myTeam[i])
+            const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
+            const summon = mySummons[i] ? summons.find(s => s.id === mySummons[i]) : null
+            return (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <div className="w-16 h-16 border rounded overflow-hidden">
+                  {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>}
+                </div>
+                <div className="flex gap-1">
+                  <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
+                    {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
+                  </div>
+                  <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
+                    {summon ? <Image src={summon.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
   }
 
   const myTeam = myRole === '1P' ? team1P : team2P
@@ -101,7 +136,7 @@ export default function SummonsPhase({
           const ninja = ninjas.find(n => n.id === myTeam[i])
           const isActive = activeIndex === i
           const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
-          const isConfirmed = !!mySummons[i]   // 数据库中已确认的通灵
+          const isConfirmed = !!mySummons[i]
           const displaySummonId = mySummons[i] || pendingSummons[i]
           const summon = displaySummonId ? summons.find(s => s.id === displaySummonId) : null
           return (
