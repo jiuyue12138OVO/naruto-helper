@@ -2999,14 +2999,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "小南",
       "scrolls": [
         {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349280153",
           "scrollName": "水遁·水龙卷",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -3316,6 +3321,28 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1785316486440",
+      "ninjaId": "1785316064800",
+      "ninjaName": "千手柱间【侠影江湖】",
+      "scrolls": [
+        {
+          "scrollId": "1783349842473",
+          "scrollName": "木遁·扦插之术",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349772182",
+          "scrollName": "木遁·一字连柱",
           "priority": 3
         }
       ]

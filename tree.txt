@@ -1,0 +1,226 @@
+﻿C:.
+|   .gitignore
+|   .npmrc
+|   .spark_project
+|   AGENTS.md
+|   components.json
+|   eslint.config.mjs
+|   index.html
+|   package-lock.json
+|   package.json
+|   README.md
+|   tree.txt
+|   tsconfig.app.json
+|   tsconfig.json
+|   tsconfig.node.json
+|   vite.config.ts
+|   
++---.githooks
+|       pre-commit
+|       
++---.github
+|   \---workflows
+|           deploy.yml
+|           
++---.spark
+|       meta.json
+|       
++---.vscode
+|       settings.json
+|       
++---logs
+|       browser.log
+|
++---node_modules
+|       
++---public
+|       404.html
+|       convert_to_base64.py
+|       favicon.svg
+|       favicon_base64.txt
+|       icon-base64.js
+|       icons.svg
+|       naruto-icon.png
+|       naruto.gif
+|       
++---scripts
+|       build.sh
+|       dev.mjs
+|       setup-git-hooks.mjs
+|       
++---shared
+|   +---capabilities
+|   \---static
+|       \---images
+|           +---ninja
+|           |       
+|           +---scoll
+|           |       
+|           \---summon
+|                   
++---src
+|   |   app.tsx
+|   |   index.css
+|   |   index.tsx
+|   |   supabase.ts
+|   |   tailwind-theme.css
+|   |   typography.css
+|   |   version.ts
+|   |   vite-env.d.ts
+|   |   
+|   +---assets
+|   |   \---wallpapers
+|   |           
+|   +---components
+|   |   |   DataLayout.tsx
+|   |   |   Header.tsx
+|   |   |   ImageUpload.tsx
+|   |   |   Layout.tsx
+|   |   |   
+|   |   \---ui
+|   |           accordion.tsx
+|   |           alert-dialog.tsx
+|   |           alert.tsx
+|   |           aspect-ratio.tsx
+|   |           avatar.tsx
+|   |           badge.tsx
+|   |           breadcrumb.tsx
+|   |           button-group.tsx
+|   |           button.tsx
+|   |           calendar.tsx
+|   |           card.tsx
+|   |           carousel.tsx
+|   |           checkbox.tsx
+|   |           collapsible.tsx
+|   |           command.tsx
+|   |           context-menu.tsx
+|   |           dialog.tsx
+|   |           drawer.tsx
+|   |           dropdown-menu.tsx
+|   |           empty.tsx
+|   |           field.tsx
+|   |           form.tsx
+|   |           hover-card.tsx
+|   |           image.tsx
+|   |           input-group.tsx
+|   |           input-otp.tsx
+|   |           input.tsx
+|   |           item.tsx
+|   |           kbd.tsx
+|   |           label.tsx
+|   |           menubar.tsx
+|   |           native-select.tsx
+|   |           navigation-menu.tsx
+|   |           pagination.tsx
+|   |           popover.tsx
+|   |           progress.tsx
+|   |           radio-group.tsx
+|   |           scroll-area.tsx
+|   |           select.tsx
+|   |           separator.tsx
+|   |           sheet.tsx
+|   |           sidebar.tsx
+|   |           skeleton.tsx
+|   |           slider.tsx
+|   |           sonner.tsx
+|   |           spinner.tsx
+|   |           switch.tsx
+|   |           table.tsx
+|   |           tabs.tsx
+|   |           textarea.tsx
+|   |           toggle-group.tsx
+|   |           toggle.tsx
+|   |           tooltip.tsx
+|   |           
+|   +---contexts
+|   |       DataContext.tsx
+|   |       
+|   +---data
+|   |       battleBp.ts
+|   |       blindPickOrder.ts
+|   |       ninjas.ts
+|   |       recommendations.ts
+|   |       scrolls.ts
+|   |       summons.ts
+|   |       
+|   +---hooks
+|   |       use-mobile.ts
+|   |       
+|   +---lib
+|   |       utils.ts
+|   |       
+|   \---pages
+|       +---BattleBPPage
+|       |   |   BattleBPPage.tsx
+|       |   |   BPRecommendation.tsx
+|       |   |   CounterTab.tsx
+|       |   |   
+|       |   +---room
+|       |   |       BanPhase.tsx
+|       |   |       BPRoomPage.tsx
+|       |   |       DonePhase.tsx
+|       |   |       PickPhase.tsx
+|       |   |       ScrollsPhase.tsx
+|       |   |       SummonsPhase.tsx
+|       |   |       
+|       |   \---simulate
+|       |           BanPanel.tsx
+|       |           PickPanel.tsx
+|       |           ScrollSummonPanel.tsx
+|       |           SimulateBPTab.tsx
+|       |           
+|       +---CounterGraph3DPage
+|       |       CounterGraph3DPage.tsx
+|       |       
+|       +---DataManagementPage
+|       |       BattleBPManageTab.tsx
+|       |       DataManagementPage.tsx
+|       |       NinjaManageTab.tsx
+|       |       RecommendationManageTab.tsx
+|       |       ScrollAndRecommendManageTab.tsx
+|       |       ScrollManageTab.tsx
+|       |       SummonManageTab.tsx
+|       |       
+|       +---EntertainmentPage
+|       |       EntertainmentPage.tsx
+|       |       RandomTab.tsx
+|       |       RandomTeamTab.tsx
+|       |       SharedTeamTab.tsx
+|       |       SlotFilterCard.tsx
+|       |       
+|       +---ExamplePage
+|       |       ExamplePage.tsx
+|       |       
+|       +---HomePage
+|       |       FeatureCardsSection.tsx
+|       |       HeroSection.tsx
+|       |       HomePage.tsx
+|       |       
+|       +---NinjaScrollPage
+|       |       NinjaScrollPage.tsx
+|       |       RecommendationListSection.tsx
+|       |       SearchBarSection.tsx
+|       |       
+|       +---NotFoundPage
+|       |       NotFoundPage.tsx
+|       |       
+|       +---ScrollListPage
+|       |       FilterBarSection.tsx
+|       |       ScrollGridSection.tsx
+|       |       ScrollListPage.tsx
+|       |       
+|       +---ScrollPage
+|       |       ScrollPage.tsx
+|       |       
+|       +---SummonPage
+|       |       SummonPage.tsx
+|       |       
+|       \---TierListPage
+|               FilterBarSection.tsx
+|               NinjaGridSection.tsx
+|               TierListPage.tsx
+|               
+\---导出数据及压缩
+        compress_images.py
+        naruto-data-2026-07-27.json
+        naruto-data-compressed.json

@@ -17,7 +17,7 @@ import type { INinja } from '@/data/ninjas'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 const COUNTDOWN_SECONDS = 60
-const MAX_PUBLIC_BAN = 2
+const MAX_PUBLIC_BAN = 10           // 改为10
 const MAX_SPECTATORS = 5
 
 type Phase = 'waiting' | 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
@@ -64,6 +64,8 @@ interface RoomState {
   publicBan: string[]
   nextGameConfirmed1P: boolean
   nextGameConfirmed2P: boolean
+  startConfirmed1P: boolean       // 新增：1P是否已点击开始
+  startConfirmed2P: boolean       // 新增：2P是否已点击开始
 }
 
 const BAN_STEPS = [
@@ -110,6 +112,8 @@ const emptyRoomState = (player1PId: string): RoomState => ({
   publicBan: [],
   nextGameConfirmed1P: false,
   nextGameConfirmed2P: false,
+  startConfirmed1P: false,
+  startConfirmed2P: false,
 })
 
 export default function BPRoomPage() {
@@ -140,13 +144,12 @@ export default function BPRoomPage() {
   const isSpectator = myRole === 'spectator'
   const isPlayer = myRole === '1P' || myRole === '2P'
 
-  // 用于在订阅回调中获取最新的观众状态
   const isSpectatorRef = useRef(isSpectator)
   useEffect(() => {
     isSpectatorRef.current = isSpectator
   }, [isSpectator])
 
-  // 持久化房间/玩家ID
+  // 持久化
   useEffect(() => {
     if (roomId && myPlayerId) {
       localStorage.setItem('bp_room_id', roomId)
@@ -154,7 +157,7 @@ export default function BPRoomPage() {
     }
   }, [roomId, myPlayerId])
 
-  // 断线重连（支持观众）
+  // 断线重连
   useEffect(() => {
     const savedRoomId = localStorage.getItem('bp_room_id')
     const savedPlayerId = localStorage.getItem('bp_player_id')
@@ -190,14 +193,13 @@ export default function BPRoomPage() {
     }
   }, [])
 
-  // 实时订阅，增加房间删除检测
+  // 实时订阅
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
       .channel(`room_${roomId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
         (payload) => {
-          // 如果房间被删除，自动让观众退出
           if (payload.eventType === 'DELETE') {
             if (isSpectatorRef.current) {
               setRoomId(null)
@@ -309,19 +311,37 @@ export default function BPRoomPage() {
     localStorage.removeItem('bp_player_id')
   }, [roomId, myRole, myPlayerId, roomState])
 
-  const startGame = async () => {
-    if (!roomState || myRole !== '1P') return
-    if (!roomState.player1PId || !roomState.player2PId) return
-    await updateRoom({
-      phase: 'ban',
-      banStep: 0,
-      deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
-      currentPlayer: BAN_STEPS[0].player,
-    })
-  }
+  // 双方确认开始
+  const confirmStart = useCallback(async () => {
+    if (!roomState || !isPlayer || roomState.phase !== 'waiting') return
+    if (isSpectator) return
+    const key = myRole === '1P' ? 'startConfirmed1P' : 'startConfirmed2P'
+    // 如果已经确认则忽略
+    if (roomState[key]) return
+    // 先写入自己的确认状态
+    await updateRoom({ [key]: true })
 
+    // 检查双方是否都已确认
+    const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+    if (data) {
+      const latestState = data.state as RoomState
+      if (latestState.startConfirmed1P && latestState.startConfirmed2P) {
+        // 双方确认，开始游戏
+        await updateRoom({
+          phase: 'ban',
+          banStep: 0,
+          deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+          currentPlayer: BAN_STEPS[0].player,
+          startConfirmed1P: false,
+          startConfirmed2P: false,
+        })
+      }
+    }
+  }, [roomState, isPlayer, myRole, roomId, updateRoom])
+
+  // 公ban：双方均可操作（在等待阶段）
   const togglePublicBan = async (ninjaId: string) => {
-    if (!roomState || myRole !== '1P' || roomState.phase !== 'waiting') return
+    if (!roomState || roomState.phase !== 'waiting' || isSpectator) return
     const current = roomState.publicBan || []
     if (current.includes(ninjaId)) {
       await updateRoom({ publicBan: current.filter(id => id !== ninjaId) })
@@ -330,6 +350,7 @@ export default function BPRoomPage() {
     }
   }
 
+  // 以下核心逻辑与原版一致，未作改动（ban/pick/scrolls/summons/nextGame等）
   const availableNinjas = useMemo(() => {
     if (!roomState) return []
     const publicBanSet = new Set(roomState.publicBan || [])
@@ -369,7 +390,6 @@ export default function BPRoomPage() {
     return false
   }, [roomState, myRole, isPlayer])
 
-  // 超时自动操作
   const handleTimeout = useCallback(() => {
     if (!roomState || !roomId) return
     const { phase } = roomState
@@ -592,6 +612,8 @@ export default function BPRoomPage() {
         publicBan: state.publicBan,
         gameHistory: [...(state.gameHistory || []), newRecord],
         spectators: state.spectators,
+        startConfirmed1P: false,
+        startConfirmed2P: false,
       })
     } finally {
       setTransitioning(false)
@@ -835,6 +857,11 @@ export default function BPRoomPage() {
   if (!roomState || !myRole) return <p className="text-center">加载中...</p>
 
   if (roomState.phase === 'waiting') {
+    const bothPlayersPresent = roomState.player1PId && roomState.player2PId
+    const myStartConfirmed = myRole === '1P' ? roomState.startConfirmed1P : roomState.startConfirmed2P
+    const otherConfirmed = myRole === '1P' ? roomState.startConfirmed2P : roomState.startConfirmed1P
+    const canStart = bothPlayersPresent && !myStartConfirmed
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -853,10 +880,11 @@ export default function BPRoomPage() {
           <div>
             <h3 className="font-semibold text-center mb-2">公 ban（全局禁用忍者）</h3>
             <p className="text-sm text-muted-foreground text-center mb-3">
-              选择最多 {MAX_PUBLIC_BAN} 名忍者，本局对战全程禁用（仅 1P 可设置）
+              双方共同选择最多 {MAX_PUBLIC_BAN} 名忍者，本局对战全程禁用
             </p>
+            {/* 已选公ban展示（双方都可移除） */}
             {roomState.publicBan.length > 0 && (
-              <div className="flex justify-center gap-2 mb-3">
+              <div className="flex flex-wrap justify-center gap-2 mb-3">
                 {roomState.publicBan.map(id => {
                   const ninja = ninjas.find(n => n.id === id)
                   return ninja ? (
@@ -864,7 +892,7 @@ export default function BPRoomPage() {
                       <div className="w-14 h-14 border rounded overflow-hidden">
                         <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
                       </div>
-                      {myRole === '1P' && !isSpectator && (
+                      {!isSpectator && (
                         <div
                           className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => togglePublicBan(id)}
@@ -877,52 +905,63 @@ export default function BPRoomPage() {
                 })}
               </div>
             )}
-            {myRole === '1P' && !isSpectator && roomState.publicBan.length < MAX_PUBLIC_BAN && (
-              <div className="relative max-w-md mx-auto">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={publicBanSearch}
-                  onChange={e => setPublicBanSearch(e.target.value)}
-                  placeholder="搜索忍者添加公 ban..."
-                  className="pl-9 pr-9"
-                />
-                {publicBanSearch && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setPublicBanSearch('')}><X className="h-4 w-4" /></Button>}
-              </div>
-            )}
-            {myRole === '1P' && !isSpectator && roomState.publicBan.length < MAX_PUBLIC_BAN && (
-              <div className="max-h-48 overflow-y-auto space-y-3 mt-2">
-                {publicBanNinjas.map(group => (
-                  <div key={group.tier}>
-                    <Badge variant="outline" className="mb-1 text-sm font-bold">{group.tier}</Badge>
-                    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                      {group.ninjas.map(ninja => (
-                        <div
-                          key={ninja.id}
-                          className="cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-muted/50 transition-colors"
-                          onClick={() => togglePublicBan(ninja.id)}
-                        >
-                          <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
-                            <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+            {/* 搜索添加公ban（双方皆可） */}
+            {!isSpectator && roomState.publicBan.length < MAX_PUBLIC_BAN && (
+              <>
+                <div className="relative max-w-md mx-auto mt-3">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={publicBanSearch}
+                    onChange={e => setPublicBanSearch(e.target.value)}
+                    placeholder="搜索忍者添加公 ban..."
+                    className="pl-9 pr-9"
+                  />
+                  {publicBanSearch && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setPublicBanSearch('')}><X className="h-4 w-4" /></Button>}
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-3 mt-2">
+                  {publicBanNinjas.map(group => (
+                    <div key={group.tier}>
+                      <Badge variant="outline" className="mb-1 text-sm font-bold">{group.tier}</Badge>
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        {group.ninjas.map(ninja => (
+                          <div
+                            key={ninja.id}
+                            className="cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-muted/50 transition-colors"
+                            onClick={() => togglePublicBan(ninja.id)}
+                          >
+                            <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
+            )}
+            {/* 观众模式：已满提示 */}
+            {isSpectator && roomState.publicBan.length >= MAX_PUBLIC_BAN && (
+              <p className="text-sm text-muted-foreground text-center">公ban已达上限</p>
             )}
           </div>
 
           <div className="text-center space-y-4">
-            <h3 className="font-semibold text-lg">等待双方就位...</h3>
-            {!roomState.player1PId || !roomState.player2PId ? (
+            <h3 className="font-semibold text-lg">等待双方就位…</h3>
+            {!bothPlayersPresent ? (
               <p className="text-muted-foreground">等待玩家加入</p>
-            ) : myRole === '1P' && !isSpectator ? (
-              <Button onClick={startGame}>开始 BP</Button>
             ) : isSpectator ? (
-              <p className="text-muted-foreground">观众等待对局开始</p>
+              <p className="text-muted-foreground">观众等待双方确认开始对局</p>
             ) : (
-              <p className="text-muted-foreground">等待 1P 开始对局</p>
+              <div className="space-y-2">
+                {myStartConfirmed ? (
+                  <p className="text-muted-foreground">已确认开始，等待对手确认…</p>
+                ) : (
+                  <Button onClick={confirmStart} className="w-48">开始 BP</Button>
+                )}
+                {roomState.startConfirmed1P && <Badge variant="default" className="mr-2">1P 已就绪</Badge>}
+                {roomState.startConfirmed2P && <Badge variant="default">2P 已就绪</Badge>}
+              </div>
             )}
           </div>
         </Card>

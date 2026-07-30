@@ -1,109 +1,115 @@
-# 项目技术规范
+# 火影忍者辅助助手 (Naruto Helper)
+
+一个面向《火影忍者手游》（Naruto Mobile）玩家的工具型 Web 应用，提供忍者强度排行、密卷/通灵搭配推荐、武斗赛 BP 模拟与联机房间、娱乐模式等功能。
+
+## 在线访问
+
+🔗 [https://jiuyue12138OVO.github.io/naruto-helper/](https://jiuyue12138OVO.github.io/naruto-helper/)
 
 ## 技术栈
 
-- 前端: React 19 + TypeScript
-- 样式: Tailwind CSS v4
-- UI 组件: shadcn/ui `import { Button } from "@/components/ui/button";`
-- 图标: lucide-react `import { SearchIcon } from "lucide-react";`
-- 图表: echarts-for-react `import ReactECharts from "echarts-for-react";`
-- 动画: framer-motion `import { motion } from "framer-motion";`
-- 路由: react-router-dom `import { Link, useNavigate } from "react-router-dom";`
+- **前端框架**：React 19 + TypeScript
+- **构建工具**：Vite 8
+- **样式方案**：Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com/)
+- **路由**：react-router-dom (HashRouter)
+- **动画**：framer-motion
+- **数据持久化**：localStorage（自定义 DataContext）+ Supabase Realtime（联机房间）
+- **部署**：GitHub Pages (gh-pages 分支)
 
----
+## 主要功能
 
-## 目录结构
+### 1. 首页
+壁纸轮播、功能卡片入口、版本号显示。
+
+### 2. 忍者强度排行
+- 按梯度分组展示，支持梯度、评级、定位标签筛选（包含/排除）
+- 动态趋势标记（升降箭头），盲选位标注
+- 详情弹窗查看基础信息及定位标签
+
+### 3. 密卷 & 通灵兽
+- 密卷大全：支持搜索，详情弹窗查看适配忍者
+- 忍者密卷推荐：按忍者查密卷 / 按密卷查忍者
+- 通灵兽大全：图片墙、搜索、详情弹窗
+
+### 4. 武斗赛 (BP 模拟 & 联机)
+- **克制关系**：查看忍者克制/被克制关系、盲选位标识、3D 克制关系图入口
+- **模拟 BP**：完整的本地 Ban/Pick/密卷/通灵流程，支持身份选择、多小局换边、历史记录
+- **武斗房间**：基于 Supabase 实时数据库的联机 BP，支持断线重连、60s 倒计时、观众席（最多 5 人，可看当前阵容和过往小局记录）
+
+### 5. 娱乐模式
+随机忍者、随机阵容抽取，支持梯度/评级/定位标签过滤，可排除忍者/密卷，设置持久化。
+
+### 6. 本地数据管理（默认隐藏）
+后台管理全部数据：忍者（含盲选位设置）、密卷、通灵兽、武斗赛克制关系（含分数滑块），支持数据导出/导入。
+
+## 项目结构
 
 ```
-src/
-├── index.tsx            # 入口（勿修改）
-├── app.tsx              # 路由配置（仅在 <Routes> 内增删 <Route>）
-├── index.css            # 全局样式 + 主题变量
-├── components/          # 基础 UI 组件（禁止存放业务组件）
-│   ├── layout.tsx       # 全局布局容器（含 <Outlet />）
-│   └── ui/              # shadcn/ui 内置组件（勿修改）
-├── pages/               # 页面模块（每个页面一个目录）
-│   ├── <PageName>/      # 页面目录示例
-│   │   ├── PageName.tsx        # 页面入口文件与目录同名
-│   │   └── components/         # 页面专属组件
-│   └── NotFoundPage/
-│       └── NotFoundPage.tsx
-├── hooks/               # 自定义 Hooks
-└── lib/                 # 工具函数（cn() 等）
-
-shared/
-└── static/              # 静态资源
-    ├── data/            # 数据文件（JSON）
-    └── images/          # 图片资源
+.
+├── public/                     # 静态公共资源（favicon、404页面等）
+├── shared/
+│   └── static/images/          # 静态图片（未在当前版本中使用）
+├── src/
+│   ├── app.tsx                 # 路由配置 (HashRouter)
+│   ├── index.tsx               # 应用入口
+│   ├── version.ts              # 数据版本号
+│   ├── supabase.ts             # Supabase 客户端配置
+│   ├── components/             # 通用组件 (Header, Layout, ImageUpload 等)
+│   │   └── ui/                 # shadcn/ui 组件
+│   ├── contexts/
+│   │   └── DataContext.tsx     # 全局数据状态 (按需加载、localStorage 持久化)
+│   ├── data/                   # 静态数据定义 (忍者、密卷、通灵、BP等)
+│   ├── hooks/                  # 自定义 Hooks
+│   ├── lib/                    # 工具函数
+│   └── pages/                  # 所有页面
+│       ├── HomePage/           # 首页
+│       ├── TierListPage/       # 忍者强度排行
+│       ├── ScrollPage/         # 密卷 & 忍者密卷推荐 (合二为一)
+│       ├── SummonPage/         # 通灵兽大全
+│       ├── BattleBPPage/       # 武斗赛 (克制关系、模拟BP、联机房间)
+│       ├── EntertainmentPage/  # 娱乐模式
+│       ├── DataManagementPage/ # 数据管理
+│       ├── CounterGraph3DPage/ # 3D 克制关系图
+│       ├── NinjaScrollPage/    # 忍者密卷推荐 (兼容页面)
+│       ├── ScrollListPage/     # 密卷大全 (兼容页面)
+│       ├── ExamplePage/        # 示例页面
+│       └── NotFoundPage/       # 404 页面
+├── scripts/                    # 构建/开发脚本
+├── .github/workflows/          # GitHub Actions 部署配置
+├── index.html                  # HTML 入口 (含版本检测、Umami 统计)
+└── vite.config.ts              # Vite 配置 (包含路径别名)
 ```
 
----
+## 本地开发
 
-## 模板初始状态
+```bash
+# 安装依赖
+npm install
 
-- `app.tsx` 首页路由指向平台内置的 `<Welcome />` 组件
-- 开发时需将 `index` 路由替换为业务首页，并在 `pages/` 下创建对应页面目录
-- `layout.tsx` 为空壳容器（仅 `<Outlet />`），需根据需求实现导航和布局
+# 启动开发服务器 (默认 http://localhost:5173)
+npm run dev
 
----
-
-## 禁止修改的文件
-
-| 文件 | 原因 |
-|------|------|
-| `src/index.tsx` | Provider 层级 + 样式引入，由模板管理 |
-| `src/components/ui/*` | shadcn/ui 内置组件，版本锁定 |
-
----
-
-## 文件放置规则
-
-| 内容类型 | 放置位置 |
-|---------|---------|
-| 新页面 | `src/pages/<PageName>/PageName.tsx` |
-| 页面专属组件 | `src/pages/<PageName>/components/` |
-| 自定义 Hooks | `src/hooks/` |
-| 工具函数 | `src/lib/` |
-| 静态数据文件 | `shared/static/data/` |
-| 静态图片 | `shared/static/images/` |
-
----
-
-## 导入路径
-
-```typescript
-// @/ 别名 → src/
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-
-// @shared/ 别名 → shared/
-import heroImage from "@shared/static/images/hero.png";
-import configData from "@shared/static/config.json";
+# 构建生产版本
+npm run build
 ```
 
+## 部署
+
+项目通过 GitHub Actions 自动部署到 GitHub Pages。  
+路由使用 **HashRouter** 避免刷新 404 问题。  
+部署分支：`gh-pages`。
+
+## 数据更新与版本管理
+
+应用的数据源分为两部分：
+1. **静态数据**：`src/data/*.ts` 中的 TypeScript 文件，作为初始默认值。
+2. **用户自定义数据**：存储在浏览器 localStorage 中，通过 `DataContext` 管理。
+
+当静态数据有更新时，需要修改：
+- `src/version.ts` 中的 `DATA_VERSION`
+
+版本变化后，浏览器会自动清除旧的 localStorage 缓存并加载最新数据。
+
 ---
 
-## 路由配置
-
-- 新增页面需在 `src/app.tsx` 的 `<Routes>` 内注册 `<Route>`
-- `BrowserRouter` 已在 `index.tsx` 中配置，`app.tsx` 中**禁止**再包裹 Router
-
----
-
-## 主题变量
-
-主题色定义在 `src/index.css`，通过 `:root` CSS 变量 + `@theme inline` 注册到 Tailwind。
-
-| 用途 | Tailwind 类 | CSS 变量 |
-|------|------------|----------|
-| 页面背景 | `bg-background` | `--background` |
-| 主文本 | `text-foreground` | `--foreground` |
-| 卡片背景 | `bg-card` | `--card` |
-| 次要文本 | `text-muted-foreground` | `--muted-foreground` |
-| 主色 | `bg-primary` / `text-primary` | `--primary` |
-| 强调色 | `bg-accent` | `--accent` |
-| 边框 | `border-border` | `--border` |
-| 危险色 | `text-destructive` | `--destructive` |
-| 图表色 | `bg-chart-1` ~ `bg-chart-5` | `--chart-1` ~ `--chart-5` |
-
-HSL 格式使用**空格分隔**：`--primary: hsl(150 60% 40%);`
+**免责声明**：本项目为个人学习/辅助工具，忍者强度排行及推荐基于个人理解，仅供参考。素材版权归原作者/官方所有。

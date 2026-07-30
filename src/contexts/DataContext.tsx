@@ -67,6 +67,7 @@ interface DataContextType {
   ninjaTags: string[]
   counters: IBPCounter[]
   blindPickOrder: string[]
+  loadingCount: number                    // 正在加载的数据模块数量
   setBlindPickOrder: (order: string[] | ((prev: string[]) => string[])) => void
   ensureNinjas: () => Promise<void>
   ensureScrolls: () => Promise<void>
@@ -111,12 +112,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
   const [counters, setCounters] = useState<IBPCounter[]>(() => loadFromStorage(COUNTERS_KEY, []))
 
-  // 修改初始化：优先读取 localStorage，若无则使用导入的默认值
   const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() => {
     const stored = loadFromStorage(BLIND_PICK_ORDER_KEY, null)
     if (stored !== null) return stored
     return DEFAULT_BLIND_PICK_ORDER
   })
+
+  // 正在进行的异步加载计数器
+  const [loadingCount, setLoadingCount] = useState(0)
 
   const loadingRef = useRef({
     ninjas: false,
@@ -131,67 +134,83 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToStorage(COUNTERS_KEY, counters) }, [counters])
   useEffect(() => { saveToStorage(BLIND_PICK_ORDER_KEY, blindPickOrder) }, [blindPickOrder])
 
-  // --- Async data loaders ---
+  // 通用加载包装器：仅在数据为空且未在加载中时执行动态导入，同时更新 loadingCount
+  const wrapLoader = useCallback(async (key: keyof typeof loadingRef.current, loader: () => Promise<void>) => {
+    if (loadingRef.current[key]) return
+    loadingRef.current[key] = true
+    setLoadingCount(prev => prev + 1)
+    try {
+      await loader()
+    } finally {
+      setLoadingCount(prev => prev - 1)
+    }
+  }, [])
+
   const ensureNinjas = useCallback(async () => {
     if (ninjas.length > 0 || loadingRef.current.ninjas) return
-    loadingRef.current.ninjas = true
-    const { MOCK_NINJAS } = await import('@/data/ninjas')
-    setNinjas(prev => {
-      if (prev.length > 0) return prev
-      const data = MOCK_NINJAS.map(n => ({
-        ...n,
-        rating: n.rating || 'B',
-        tags: n.tags || [],
-        blindPick: n.blindPick || false,
-      }))
-      saveToStorage(NINJAS_KEY, data)
-      return data
+    await wrapLoader('ninjas', async () => {
+      const { MOCK_NINJAS } = await import('@/data/ninjas')
+      setNinjas(prev => {
+        if (prev.length > 0) return prev
+        const data = MOCK_NINJAS.map(n => ({
+          ...n,
+          rating: n.rating || 'B',
+          tags: n.tags || [],
+          blindPick: n.blindPick || false,
+        }))
+        saveToStorage(NINJAS_KEY, data)
+        return data
+      })
     })
-  }, [ninjas.length])
+  }, [ninjas.length, wrapLoader])
 
   const ensureScrolls = useCallback(async () => {
     if (scrolls.length > 0 || loadingRef.current.scrolls) return
-    loadingRef.current.scrolls = true
-    const { MOCK_SCROLLS } = await import('@/data/scrolls')
-    setScrolls(prev => {
-      if (prev.length > 0) return prev
-      saveToStorage(SCROLLS_KEY, MOCK_SCROLLS)
-      return MOCK_SCROLLS
+    await wrapLoader('scrolls', async () => {
+      const { MOCK_SCROLLS } = await import('@/data/scrolls')
+      setScrolls(prev => {
+        if (prev.length > 0) return prev
+        saveToStorage(SCROLLS_KEY, MOCK_SCROLLS)
+        return MOCK_SCROLLS
+      })
     })
-  }, [scrolls.length])
+  }, [scrolls.length, wrapLoader])
 
   const ensureRecommendations = useCallback(async () => {
     if (recommendations.length > 0 || loadingRef.current.recs) return
-    loadingRef.current.recs = true
-    const { MOCK_RECOMMENDATIONS } = await import('@/data/recommendations')
-    setRecommendations(prev => {
-      if (prev.length > 0) return prev
-      saveToStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
-      return MOCK_RECOMMENDATIONS
+    await wrapLoader('recs', async () => {
+      const { MOCK_RECOMMENDATIONS } = await import('@/data/recommendations')
+      setRecommendations(prev => {
+        if (prev.length > 0) return prev
+        saveToStorage(RECS_KEY, MOCK_RECOMMENDATIONS)
+        return MOCK_RECOMMENDATIONS
+      })
     })
-  }, [recommendations.length])
+  }, [recommendations.length, wrapLoader])
 
   const ensureSummons = useCallback(async () => {
     if (summons.length > 0 || loadingRef.current.summons) return
-    loadingRef.current.summons = true
-    const { MOCK_SUMMONS } = await import('@/data/summons')
-    setSummons(prev => {
-      if (prev.length > 0) return prev
-      saveToStorage(SUMMONS_KEY, MOCK_SUMMONS)
-      return MOCK_SUMMONS
+    await wrapLoader('summons', async () => {
+      const { MOCK_SUMMONS } = await import('@/data/summons')
+      setSummons(prev => {
+        if (prev.length > 0) return prev
+        saveToStorage(SUMMONS_KEY, MOCK_SUMMONS)
+        return MOCK_SUMMONS
+      })
     })
-  }, [summons.length])
+  }, [summons.length, wrapLoader])
 
   const ensureCounters = useCallback(async () => {
     if (counters.length > 0 || loadingRef.current.counters) return
-    loadingRef.current.counters = true
-    const { MOCK_COUNTERS } = await import('@/data/battleBp')
-    setCounters(prev => {
-      if (prev.length > 0) return prev
-      saveToStorage(COUNTERS_KEY, MOCK_COUNTERS)
-      return MOCK_COUNTERS
+    await wrapLoader('counters', async () => {
+      const { MOCK_COUNTERS } = await import('@/data/battleBp')
+      setCounters(prev => {
+        if (prev.length > 0) return prev
+        saveToStorage(COUNTERS_KEY, MOCK_COUNTERS)
+        return MOCK_COUNTERS
+      })
     })
-  }, [counters.length])
+  }, [counters.length, wrapLoader])
 
   // --- Ninja CRUD ---
   const addNinja = useCallback((ninja: INinja) => {
@@ -350,15 +369,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSummons([])
     setNinjaTags(DEFAULT_NINJA_TAGS)
     setCounters([])
-    setBlindPickOrder(DEFAULT_BLIND_PICK_ORDER)   // 恢复默认值
+    setBlindPickOrder(DEFAULT_BLIND_PICK_ORDER)
     saveToStorage(NINJAS_KEY, [])
     saveToStorage(SCROLLS_KEY, [])
     saveToStorage(RECS_KEY, [])
     saveToStorage(SUMMONS_KEY, [])
     saveToStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
     saveToStorage(COUNTERS_KEY, [])
-    saveToStorage(BLIND_PICK_ORDER_KEY, DEFAULT_BLIND_PICK_ORDER) // 保存默认值
+    saveToStorage(BLIND_PICK_ORDER_KEY, DEFAULT_BLIND_PICK_ORDER)
     loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false }
+    setLoadingCount(0)
   }, [])
 
   return (
@@ -371,6 +391,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ninjaTags,
         counters,
         blindPickOrder,
+        loadingCount,
         setBlindPickOrder,
         ensureNinjas,
         ensureScrolls,
