@@ -3346,5 +3346,46 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 3
         }
       ]
+    },
+    {
+      "id": "1785510825724",
+      "ninjaId": "1785510738512",
+      "ninjaName": "干柿鬼鲛【狂野鲛鲨】",
+      "scrolls": [
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1785510968105",
+      "ninjaId": "1785510624612",
+      "ninjaName": "迈特凯【钢铁之躯】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1785510977004",
+      "ninjaId": "1785510479412",
+      "ninjaName": "自来也【仙人模式】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        }
+      ]
     }
   ]
