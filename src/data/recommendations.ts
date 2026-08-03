@@ -262,6 +262,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 3
         }
       ]
     },
@@ -3385,6 +3390,23 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1785664754694",
+      "ninjaId": "1785664729438",
+      "ninjaName": "大野木【侠影江湖】",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783350438746",
+          "scrollName": "通灵·操手里剑",
+          "priority": 2
         }
       ]
     }
