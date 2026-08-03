@@ -3409,5 +3409,27 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         }
       ]
+    },
+    {
+      "id": "1785736080690",
+      "ninjaId": "1785725206087",
+      "ninjaName": "李洛克【截拳宗师】",
+      "scrolls": [
+        {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349062619",
+          "scrollName": "通灵·返手里剑",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349733336",
+          "scrollName": "冰遁·燕吹雪",
+          "priority": 3
+        }
+      ]
     }
   ]
