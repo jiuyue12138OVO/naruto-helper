@@ -1494,5 +1494,15 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterNinjaScores": {
         "1783309208477": 0
       }
+    },
+    {
+      "id": "1785756941156",
+      "ninjaId": "1783309162593",
+      "counterNinjaIds": [],
+      "counterScrollIds": [],
+      "counterSummonIds": [
+        "1783589344138"
+      ],
+      "counterNinjaScores": {}
     }
   ]

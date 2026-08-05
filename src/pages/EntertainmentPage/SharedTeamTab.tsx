@@ -11,32 +11,28 @@ import type { IScroll } from '@/data/scrolls'
 interface SharedTeamTabProps {
   eligibleNinjas: INinja[]
   scrolls: IScroll[]
-  disabledScrollIds: Set<string>
   randomScrollEnabled: boolean
-  getNinjaScrollIds: (ninjaId: string) => string[]
+  getFilteredScrolls: (ninjaId: string) => string[]
 }
 
 export default function SharedTeamTab({
   eligibleNinjas,
   scrolls,
-  disabledScrollIds,
   randomScrollEnabled,
-  getNinjaScrollIds,
+  getFilteredScrolls,
 }: SharedTeamTabProps) {
   const [teamResult, setTeamResult] = useState<INinja[]>([])
   const [teamScrolls, setTeamScrolls] = useState<(string | null)[]>([])
   const [isTeamRolling, setIsTeamRolling] = useState(false)
 
   const assignScrolls = (ninjas: INinja[]) => {
-    if (!randomScrollEnabled) return []
-    // 按适配密卷数量升序排列，保证数量少的先选
+    if (!randomScrollEnabled || ninjas.length !== 3) return [null, null, null]
     const withCounts = ninjas.map((n, idx) => ({
       idx,
-      ninja: n,
-      available: getNinjaScrollIds(n.id).filter(id => !disabledScrollIds.has(id)),
+      available: getFilteredScrolls(n.id),
     }))
     const sorted = [...withCounts].sort((a, b) => a.available.length - b.available.length)
-    const assigned: (string | null)[] = new Array(3).fill(null)
+    const assigned: (string | null)[] = [null, null, null]
     const used = new Set<string>()
     sorted.forEach(({ idx, available }) => {
       const filtered = available.filter(id => !used.has(id))
@@ -71,7 +67,7 @@ export default function SharedTeamTab({
         setIsTeamRolling(false)
       }
     }, interval)
-  }, [eligibleNinjas, randomScrollEnabled, getNinjaScrollIds, disabledScrollIds])
+  }, [eligibleNinjas, randomScrollEnabled, getFilteredScrolls])
 
   return (
     <>

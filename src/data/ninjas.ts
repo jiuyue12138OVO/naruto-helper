@@ -356,7 +356,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "拉扯",
         "高机动性",
-        "大招特殊情况可接"
+        "大招特殊情况可接",
+        "纯抓"
       ],
       "blindPick": true
     },
@@ -1497,7 +1498,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "破霸体",
         "大招可接",
         "防反",
-        "瞬发"
+        "瞬发",
+        "纯抓"
       ],
       "blindPick": true
     },
@@ -3098,7 +3100,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1785316064800",
       "name": "千手柱间【侠影江湖】",
-      "tier": "天王",
+      "tier": "伪天王",
       "rating": "A",
       "tags": [
         "抓取",
@@ -3110,11 +3112,11 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "位移",
         "防反",
-        "瞬发",
-        "高空优势"
+        "高空优势",
+        "乱闪"
       ],
       "imageUrl": "data:image/webp;base64,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",
-      "trend": "up",
+      "trend": "down",
       "blindPick": true
     },
     {

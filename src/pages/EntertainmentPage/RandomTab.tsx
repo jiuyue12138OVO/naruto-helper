@@ -1,22 +1,24 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Shuffle, Dice5, ChevronDown, ChevronUp, Settings, X, Search, Info } from 'lucide-react'
+import { Shuffle, ChevronDown, ChevronUp, Settings, Info } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 import SharedTeamTab from './SharedTeamTab'
 import RandomTeamTab from './RandomTeamTab'
+import SettingsDialog from './SettingsDialog'
 import type { INinja } from '@/data/ninjas'
 
 const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
 const RATING_OPTIONS = ['S', 'A', 'B', 'C']
 const DISABLED_NINJAS_KEY = 'entertainment_disabled_ninjas'
 const DISABLED_SCROLLS_KEY = 'entertainment_disabled_scrolls'
+const SELECTED_NINJAS_KEY = 'entertainment_selected_ninjas'
+const SELECTED_SCROLLS_KEY = 'entertainment_selected_scrolls'
+const MODE_KEY = 'entertainment_mode'
 
 type FilterStatus = 'include' | 'exclude' | undefined
 
@@ -43,89 +45,97 @@ export default function RandomTab() {
 
   // 设置弹窗
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settingsTab, setSettingsTab] = useState('ninjas')
+
+  // 模式 (禁用/选用)
+  const [mode, setMode] = useState<'disable' | 'select'>(() => {
+    try {
+      const saved = localStorage.getItem(MODE_KEY)
+      return saved === 'select' ? 'select' : 'disable'
+    } catch { return 'disable' }
+  })
 
   // 禁用忍者
   const [disabledNinjaIds, setDisabledNinjaIds] = useState<Set<string>>(() => {
-    try {
-      const saved = localStorage.getItem(DISABLED_NINJAS_KEY)
-      if (saved) {
-        const arr = JSON.parse(saved)
-        if (Array.isArray(arr)) return new Set<string>(arr)
-      }
-    } catch {}
-    return new Set<string>()
+    try { const arr = JSON.parse(localStorage.getItem(DISABLED_NINJAS_KEY) || '[]'); return new Set(arr) } catch { return new Set() }
   })
 
   // 禁用密卷
   const [disabledScrollIds, setDisabledScrollIds] = useState<Set<string>>(() => {
-    try {
-      const saved = localStorage.getItem(DISABLED_SCROLLS_KEY)
-      if (saved) {
-        const arr = JSON.parse(saved)
-        if (Array.isArray(arr)) return new Set<string>(arr)
-      }
-    } catch {}
-    return new Set<string>()
+    try { const arr = JSON.parse(localStorage.getItem(DISABLED_SCROLLS_KEY) || '[]'); return new Set(arr) } catch { return new Set() }
   })
 
-  useEffect(() => {
-    localStorage.setItem(DISABLED_NINJAS_KEY, JSON.stringify([...disabledNinjaIds]))
-  }, [disabledNinjaIds])
+  // 选用忍者
+  const [selectedNinjaIds, setSelectedNinjaIds] = useState<Set<string>>(() => {
+    try { const arr = JSON.parse(localStorage.getItem(SELECTED_NINJAS_KEY) || '[]'); return new Set(arr) } catch { return new Set() }
+  })
 
-  useEffect(() => {
-    localStorage.setItem(DISABLED_SCROLLS_KEY, JSON.stringify([...disabledScrollIds]))
-  }, [disabledScrollIds])
+  // 选用密卷
+  const [selectedScrollIds, setSelectedScrollIds] = useState<Set<string>>(() => {
+    try { const arr = JSON.parse(localStorage.getItem(SELECTED_SCROLLS_KEY) || '[]'); return new Set(arr) } catch { return new Set() }
+  })
 
-  const [settingsSearch, setSettingsSearch] = useState('')
+  // 持久化
+  useEffect(() => { localStorage.setItem(DISABLED_NINJAS_KEY, JSON.stringify([...disabledNinjaIds])) }, [disabledNinjaIds])
+  useEffect(() => { localStorage.setItem(DISABLED_SCROLLS_KEY, JSON.stringify([...disabledScrollIds])) }, [disabledScrollIds])
+  useEffect(() => { localStorage.setItem(SELECTED_NINJAS_KEY, JSON.stringify([...selectedNinjaIds])) }, [selectedNinjaIds])
+  useEffect(() => { localStorage.setItem(SELECTED_SCROLLS_KEY, JSON.stringify([...selectedScrollIds])) }, [selectedScrollIds])
+  useEffect(() => { localStorage.setItem(MODE_KEY, mode) }, [mode])
+
   const [teamMode, setTeamMode] = useState<'shared' | 'individual'>('shared')
   const [activeResultTab, setActiveResultTab] = useState('random-ninja')
   const [randomScrollEnabled, setRandomScrollEnabled] = useState(false)
 
-  // 过滤设置中的忍者/密卷
-  const filteredSettingsNinjas = useMemo(() => {
-    if (!settingsSearch.trim()) return ninjas
-    const kw = settingsSearch.toLowerCase()
-    return ninjas.filter(n => n.name.toLowerCase().includes(kw))
-  }, [ninjas, settingsSearch])
+  const handleModeChange = (newMode: 'disable' | 'select') => setMode(newMode)
 
-  const groupedSettingsNinjas = useMemo(() => {
-    const groups: { tier: string; ninjas: INinja[] }[] = []
-    TIER_OPTIONS.forEach(tier => {
-      const tierNinjas = filteredSettingsNinjas.filter(n => n.tier === tier)
-      if (tierNinjas.length > 0) groups.push({ tier, ninjas: tierNinjas })
+  const getNinjaScrollIds = useCallback((ninjaId: string) => {
+    const rec = recommendations.find(r => r.ninjaId === ninjaId)
+    return rec ? rec.scrolls.map(s => s.scrollId) : []
+  }, [recommendations])
+
+  // 符合条件的忍者（经过模式筛选及其他条件过滤）
+  const eligibleNinjas = useMemo(() => {
+    const filtered = ninjas.filter(n => {
+      if (mode === 'disable') {
+        if (disabledNinjaIds.has(n.id)) return false
+      } else {
+        if (selectedNinjaIds.size > 0 && !selectedNinjaIds.has(n.id)) return false
+      }
+
+      const incTiers = Object.keys(tierStatus).filter(k => tierStatus[k] === 'include')
+      const excTiers = Object.keys(tierStatus).filter(k => tierStatus[k] === 'exclude')
+      const incRatings = Object.keys(ratingStatus).filter(k => ratingStatus[k] === 'include')
+      const excRatings = Object.keys(ratingStatus).filter(k => ratingStatus[k] === 'exclude')
+      const incTags = Object.keys(tagStatus).filter(k => tagStatus[k] === 'include')
+      const excTags = Object.keys(tagStatus).filter(k => tagStatus[k] === 'exclude')
+      const incScrolls = Object.keys(scrollStatus).filter(k => scrollStatus[k] === 'include')
+      const excScrolls = Object.keys(scrollStatus).filter(k => scrollStatus[k] === 'exclude')
+
+      if (incTiers.length > 0 && !incTiers.includes(n.tier)) return false
+      if (excTiers.length > 0 && excTiers.includes(n.tier)) return false
+      if (incRatings.length > 0 && !incRatings.includes(n.rating)) return false
+      if (excRatings.length > 0 && excRatings.includes(n.rating)) return false
+      if (incTags.length > 0 && !incTags.every(tag => n.tags?.includes(tag))) return false
+      if (excTags.length > 0 && excTags.some(tag => n.tags?.includes(tag))) return false
+
+      const ninjaScrolls = getNinjaScrollIds(n.id)
+      if (incScrolls.length > 0 && !incScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+      if (excScrolls.length > 0 && excScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+
+      return true
     })
-    return groups
-  }, [filteredSettingsNinjas])
+    return filtered
+  }, [ninjas, mode, disabledNinjaIds, selectedNinjaIds, tierStatus, ratingStatus, tagStatus, scrollStatus, getNinjaScrollIds])
 
-  const filteredSettingsScrolls = useMemo(() => {
-    if (!settingsSearch.trim()) return scrolls
-    const kw = settingsSearch.toLowerCase()
-    return scrolls.filter(s => s.name.toLowerCase().includes(kw))
-  }, [scrolls, settingsSearch])
+  const getFilteredScrolls = useCallback((ninjaId: string) => {
+    const allScrolls = getNinjaScrollIds(ninjaId)
+    if (mode === 'disable') {
+      return allScrolls.filter(id => !disabledScrollIds.has(id))
+    } else {
+      if (selectedScrollIds.size === 0) return allScrolls
+      return allScrolls.filter(id => selectedScrollIds.has(id))
+    }
+  }, [getNinjaScrollIds, mode, disabledScrollIds, selectedScrollIds])
 
-  const toggleDisabledNinja = (id: string) => {
-    setDisabledNinjaIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const toggleDisabledScroll = (id: string) => {
-    setDisabledScrollIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const clearDisabledNinjas = () => setDisabledNinjaIds(new Set())
-  const clearDisabledScrolls = () => setDisabledScrollIds(new Set())
-
-  // 筛选逻辑
   const filterItems = (statusMap: Record<string, FilterStatus>, type: FilterStatus) =>
     Object.entries(statusMap).filter(([_, v]) => v === type).map(([k]) => k)
 
@@ -138,33 +148,6 @@ export default function RandomTab() {
   const includedScrolls = useMemo(() => filterItems(scrollStatus, 'include'), [scrollStatus])
   const excludedScrolls = useMemo(() => filterItems(scrollStatus, 'exclude'), [scrollStatus])
 
-  const getNinjaScrollIds = useCallback(
-    (ninjaId: string): string[] => {
-      const rec = recommendations.find(r => r.ninjaId === ninjaId)
-      if (!rec) return []
-      return rec.scrolls.map(s => s.scrollId)
-    },
-    [recommendations]
-  )
-
-  const eligibleNinjas = useMemo(() => {
-    return ninjas.filter(n => {
-      if (disabledNinjaIds.has(n.id)) return false
-      if (includedTiers.length > 0 && !includedTiers.includes(n.tier)) return false
-      if (excludedTiers.length > 0 && excludedTiers.includes(n.tier)) return false
-      if (includedRatings.length > 0 && !includedRatings.includes(n.rating)) return false
-      if (excludedRatings.length > 0 && excludedRatings.includes(n.rating)) return false
-      if (includedTags.length > 0 && !includedTags.every(tag => n.tags?.includes(tag))) return false
-      if (excludedTags.length > 0 && excludedTags.some(tag => n.tags?.includes(tag))) return false
-      if (includedScrolls.length > 0 || excludedScrolls.length > 0) {
-        const ninjaScrolls = getNinjaScrollIds(n.id)
-        if (includedScrolls.length > 0 && !includedScrolls.some(sid => ninjaScrolls.includes(sid))) return false
-        if (excludedScrolls.length > 0 && excludedScrolls.some(sid => ninjaScrolls.includes(sid))) return false
-      }
-      return true
-    })
-  }, [ninjas, disabledNinjaIds, includedTiers, excludedTiers, includedRatings, excludedRatings, includedTags, excludedTags, includedScrolls, excludedScrolls, getNinjaScrollIds])
-
   const handleRandom = useCallback(() => {
     if (eligibleNinjas.length === 0) return
     setIsRolling(true)
@@ -174,43 +157,27 @@ export default function RandomTab() {
     let count = 0
     const timer = setInterval(() => {
       const randomIdx = Math.floor(Math.random() * eligibleNinjas.length)
-      setResult(eligibleNinjas[randomIdx])
+      const ninja = eligibleNinjas[randomIdx]
+      setResult(ninja)
       if (randomScrollEnabled) {
-        const ninja = eligibleNinjas[randomIdx]
-        const scrollIds = getNinjaScrollIds(ninja.id).filter(id => !disabledScrollIds.has(id))
-        if (scrollIds.length > 0) {
-          setResultScroll(scrollIds[Math.floor(Math.random() * scrollIds.length)])
-        } else {
-          setResultScroll(null)
-        }
-      } else {
-        setResultScroll(null)
-      }
+        const scrollIds = getFilteredScrolls(ninja.id)
+        setResultScroll(scrollIds.length ? scrollIds[Math.floor(Math.random() * scrollIds.length)] : null)
+      } else setResultScroll(null)
       count++
       if (count >= steps) {
         clearInterval(timer)
-        const finalIdx = Math.floor(Math.random() * eligibleNinjas.length)
-        const finalNinja = eligibleNinjas[finalIdx]
+        const finalNinja = eligibleNinjas[Math.floor(Math.random() * eligibleNinjas.length)]
         setResult(finalNinja)
         if (randomScrollEnabled) {
-          const scrollIds = getNinjaScrollIds(finalNinja.id).filter(id => !disabledScrollIds.has(id))
-          if (scrollIds.length > 0) {
-            setResultScroll(scrollIds[Math.floor(Math.random() * scrollIds.length)])
-          } else {
-            setResultScroll(null)
-          }
-        } else {
-          setResultScroll(null)
+          const scrollIds = getFilteredScrolls(finalNinja.id)
+          setResultScroll(scrollIds.length ? scrollIds[Math.floor(Math.random() * scrollIds.length)] : null)
         }
         setIsRolling(false)
       }
     }, interval)
-  }, [eligibleNinjas, randomScrollEnabled, getNinjaScrollIds, disabledScrollIds])
+  }, [eligibleNinjas, randomScrollEnabled, getFilteredScrolls])
 
-  const cycleStatus = (
-    key: string,
-    setStatus: React.Dispatch<React.SetStateAction<Record<string, FilterStatus>>>
-  ) => {
+  const cycleStatus = (key: string, setStatus: React.Dispatch<React.SetStateAction<Record<string, FilterStatus>>>) => {
     setStatus(prev => {
       const cur = prev[key]
       if (!cur) return { ...prev, [key]: 'include' }
@@ -342,9 +309,15 @@ export default function RandomTab() {
             </>
           )}
 
+          {/* 条件统计：根据模式显示不同提示 */}
           <div className="text-sm text-muted-foreground pt-2">
             符合条件的忍者：{eligibleNinjas.length} 位
-            {disabledNinjaIds.size > 0 && <span className="text-destructive ml-2">（已禁用 {disabledNinjaIds.size} 位）</span>}
+            {mode === 'disable' && disabledNinjaIds.size > 0 && (
+              <span className="text-destructive ml-2">（已禁用 {disabledNinjaIds.size} 位）</span>
+            )}
+            {mode === 'select' && selectedNinjaIds.size > 0 && (
+              <span className="text-primary ml-2">（已选用 {selectedNinjaIds.size} 位）</span>
+            )}
           </div>
         </Card>
       )}
@@ -452,14 +425,17 @@ export default function RandomTab() {
             <SharedTeamTab
               eligibleNinjas={eligibleNinjas}
               scrolls={scrolls}
-              disabledScrollIds={disabledScrollIds}
+              getFilteredScrolls={getFilteredScrolls}
               randomScrollEnabled={randomScrollEnabled}
-              getNinjaScrollIds={getNinjaScrollIds}
             />
           ) : (
             <RandomTeamTab
               ninjas={ninjas}
+              mode={mode}
               disabledNinjaIds={disabledNinjaIds}
+              selectedNinjaIds={selectedNinjaIds}
+              disabledScrollIds={disabledScrollIds}
+              selectedScrollIds={selectedScrollIds}
               globalTierStatus={tierStatus}
               globalRatingStatus={ratingStatus}
               globalTagStatus={tagStatus}
@@ -467,127 +443,32 @@ export default function RandomTab() {
               globalIncludedScrolls={includedScrolls}
               globalExcludedScrolls={excludedScrolls}
               scrolls={scrolls}
-              disabledScrollIds={disabledScrollIds}
               randomScrollEnabled={randomScrollEnabled}
             />
           )}
         </div>
       )}
 
-      {/* 设置弹窗 */}
-      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>随机设置</DialogTitle>
-          </DialogHeader>
-          <Tabs value={settingsTab} onValueChange={setSettingsTab} className="flex-1 flex flex-col">
-            <TabsList>
-              <TabsTrigger value="ninjas">禁用忍者</TabsTrigger>
-              <TabsTrigger value="scrolls">禁用密卷</TabsTrigger>
-            </TabsList>
-            <TabsContent value="ninjas" className="flex-1 overflow-auto">
-              <div className="space-y-3 mt-4">
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={settingsSearch}
-                      onChange={(e) => setSettingsSearch(e.target.value)}
-                      placeholder="搜索忍者..."
-                      className="pl-9 pr-9"
-                    />
-                    {settingsSearch && (
-                      <Button variant="ghost" size="icon" className="!absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSettingsSearch('')}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={clearDisabledNinjas} disabled={disabledNinjaIds.size === 0}>
-                    清空禁用列表
-                  </Button>
-                </div>
-                <div className="space-y-4 max-h-80 overflow-y-auto">
-                  {groupedSettingsNinjas.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-8">无匹配忍者</p>
-                  ) : (
-                    groupedSettingsNinjas.map(group => (
-                      <div key={group.tier}>
-                        <Badge variant="outline" className="mb-2 text-sm font-bold">
-                          {group.tier}
-                        </Badge>
-                        <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                          {group.ninjas.map(ninja => {
-                            const isDisabled = disabledNinjaIds.has(ninja.id)
-                            return (
-                              <div
-                                key={ninja.id}
-                                className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg transition-all ${isDisabled ? 'opacity-40 grayscale' : 'hover:bg-muted/50'}`}
-                                onClick={() => toggleDisabledNinja(ninja.id)}
-                              >
-                                <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
-                                  <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
-                                </div>
-                                <span className={`text-xs text-center leading-tight ${isDisabled ? 'text-destructive line-through' : 'text-foreground'}`}>
-                                  {ninja.name}
-                                </span>
-                                {isDisabled && <span className="text-[10px] text-destructive">已禁用</span>}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="scrolls" className="flex-1 overflow-auto">
-              <div className="space-y-3 mt-4">
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={settingsSearch}
-                      onChange={(e) => setSettingsSearch(e.target.value)}
-                      placeholder="搜索密卷..."
-                      className="pl-9 pr-9"
-                    />
-                    {settingsSearch && (
-                      <Button variant="ghost" size="icon" className="!absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSettingsSearch('')}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={clearDisabledScrolls} disabled={disabledScrollIds.size === 0}>
-                    清空禁用列表
-                  </Button>
-                </div>
-                <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-80 overflow-y-auto">
-                  {filteredSettingsScrolls.map(scroll => {
-                    const isDisabled = disabledScrollIds.has(scroll.id)
-                    return (
-                      <div
-                        key={scroll.id}
-                        className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg transition-all ${isDisabled ? 'opacity-40 grayscale' : 'hover:bg-muted/50'}`}
-                        onClick={() => toggleDisabledScroll(scroll.id)}
-                      >
-                        <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
-                          <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
-                        </div>
-                        <span className={`text-xs text-center leading-tight ${isDisabled ? 'text-destructive line-through' : 'text-foreground'}`}>
-                          {scroll.name}
-                        </span>
-                        {isDisabled && <span className="text-[10px] text-destructive">已禁用</span>}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        ninjas={ninjas}
+        scrolls={scrolls}
+        mode={mode}
+        onModeChange={handleModeChange}
+        disabledNinjaIds={disabledNinjaIds}
+        onToggleDisabledNinja={(id) => setDisabledNinjaIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })}
+        clearDisabledNinjas={() => setDisabledNinjaIds(new Set())}
+        disabledScrollIds={disabledScrollIds}
+        onToggleDisabledScroll={(id) => setDisabledScrollIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })}
+        clearDisabledScrolls={() => setDisabledScrollIds(new Set())}
+        selectedNinjaIds={selectedNinjaIds}
+        onToggleSelectedNinja={(id) => setSelectedNinjaIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })}
+        clearSelectedNinjas={() => setSelectedNinjaIds(new Set())}
+        selectedScrollIds={selectedScrollIds}
+        onToggleSelectedScroll={(id) => setSelectedScrollIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })}
+        clearSelectedScrolls={() => setSelectedScrollIds(new Set())}
+      />
     </div>
   )
 }

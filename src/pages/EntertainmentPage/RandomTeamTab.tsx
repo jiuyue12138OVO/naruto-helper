@@ -18,9 +18,13 @@ interface SlotState {
   scroll: Record<string, FilterStatus>
 }
 
-interface TeamFiltersProps {
+interface RandomTeamTabProps {
   ninjas: INinja[]
+  mode: 'disable' | 'select'
   disabledNinjaIds: Set<string>
+  selectedNinjaIds: Set<string>
+  disabledScrollIds: Set<string>
+  selectedScrollIds: Set<string>
   globalTierStatus: Record<string, FilterStatus>
   globalRatingStatus: Record<string, FilterStatus>
   globalTagStatus: Record<string, FilterStatus>
@@ -28,13 +32,16 @@ interface TeamFiltersProps {
   globalIncludedScrolls: string[]
   globalExcludedScrolls: string[]
   scrolls: IScroll[]
-  disabledScrollIds: Set<string>
   randomScrollEnabled: boolean
 }
 
 export default function RandomTeamTab({
   ninjas,
+  mode,
   disabledNinjaIds,
+  selectedNinjaIds,
+  disabledScrollIds,
+  selectedScrollIds,
   globalTierStatus,
   globalRatingStatus,
   globalTagStatus,
@@ -42,9 +49,8 @@ export default function RandomTeamTab({
   globalIncludedScrolls,
   globalExcludedScrolls,
   scrolls,
-  disabledScrollIds,
   randomScrollEnabled,
-}: TeamFiltersProps) {
+}: RandomTeamTabProps) {
   const [teamResult, setTeamResult] = useState<INinja[]>([])
   const [teamScrolls, setTeamScrolls] = useState<(string | null)[]>([])
   const [isTeamRolling, setIsTeamRolling] = useState(false)
@@ -69,22 +75,30 @@ export default function RandomTeamTab({
       const excScrolls = Object.keys(slot.scroll).filter(k => slot.scroll[k] === 'exclude')
 
       return ninjas.filter(n => {
-        if (disabledNinjaIds.has(n.id)) return false
+        // 全局模式过滤
+        if (mode === 'disable') {
+          if (disabledNinjaIds.has(n.id)) return false
+        } else {
+          if (selectedNinjaIds.size > 0 && !selectedNinjaIds.has(n.id)) return false
+        }
+
         if (incTiers.length > 0 && !incTiers.includes(n.tier)) return false
         if (excTiers.length > 0 && excTiers.includes(n.tier)) return false
         if (incRatings.length > 0 && !incRatings.includes(n.rating)) return false
         if (excRatings.length > 0 && excRatings.includes(n.rating)) return false
         if (incTags.length > 0 && !incTags.every(tag => n.tags?.includes(tag))) return false
         if (excTags.length > 0 && excTags.some(tag => n.tags?.includes(tag))) return false
-        const scrollIds = getNinjaScrollIds(n.id)
-        if (incScrolls.length > 0 && !incScrolls.some(sid => scrollIds.includes(sid))) return false
-        if (excScrolls.length > 0 && excScrolls.some(sid => scrollIds.includes(sid))) return false
-        if (globalIncludedScrolls.length > 0 && !globalIncludedScrolls.some(sid => scrollIds.includes(sid))) return false
-        if (globalExcludedScrolls.length > 0 && globalExcludedScrolls.some(sid => scrollIds.includes(sid))) return false
+
+        const ninjaScrolls = getNinjaScrollIds(n.id)
+        if (incScrolls.length > 0 && !incScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+        if (excScrolls.length > 0 && excScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+        if (globalIncludedScrolls.length > 0 && !globalIncludedScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+        if (globalExcludedScrolls.length > 0 && globalExcludedScrolls.some(sid => ninjaScrolls.includes(sid))) return false
+
         return true
       })
     },
-    [ninjas, disabledNinjaIds, slotStates, getNinjaScrollIds, globalIncludedScrolls, globalExcludedScrolls]
+    [ninjas, mode, disabledNinjaIds, selectedNinjaIds, slotStates, getNinjaScrollIds, globalIncludedScrolls, globalExcludedScrolls]
   )
 
   const eligibleSlots = useMemo(
@@ -94,12 +108,18 @@ export default function RandomTeamTab({
 
   const canRoll = eligibleSlots.every(list => list.length > 0)
 
-  const assignScrolls = (ninjas: INinja[]) => {
-    if (!randomScrollEnabled || ninjas.length !== 3) return [null, null, null]
-    // 按适配密卷数量升序，优先分配数量少的
-    const withCounts = ninjas.map((n, idx) => ({
+  const assignScrolls = (resultNinjas: INinja[]) => {
+    if (!randomScrollEnabled || resultNinjas.length !== 3) return [null, null, null]
+    const withCounts = resultNinjas.map((n, idx) => ({
       idx,
-      available: getNinjaScrollIds(n.id).filter(id => !disabledScrollIds.has(id)),
+      available: getNinjaScrollIds(n.id).filter(id => {
+        if (mode === 'disable') {
+          return !disabledScrollIds.has(id)
+        } else {
+          if (selectedScrollIds.size === 0) return true
+          return selectedScrollIds.has(id)
+        }
+      }),
     }))
     const sorted = [...withCounts].sort((a, b) => a.available.length - b.available.length)
     const assigned: (string | null)[] = [null, null, null]
@@ -135,7 +155,7 @@ export default function RandomTeamTab({
         setIsTeamRolling(false)
       }
     }, interval)
-  }, [canRoll, eligibleSlots, randomScrollEnabled, getNinjaScrollIds, disabledScrollIds])
+  }, [canRoll, eligibleSlots, randomScrollEnabled, mode, disabledScrollIds, selectedScrollIds, getNinjaScrollIds])
 
   return (
     <div className="space-y-6">
