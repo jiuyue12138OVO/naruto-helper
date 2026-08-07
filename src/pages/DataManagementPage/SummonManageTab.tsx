@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import ImageUpload from '@/components/ImageUpload'
 import { useData } from '@/contexts/DataContext'
 import { ISummon } from '@/data/summons'
@@ -29,6 +30,8 @@ interface FormData {
   skill: string
   description: string
   imageUrl: string
+  isExclusive: boolean
+  exclusiveEffect: string
 }
 
 const EMPTY_FORM: FormData = {
@@ -36,6 +39,8 @@ const EMPTY_FORM: FormData = {
   skill: '',
   description: '',
   imageUrl: DEFAULT_IMG,
+  isExclusive: false,
+  exclusiveEffect: '',
 }
 
 type SortField = 'name' | 'skill' | 'description'
@@ -80,7 +85,9 @@ export default function SummonManageTab() {
       name: summon.name,
       skill: summon.skill || '',
       description: summon.description,
-      imageUrl: summon.imageUrl || ''
+      imageUrl: summon.imageUrl || '',
+      isExclusive: summon.isExclusive || false,
+      exclusiveEffect: summon.exclusiveEffect || '',
     })
     setErrors({}); setDialogOpen(true)
   }
@@ -90,6 +97,7 @@ export default function SummonManageTab() {
     if (!form.name.trim()) e.name = '名称不能为空'
     if (!form.skill.trim()) e.skill = '技能不能为空'
     if (!form.description.trim()) e.description = '描述不能为空'
+    if (form.isExclusive && !form.exclusiveEffect.trim()) e.exclusiveEffect = '专属效果不能为空'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -102,6 +110,8 @@ export default function SummonManageTab() {
       skill: form.skill.trim(),
       description: form.description.trim(),
       imageUrl: form.imageUrl.trim() || DEFAULT_IMG,
+      isExclusive: form.isExclusive,
+      exclusiveEffect: form.isExclusive ? form.exclusiveEffect.trim() : undefined,
     }
     if (editingId) { updateSummon(editingId, data) } else { addSummon(data) }
     setDialogOpen(false)
@@ -141,18 +151,26 @@ export default function SummonManageTab() {
                 <TableHead>名称</TableHead>
                 <TableHead>技能</TableHead>
                 <TableHead>描述</TableHead>
+                <TableHead>专属</TableHead>
                 <TableHead className="text-right w-[120px]">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredAndSorted.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">暂无通灵兽数据</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-12 text-muted-foreground">暂无通灵兽数据</TableCell></TableRow>
               ) : (
                 filteredAndSorted.map(s => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium">{s.name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{s.skill}</TableCell>
                     <TableCell className="text-muted-foreground text-sm truncate max-w-[200px]">{s.description}</TableCell>
+                    <TableCell>
+                      {s.isExclusive ? (
+                        <span className="text-xs text-primary font-medium">是</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">否</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button size="icon" variant="ghost" onClick={() => openEdit(s)}><Pencil className="size-4" /></Button>
                       <Button size="icon" variant="ghost" className="text-destructive" onClick={() => setDeleteId(s.id)}><Trash2 className="size-4" /></Button>
@@ -165,6 +183,7 @@ export default function SummonManageTab() {
         </CardContent>
       </Card>
 
+      {/* 编辑弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingId ? '编辑通灵兽' : '新增通灵兽'}</DialogTitle></DialogHeader>
@@ -188,6 +207,29 @@ export default function SummonManageTab() {
               <Label>图片（可选）</Label>
               <ImageUpload value={form.imageUrl} onChange={b64 => setForm({...form, imageUrl: b64})} />
             </div>
+
+            {/* 专属通灵开关 */}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="exclusive-switch">设为专属通灵</Label>
+              <Switch
+                id="exclusive-switch"
+                checked={form.isExclusive}
+                onCheckedChange={checked => setForm({ ...form, isExclusive: checked, exclusiveEffect: checked ? form.exclusiveEffect : '' })}
+              />
+            </div>
+
+            {form.isExclusive && (
+              <div>
+                <Label>专属效果 *</Label>
+                <Textarea
+                  value={form.exclusiveEffect}
+                  onChange={e => setForm({ ...form, exclusiveEffect: e.target.value })}
+                  rows={2}
+                  placeholder="输入专属通灵兽效果描述..."
+                />
+                {errors.exclusiveEffect && <p className="text-destructive text-xs">{errors.exclusiveEffect}</p>}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
@@ -196,6 +238,7 @@ export default function SummonManageTab() {
         </DialogContent>
       </Dialog>
 
+      {/* 删除确认 */}
       <AlertDialog open={!!deleteId} onOpenChange={v => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>确认删除？</AlertDialogTitle></AlertDialogHeader>

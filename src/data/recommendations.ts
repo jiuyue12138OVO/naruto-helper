@@ -615,6 +615,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350043475",
           "scrollName": "风遁·气旋",
           "priority": 5
+        },
+        {
+          "scrollId": "1783349772182",
+          "scrollName": "木遁·一字连柱",
+          "priority": 6
         }
       ]
     },
@@ -1174,6 +1179,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350925467",
           "scrollName": "时空间忍术",
           "priority": 3
+        },
+        {
+          "scrollId": "6",
+          "scrollName": "通灵·护手里剑",
+          "priority": 4
         }
       ]
     },
@@ -2376,14 +2386,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "长门【青年】",
       "scrolls": [
         {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -3419,6 +3434,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349772182",
           "scrollName": "木遁·一字连柱",
           "priority": 3
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 4
         }
       ]
     },
@@ -3499,6 +3519,45 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349733336",
           "scrollName": "冰遁·燕吹雪",
           "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1786094309096",
+      "ninjaId": "1786091194700",
+      "ninjaName": "猿飞阿斯玛【秽土转生】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783350583210",
+          "scrollName": "幻术·一叶障",
+          "priority": 2
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1786094322996",
+      "ninjaId": "1786091108484",
+      "ninjaName": "迈特凯【青春爆炸】",
+      "scrolls": [
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
         }
       ]
     }
