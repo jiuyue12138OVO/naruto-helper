@@ -3811,9 +3811,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 2
+        },
+        {
           "scrollId": "1783350557155",
           "scrollName": "掌仙术·振奋",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
