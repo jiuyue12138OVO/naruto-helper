@@ -17,7 +17,7 @@ import SummonsPhase from './SummonsPhase'
 import DonePhase from './DonePhase'
 import type { INinja } from '@/data/ninjas'
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 const COUNTDOWN_SECONDS = 60
 const MAX_PUBLIC_BAN = 10
 const MAX_SPECTATORS = 5

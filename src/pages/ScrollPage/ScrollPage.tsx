@@ -14,7 +14,7 @@ import { useData } from '@/contexts/DataContext'
 import { IScroll, IScrollVariant } from '@/data/scrolls'
 import { INinja } from '@/data/ninjas'
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 
 export default function ScrollPage() {
   const { scrolls, ninjas, recommendations, ensureScrolls, ensureRecommendations, ensureNinjas } = useData()

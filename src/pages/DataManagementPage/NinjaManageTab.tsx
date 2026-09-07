@@ -51,7 +51,7 @@ import { INinja } from '@/data/ninjas'
 import { cn } from '@/lib/utils'
 import { Image } from '@/components/ui/image'
 
-const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 const TIER_ORDER = Object.fromEntries(TIER_OPTIONS.map((t, i) => [t, i]))
 const RATING_OPTIONS = ['S', 'A', 'B', 'C']
 
@@ -63,6 +63,7 @@ const TIER_COLORS: Record<string, string> = {
   't0中': 'bg-green-500/10 text-green-500 border-green-500/20',
   't0下': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   '准t0': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+  't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',   // 新颜色，可以自定义
 }
 
 const DEFAULT_IMG = ''

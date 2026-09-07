@@ -17,7 +17,7 @@ interface BanPanelProps {
   pendingNinjaId?: string
 }
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 
 export default function BanPanel({ currentSlot, usedNinjas, banned1P, banned2P, onSelect, pendingNinjaId }: BanPanelProps) {
   const { ninjas } = useData()

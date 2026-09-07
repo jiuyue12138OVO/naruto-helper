@@ -23,7 +23,7 @@ interface SlotFilterCardProps {
   eligibleCount: number
 }
 
-const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 const RATING_OPTIONS = ['S', 'A', 'B', 'C']
 
 export default function SlotFilterCard({

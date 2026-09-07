@@ -27,7 +27,7 @@ import { IScroll, IScrollVariant } from '@/data/scrolls'
 import type { INinja } from '@/data/ninjas'
 
 const DEFAULT_IMG = ''
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
 
 interface FormData {
   name: string
