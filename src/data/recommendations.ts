@@ -3965,5 +3965,254 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         }
       ]
+    },
+    {
+      "id": "1788836366677",
+      "ninjaId": "1788836283041",
+      "ninjaName": "白【漂泊武士】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1788836576912",
+      "ninjaId": "1788788499677",
+      "ninjaName": "日向花火【武当宗师】",
+      "scrolls": [
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        },
+        {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783350925467",
+          "scrollName": "时空间忍术",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1788876596676",
+      "ninjaId": "1788876338242",
+      "ninjaName": "日向花火【冬日限定】",
+      "scrolls": [
+        {
+          "scrollId": "4",
+          "scrollName": "雷遁·雷电击",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349884279",
+          "scrollName": "封印术·四肢重封印",
+          "priority": 2
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783350480900",
+          "scrollName": "忍法·蛙变之术",
+          "priority": 4
+        },
+        {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 5
+        }
+      ]
+    },
+    {
+      "id": "1788918438969",
+      "ninjaId": "1788916901381",
+      "ninjaName": "土台【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        },
+        {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349802096",
+          "scrollName": "水遁·水盾",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1788918474740",
+      "ninjaId": "1788917040023",
+      "ninjaName": "飞段【死司凭血】",
+      "scrolls": [
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1788918494196",
+      "ninjaId": "1788917165295",
+      "ninjaName": "角度【地怨虞】",
+      "scrolls": [
+        {
+          "scrollId": "1783349842473",
+          "scrollName": "木遁·扦插之术",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1788918763501",
+      "ninjaId": "1788917296594",
+      "ninjaName": "勘九郎【指导上忍】",
+      "scrolls": [
+        {
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 3
+        },
+        {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1788918834146",
+      "ninjaId": "1788917471152",
+      "ninjaName": "达鲁伊",
+      "scrolls": [
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1788918878826",
+      "ninjaId": "1788917702688",
+      "ninjaName": "猿飞日斩【三忍之师】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1788918983258",
+      "ninjaId": "1788917946367",
+      "ninjaName": "勘九郎【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783350105829",
+          "scrollName": "水遁·雾隐之术",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1788919067212",
+      "ninjaId": "1788918113976",
+      "ninjaName": "猿飞日斩【火影继承人】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1788919141600",
+      "ninjaId": "1788918398909",
+      "ninjaName": "加藤断",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
     }
   ]
