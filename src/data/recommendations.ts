@@ -488,13 +488,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
           "priority": 3
         },
         {
-          "scrollId": "1783349280153",
-          "scrollName": "水遁·水龙卷",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 4
         }
       ]
@@ -1187,6 +1187,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 3
         }
       ]
     },
@@ -1508,11 +1513,6 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
           "priority": 5
-        },
-        {
-          "scrollId": "1783349379011",
-          "scrollName": "风遁·真空波",
-          "priority": 6
         }
       ]
     },
@@ -1738,6 +1738,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 3
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 4
         }
       ]
     },
@@ -2861,24 +2866,29 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
+        },
+        {
           "scrollId": "1783350583210",
           "scrollName": "幻术·一叶障",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 3
+          "priority": 4
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 4
+          "priority": 5
         },
         {
           "scrollId": "10",
           "scrollName": "土遁·地动",
-          "priority": 5
+          "priority": 6
         }
       ]
     },
@@ -3493,23 +3503,23 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "伊豆野山葵",
       "scrolls": [
         {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
           "scrollId": "12",
           "scrollName": "火遁·烈焰弹",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 3
-        },
-        {
-          "scrollId": "10",
-          "scrollName": "土遁·地动",
           "priority": 4
         }
       ]
@@ -4434,6 +4444,115 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 3
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 4
+        }
+      ]
+    },
+    {
+      "id": "1789178950486",
+      "ninjaId": "1789178878803",
+      "ninjaName": "大和【新春限定】",
+      "scrolls": [
+        {
+          "scrollId": "1783350557155",
+          "scrollName": "掌仙术·振奋",
+          "priority": 1
+        },
+        {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1789297100309",
+      "ninjaId": "1789296416670",
+      "ninjaName": "奇拉比【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1789297127417",
+      "ninjaId": "1789296484148",
+      "ninjaName": "千代【近松十人卫】",
+      "scrolls": [
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1789297139803",
+      "ninjaId": "1789296538418",
+      "ninjaName": "纲手",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1789297221163",
+      "ninjaId": "1789296711939",
+      "ninjaName": "鬼灯满月【忍刀七人众】",
+      "scrolls": [
+        {
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1789297327967",
+      "ninjaId": "1789296877572",
+      "ninjaName": "羽高【新佩恩六道】",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1789297410352",
+      "ninjaId": "1789296988071",
+      "ninjaName": "佩恩【畜生道】",
+      "scrolls": [
+        {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 1
         }
       ]
     }

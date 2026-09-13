@@ -1,2 +1,2 @@
 // 🔥 修改此处即可：部署到线上前修改此值即可强制用户更新数据
-export const DATA_VERSION = '2026-09-12-09-09'
+export const DATA_VERSION = '2026-09-13-20-38'

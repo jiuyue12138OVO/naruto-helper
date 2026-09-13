@@ -57,9 +57,9 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterNinjaIds": [
         "8",
         "1783309774545",
+        "1783309829510",
         "1783310042732",
         "9",
-        "1783309829510",
         "1783315644309"
       ],
       "counterScrollIds": [
@@ -74,7 +74,13 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783588233106",
         "1783589300960"
       ],
-      "counterNinjaScores": {}
+      "counterNinjaScores": {
+        "8": 30,
+        "9": -10,
+        "1783315644309": -10,
+        "1783309829510": 25,
+        "1783309774545": 25
+      }
     },
     {
       "id": "1783595886977",
@@ -397,8 +403,10 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783350952440"
       ],
       "counterSummonIds": [
-        "1783589344138"
-      ]
+        "1783589344138",
+        "1783588906858"
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783596693446",
@@ -530,9 +538,9 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783596972178",
       "ninjaId": "11",
       "counterNinjaIds": [
-        "1783309398928",
         "1783309612984",
         "1783309172598",
+        "1783309398928",
         "1783315644309"
       ],
       "counterScrollIds": [
@@ -546,7 +554,13 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterSummonIds": [
         "1783587820594",
         "1783587626528"
-      ]
+      ],
+      "counterNinjaScores": {
+        "1783309612984": 30,
+        "1783309172598": 30,
+        "1783309398928": 25,
+        "1783315644309": 15
+      }
     },
     {
       "id": "1783596998789",
@@ -684,6 +698,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783693125830",
       "ninjaId": "1783309148171",
       "counterNinjaIds": [
+        "1783308767737",
         "1783309084993",
         "1783309783866",
         "1783308752772",
@@ -691,9 +706,15 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterScrollIds": [
         "1783350438746",
-        "1783349488627"
+        "1783349488627",
+        "1783349328947"
       ],
-      "counterSummonIds": []
+      "counterSummonIds": [
+        "1"
+      ],
+      "counterNinjaScores": {
+        "1783308767737": 50
+      }
     },
     {
       "id": "1783693169329",
@@ -739,8 +760,14 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterSummonIds": [
         "1783587234386",
-        "1783588906858"
-      ]
+        "1783588906858",
+        "1783587352179"
+      ],
+      "counterNinjaScores": {
+        "1783309208477": 45,
+        "1783309783866": 40,
+        "1783310586721": 40
+      }
     },
     {
       "id": "1783693492042",
@@ -798,7 +825,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterScrollIds": [
         "12",
         "1783351060243",
-        "1783350438746"
+        "1783350438746",
+        "1783350283755"
       ],
       "counterSummonIds": [
         "1783588233106",
@@ -898,9 +926,11 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "ninjaId": "1783310187740",
       "counterNinjaIds": [
         "1783308767737",
+        "1783309208477",
+        "1783735988278",
         "12",
-        "9",
-        "1783309398928"
+        "1783309398928",
+        "9"
       ],
       "counterScrollIds": [
         "10",
@@ -913,7 +943,12 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783589344138"
       ],
       "counterNinjaScores": {
-        "1783309398928": 0
+        "9": 10,
+        "12": 40,
+        "1783309398928": 30,
+        "1783735988278": 45,
+        "1783308767737": 50,
+        "1783309208477": 50
       }
     },
     {
@@ -989,8 +1024,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309311486",
         "1783310042732",
         "1783308752772",
-        "1783309348233",
-        "1783309415054"
+        "1783309348233"
       ],
       "counterScrollIds": [
         "1"
@@ -1002,8 +1036,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783589344138"
       ],
       "counterNinjaScores": {
-        "1783309348233": 0,
-        "1783309415054": 0
+        "1783309348233": 0
       }
     },
     {
@@ -1020,11 +1053,13 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783350952440",
         "6",
         "9",
-        "1783349280153"
+        "1783349280153",
+        "12"
       ],
       "counterSummonIds": [
         "1783589344138"
-      ]
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783762855518",
@@ -1041,8 +1076,10 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783349733336"
       ],
       "counterSummonIds": [
-        "1783589344138"
-      ]
+        "1783589344138",
+        "1"
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783762948712",
@@ -1291,19 +1328,31 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "9"
       ],
       "counterSummonIds": [
-        "1783589344138"
-      ]
+        "1783589344138",
+        "1783587820594"
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783785379515",
       "ninjaId": "1783308796552",
       "counterNinjaIds": [
+        "1783309257305",
+        "1783309186224",
         "10"
       ],
-      "counterScrollIds": [],
+      "counterScrollIds": [
+        "1783350480900"
+      ],
       "counterSummonIds": [
-        "1783587571165"
-      ]
+        "1783587571165",
+        "1783588906858"
+      ],
+      "counterNinjaScores": {
+        "10": 0,
+        "1783309257305": 40,
+        "1783309186224": 40
+      }
     },
     {
       "id": "1783785689152",
@@ -1315,8 +1364,10 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterScrollIds": [],
       "counterSummonIds": [
-        "1783589300960"
-      ]
+        "1783589300960",
+        "1783587288271"
+      ],
+      "counterNinjaScores": {}
     },
     {
       "id": "1783785850865",
@@ -1333,12 +1384,17 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783785953806",
       "ninjaId": "1783309612984",
       "counterNinjaIds": [
-        "1783310541594"
+        "1783310541594",
+        "1783308944026"
       ],
       "counterScrollIds": [],
       "counterSummonIds": [
         "1783589507534"
-      ]
+      ],
+      "counterNinjaScores": {
+        "1783308944026": 35,
+        "1783310541594": 40
+      }
     },
     {
       "id": "1783786807806",
@@ -1408,10 +1464,17 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1784173397571",
       "ninjaId": "1783310469533",
       "counterNinjaIds": [
+        "1783309612984",
         "1783310082543"
       ],
-      "counterScrollIds": [],
-      "counterSummonIds": []
+      "counterScrollIds": [
+        "12"
+      ],
+      "counterSummonIds": [],
+      "counterNinjaScores": {
+        "1783309612984": 30,
+        "1783310082543": 20
+      }
     },
     {
       "id": "1784369811865",
@@ -1562,5 +1625,27 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterNinjaScores": {
         "1783309257305": 0
       }
+    },
+    {
+      "id": "1789298666095",
+      "ninjaId": "1789098396723",
+      "counterNinjaIds": [
+        "1783309783866"
+      ],
+      "counterScrollIds": [],
+      "counterSummonIds": [],
+      "counterNinjaScores": {
+        "1783309783866": 30
+      }
+    },
+    {
+      "id": "1789298826245",
+      "ninjaId": "1787364324882",
+      "counterNinjaIds": [],
+      "counterScrollIds": [
+        "1783349379011"
+      ],
+      "counterSummonIds": [],
+      "counterNinjaScores": {}
     }
   ]
