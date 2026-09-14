@@ -1309,24 +1309,29 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
-          "scrollId": "1783350663437",
-          "scrollName": "火遁·火炎阵",
-          "priority": 3
-        },
-        {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 4
-        },
-        {
-          "scrollId": "3",
-          "scrollName": "岚遁·雷云",
-          "priority": 5
+          "priority": 3
         },
         {
           "scrollId": "1783349842473",
           "scrollName": "木遁·扦插之术",
+          "priority": 4
+        },
+        {
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
+          "priority": 5
+        },
+        {
+          "scrollId": "1783350663437",
+          "scrollName": "火遁·火炎阵",
           "priority": 6
+        },
+        {
+          "scrollId": "3",
+          "scrollName": "岚遁·雷云",
+          "priority": 7
         }
       ]
     },
@@ -1410,6 +1415,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
+          "priority": 3
         }
       ]
     },
@@ -1679,9 +1689,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
+          "scrollId": "1783350583210",
+          "scrollName": "幻术·一叶障",
+          "priority": 3
+        },
+        {
           "scrollId": "12",
           "scrollName": "火遁·烈焰弹",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -2056,14 +2071,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
-          "scrollId": "1783349379011",
-          "scrollName": "风遁·真空波",
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
           "priority": 3
         },
         {
-          "scrollId": "1783349114634",
-          "scrollName": "风遁·斩空波",
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
           "priority": 4
+        },
+        {
+          "scrollId": "1783349379011",
+          "scrollName": "风遁·真空波",
+          "priority": 5
         }
       ]
     },
@@ -2876,18 +2896,18 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 3
         },
         {
+          "scrollId": "6",
+          "scrollName": "通灵·护手里剑",
+          "priority": 4
+        },
+        {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 4
+          "priority": 5
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 5
-        },
-        {
-          "scrollId": "10",
-          "scrollName": "土遁·地动",
           "priority": 6
         }
       ]
@@ -4553,6 +4573,35 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349453506",
           "scrollName": "火遁·豪炎矢",
           "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1789374380554",
+      "ninjaId": "1789372944362",
+      "ninjaName": "阿茨伊",
+      "scrolls": [
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1789374945430",
+      "ninjaId": "1789374915520",
+      "ninjaName": "漩涡鸣人【忍者学员】",
+      "scrolls": [
+        {
+          "scrollId": "1783350583210",
+          "scrollName": "幻术·一叶障",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
         }
       ]
     }
