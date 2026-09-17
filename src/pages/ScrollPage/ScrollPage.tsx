@@ -26,9 +26,24 @@ export default function ScrollPage() {
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
   const [showExclusive, setShowExclusive] = useState(false)
 
+  // 选忍者看密卷模式下，显示忍者最优密卷
+  const [showBestInNinjaView, setShowBestInNinjaView] = useState(false)
+  // 密卷详情弹窗内，适配忍者标签页显示忍者最优密卷
+  const [showBestInAdapted, setShowBestInAdapted] = useState(false)
+  // 密卷详情弹窗内的子标签状态
+  const [detailTab, setDetailTab] = useState<'info' | 'ninjas'>('info')
+
   useEffect(() => {
     Promise.all([ensureScrolls(), ensureRecommendations(), ensureNinjas()]).finally(() => setLoading(false))
   }, [ensureScrolls, ensureRecommendations, ensureNinjas])
+
+  // 关闭密卷详情时重置内部状态
+  useEffect(() => {
+    if (!selectedScroll) {
+      setDetailTab('info')
+      setShowBestInAdapted(false)
+    }
+  }, [selectedScroll])
 
   const filteredScrolls = useMemo(() => {
     if (!searchScroll.trim()) return scrolls
@@ -53,6 +68,15 @@ export default function ScrollPage() {
         detail: scrolls.find(sc => sc.id === s.scrollId),
       }))
       .filter(s => s.detail)
+  }
+
+  // 获取某忍者最适配（优先级最高）的密卷
+  const getBestScrollForNinja = (ninjaId: string): IScroll | null => {
+    const rec = recommendations.find(r => r.ninjaId === ninjaId)
+    if (!rec || rec.scrolls.length === 0) return null
+    const sorted = [...rec.scrolls].sort((a, b) => a.priority - b.priority)
+    const top = sorted[0]
+    return scrolls.find(s => s.id === top.scrollId) || null
   }
 
   // 获取某密卷下当前忍者的专属变体（可能为多个，这里返回第一个匹配的）
@@ -90,10 +114,26 @@ export default function ScrollPage() {
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="scrollToNinja">选密卷看忍者</TabsTrigger>
-            <TabsTrigger value="ninjaToScroll">选忍者看密卷</TabsTrigger>
-          </TabsList>
+          {/* 顶层 Tab 与开关同一行 */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="scrollToNinja">选密卷看忍者</TabsTrigger>
+              <TabsTrigger value="ninjaToScroll">选忍者看密卷</TabsTrigger>
+            </TabsList>
+
+            {mode === 'ninjaToScroll' && (
+              <div className="flex items-center gap-2">
+                <Label htmlFor="ninja-best-toggle" className="text-sm cursor-pointer select-none">
+                  显示最优密卷
+                </Label>
+                <Switch
+                  id="ninja-best-toggle"
+                  checked={showBestInNinjaView}
+                  onCheckedChange={setShowBestInNinjaView}
+                />
+              </div>
+            )}
+          </div>
 
           {/* ===== A 模式：选密卷看忍者 ===== */}
           <TabsContent value="scrollToNinja" className="mt-6 space-y-6">
@@ -150,14 +190,22 @@ export default function ScrollPage() {
                   <div key={group.tier}>
                     <div className="flex items-center gap-3 mb-4"><Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge><span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span></div>
                     <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
-                      {group.ninjas.map((ninja, i) => (
-                        <motion.div key={ninja.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.03 }} whileHover={{ y: -4 }} className="cursor-pointer" onClick={() => setSelectedNinja(ninja)}>
-                          <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1">
-                            <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
-                          </Card>
-                          <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
-                        </motion.div>
-                      ))}
+                      {group.ninjas.map((ninja, i) => {
+                        const bestScroll = showBestInNinjaView ? getBestScrollForNinja(ninja.id) : null
+                        return (
+                          <motion.div key={ninja.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.03 }} whileHover={{ y: -4 }} className="cursor-pointer" onClick={() => setSelectedNinja(ninja)}>
+                            <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
+                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
+                              {bestScroll && (
+                                <div className="absolute bottom-0.5 right-0.5 w-5 h-5 rounded overflow-hidden border border-border/60 bg-card shadow-sm" title={`最优密卷：${bestScroll.name}`}>
+                                  <Image src={bestScroll.imageUrl} alt={bestScroll.name} className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                            </Card>
+                            <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
+                          </motion.div>
+                        )
+                      })}
                     </div>
                   </div>
                 ))}
@@ -171,11 +219,27 @@ export default function ScrollPage() {
           <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
             <DialogHeader><DialogTitle>{selectedScroll?.name}</DialogTitle></DialogHeader>
             {selectedScroll && (
-              <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="info">密卷信息</TabsTrigger>
-                  <TabsTrigger value="ninjas">适配忍者</TabsTrigger>
-                </TabsList>
+              <Tabs value={detailTab} onValueChange={(v) => setDetailTab(v as 'info' | 'ninjas')} className="flex-1 flex flex-col overflow-hidden">
+                {/* 详情 Tab 与开关同一行 */}
+                <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+                  <TabsList>
+                    <TabsTrigger value="info">密卷信息</TabsTrigger>
+                    <TabsTrigger value="ninjas">适配忍者</TabsTrigger>
+                  </TabsList>
+
+                  {detailTab === 'ninjas' && (
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="adapted-best-toggle" className="text-sm cursor-pointer select-none">
+                        显示最优密卷
+                      </Label>
+                      <Switch
+                        id="adapted-best-toggle"
+                        checked={showBestInAdapted}
+                        onCheckedChange={setShowBestInAdapted}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <TabsContent value="info" className="flex-1 overflow-y-auto -mx-6 px-6">
                   <Tabs defaultValue="original" className="w-full">
@@ -243,12 +307,22 @@ export default function ScrollPage() {
                           <div key={group.tier}>
                             <h4 className="text-sm font-semibold text-muted-foreground mb-2">{group.tier}</h4>
                             <div className="flex flex-wrap gap-2">
-                              {group.ninjas.map(n => (
-                                <div key={n.id} className="flex flex-col items-center w-14">
-                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card"><Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" /></div>
-                                  <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5">{n.name}</span>
-                                </div>
-                              ))}
+                              {group.ninjas.map(n => {
+                                const bestScroll = showBestInAdapted ? getBestScrollForNinja(n.id) : null
+                                return (
+                                  <div key={n.id} className="flex flex-col items-center w-14">
+                                    <div className="relative w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                      <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
+                                      {bestScroll && (
+                                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded overflow-hidden border border-border/60 bg-card" title={`最优密卷：${bestScroll.name}`}>
+                                          <Image src={bestScroll.imageUrl} alt={bestScroll.name} className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5">{n.name}</span>
+                                  </div>
+                                )
+                              })}
                             </div>
                           </div>
                         ))}
