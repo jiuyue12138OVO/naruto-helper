@@ -24,7 +24,7 @@ const TIERS = [
   { value: 't0中', label: 't0中' },
   { value: 't0下', label: 't0下' },
   { value: '准t0', label: '准t0' },
-  { value: 't1', label: 't1' },       // 新增
+  { value: 't1', label: 't1' },
 ]
 
 const RATINGS = ['all', 'S', 'A', 'B', 'C']
@@ -37,6 +37,9 @@ interface FilterBarSectionProps {
   tagStatus: Record<string, 'include' | 'exclude'>
   onTagCycle: (tag: string) => void
   onClearTags: () => void
+  acquisitionStatus: Record<string, 'include' | 'exclude'>
+  onAcquisitionCycle: (option: string) => void
+  onClearAcquisitions: () => void
   keyword: string
   onKeywordChange: (keyword: string) => void
   matchAllTags?: boolean
@@ -51,12 +54,15 @@ export default function FilterBarSection({
   tagStatus,
   onTagCycle,
   onClearTags,
+  acquisitionStatus,
+  onAcquisitionCycle,
+  onClearAcquisitions,
   keyword,
   onKeywordChange,
   matchAllTags = false,
   onMatchAllTagsChange,
 }: FilterBarSectionProps) {
-  const { ninjaTags } = useData()
+  const { ninjaTags, acquisitionOptions } = useData()
 
   // 计算包含标签的数量（用于判断是否显示且/或开关）
   const includedTagsCount = Object.values(tagStatus).filter(v => v === 'include').length
@@ -156,6 +162,50 @@ export default function FilterBarSection({
           </div>
         )}
       </div>
+
+      {/* 获取方式筛选 */}
+      {acquisitionOptions.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-muted-foreground">获取方式：</span>
+          {acquisitionOptions.map(option => {
+            const status = acquisitionStatus[option]
+            let variant: 'outline' | 'default' | 'destructive' = 'outline'
+            if (status === 'include') variant = 'default'
+            else if (status === 'exclude') variant = 'destructive'
+
+            return (
+              <Badge
+                key={option}
+                variant={variant}
+                className="cursor-pointer text-xs select-none"
+                onClick={() => onAcquisitionCycle(option)}
+                title={
+                  status === 'include'
+                    ? '包含此获取方式（点击切换为排除）'
+                    : status === 'exclude'
+                    ? '排除此获取方式（点击取消）'
+                    : '未筛选（点击包含）'
+                }
+              >
+                {option}
+                {status === 'exclude' && (
+                  <span className="ml-0.5 opacity-70">✕</span>
+                )}
+              </Badge>
+            )
+          })}
+          {Object.keys(acquisitionStatus).length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs"
+              onClick={onClearAcquisitions}
+            >
+              清除
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* 搜索 */}
       <div className="relative max-w-md">

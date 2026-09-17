@@ -5,19 +5,21 @@ import NinjaGridSection from './NinjaGridSection'
 import { useData } from '@/contexts/DataContext'
 
 export default function TierListPage() {
-  const { ninjas, ninjaTags, ensureNinjas } = useData()
+  const { ninjas, ninjaTags, acquisitionOptions, ensureNinjas } = useData()
   const [loading, setLoading] = useState(true)
 
   const [activeTier, setActiveTier] = useState('all')
   const [activeRating, setActiveRating] = useState('all')
   const [keyword, setKeyword] = useState('')
   const [tagStatus, setTagStatus] = useState<Record<string, 'include' | 'exclude'>>({})
+  const [acquisitionStatus, setAcquisitionStatus] = useState<Record<string, 'include' | 'exclude'>>({})
   const [matchAllTags, setMatchAllTags] = useState(false)
 
   useEffect(() => {
     ensureNinjas().finally(() => setLoading(false))
   }, [ensureNinjas])
 
+  // 清理已删除的标签筛选
   useEffect(() => {
     const existing = new Set(ninjaTags)
     setTagStatus(prev => {
@@ -33,6 +35,22 @@ export default function TierListPage() {
     })
   }, [ninjaTags])
 
+  // 清理已删除的获取方式筛选
+  useEffect(() => {
+    const existing = new Set(acquisitionOptions)
+    setAcquisitionStatus(prev => {
+      let changed = false
+      const newStatus = { ...prev }
+      for (const option of Object.keys(newStatus)) {
+        if (!existing.has(option)) {
+          delete newStatus[option]
+          changed = true
+        }
+      }
+      return changed ? newStatus : prev
+    })
+  }, [acquisitionOptions])
+
   const handleTagCycle = (tag: string) => {
     setTagStatus(prev => {
       const current = prev[tag]
@@ -47,6 +65,20 @@ export default function TierListPage() {
     setTagStatus({})
   }
 
+  const handleAcquisitionCycle = (option: string) => {
+    setAcquisitionStatus(prev => {
+      const current = prev[option]
+      if (!current) return { ...prev, [option]: 'include' }
+      if (current === 'include') return { ...prev, [option]: 'exclude' }
+      const { [option]: _, ...rest } = prev
+      return rest
+    })
+  }
+
+  const handleClearAcquisitions = () => {
+    setAcquisitionStatus({})
+  }
+
   const includedTags = useMemo(
     () => Object.entries(tagStatus).filter(([_, v]) => v === 'include').map(([k]) => k),
     [tagStatus]
@@ -54,6 +86,15 @@ export default function TierListPage() {
   const excludedTags = useMemo(
     () => Object.entries(tagStatus).filter(([_, v]) => v === 'exclude').map(([k]) => k),
     [tagStatus]
+  )
+
+  const includedAcquisitions = useMemo(
+    () => Object.entries(acquisitionStatus).filter(([_, v]) => v === 'include').map(([k]) => k),
+    [acquisitionStatus]
+  )
+  const excludedAcquisitions = useMemo(
+    () => Object.entries(acquisitionStatus).filter(([_, v]) => v === 'exclude').map(([k]) => k),
+    [acquisitionStatus]
   )
 
   const filtered = useMemo(() => {
@@ -74,12 +115,35 @@ export default function TierListPage() {
         }
       }
 
+      // 获取方式筛选
+      const nAcq = n.acquisition
+      let matchAcquisition = true
+      // 排除逻辑：如果忍者的获取方式在排除列表中
+      if (excludedAcquisitions.length > 0 && nAcq && excludedAcquisitions.includes(nAcq)) {
+        matchAcquisition = false
+      }
+      // 包含逻辑：如果设置了包含，则忍者必须有获取方式且在包含列表中
+      if (matchAcquisition && includedAcquisitions.length > 0) {
+        if (!nAcq) matchAcquisition = false
+        else matchAcquisition = includedAcquisitions.includes(nAcq)
+      }
+
       const matchKeyword =
         !keyword || n.name.toLowerCase().includes(keyword.toLowerCase())
 
-      return matchTier && matchRating && matchExclude && matchInclude && matchKeyword
+      return matchTier && matchRating && matchExclude && matchInclude && matchAcquisition && matchKeyword
     })
-  }, [ninjas, activeTier, activeRating, includedTags, excludedTags, matchAllTags, keyword])
+  }, [
+    ninjas,
+    activeTier,
+    activeRating,
+    includedTags,
+    excludedTags,
+    includedAcquisitions,
+    excludedAcquisitions,
+    matchAllTags,
+    keyword,
+  ])
 
   if (loading) {
     return (
@@ -115,6 +179,9 @@ export default function TierListPage() {
           tagStatus={tagStatus}
           onTagCycle={handleTagCycle}
           onClearTags={handleClearTags}
+          acquisitionStatus={acquisitionStatus}
+          onAcquisitionCycle={handleAcquisitionCycle}
+          onClearAcquisitions={handleClearAcquisitions}
           keyword={keyword}
           onKeywordChange={setKeyword}
           matchAllTags={matchAllTags}

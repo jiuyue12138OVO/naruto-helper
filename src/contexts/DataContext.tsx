@@ -16,6 +16,7 @@ const NINJA_TAGS_KEY = 'naruto_ninja_tags'
 const SUMMONS_KEY = 'naruto_summons'
 const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
+const ACQUISITION_OPTIONS_KEY = 'naruto_acquisition_options'
 const VERSION_KEY = 'naruto_data_version'
 
 import { DATA_VERSION } from '@/version'
@@ -48,6 +49,7 @@ function checkVersionAndClearIfNeeded() {
       scopedStorage.removeItem(COUNTERS_KEY)
       scopedStorage.removeItem(NINJA_TAGS_KEY)
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
+      scopedStorage.removeItem(ACQUISITION_OPTIONS_KEY)
     } catch (e) { /* 忽略清除错误 */ }
     saveToStorage(VERSION_KEY, DATA_VERSION)
   }
@@ -59,15 +61,18 @@ const DEFAULT_NINJA_TAGS = [
   "高机动性", "大招特殊情况可接", "防反", "瞬发"
 ]
 
+const DEFAULT_ACQUISITION_OPTIONS = ['高招', '点券', '忍法帖', '328', '蓝券', '直购', '金币', '免费']
+
 interface DataContextType {
   ninjas: INinja[]
   scrolls: IScroll[]
   recommendations: IRecommendation[]
   summons: ISummon[]
   ninjaTags: string[]
+  acquisitionOptions: string[]
   counters: IBPCounter[]
   blindPickOrder: string[]
-  loadingCount: number                    // 正在加载的数据模块数量
+  loadingCount: number
   setBlindPickOrder: (order: string[] | ((prev: string[]) => string[])) => void
   ensureNinjas: () => Promise<void>
   ensureScrolls: () => Promise<void>
@@ -88,6 +93,8 @@ interface DataContextType {
   deleteSummon: (id: string) => void
   addNinjaTag: (tag: string) => void
   removeNinjaTag: (tag: string) => void
+  addAcquisitionOption: (option: string) => void
+  removeAcquisitionOption: (option: string) => void
   updateNinjaBlindPick: (id: string, blindPick: boolean) => void
   addCounter: (counter: IBPCounter) => void
   updateCounter: (id: string, data: Partial<IBPCounter>) => void
@@ -110,6 +117,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [ninjaTags, setNinjaTags] = useState<string[]>(() =>
     loadFromStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
   )
+  const [acquisitionOptions, setAcquisitionOptions] = useState<string[]>(() =>
+    loadFromStorage(ACQUISITION_OPTIONS_KEY, DEFAULT_ACQUISITION_OPTIONS)
+  )
   const [counters, setCounters] = useState<IBPCounter[]>(() => loadFromStorage(COUNTERS_KEY, []))
 
   const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() => {
@@ -130,11 +140,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => { saveToStorage(NINJA_TAGS_KEY, ninjaTags) }, [ninjaTags])
+  useEffect(() => { saveToStorage(ACQUISITION_OPTIONS_KEY, acquisitionOptions) }, [acquisitionOptions])
   useEffect(() => { saveToStorage(SUMMONS_KEY, summons) }, [summons])
   useEffect(() => { saveToStorage(COUNTERS_KEY, counters) }, [counters])
   useEffect(() => { saveToStorage(BLIND_PICK_ORDER_KEY, blindPickOrder) }, [blindPickOrder])
 
-  // 通用加载包装器：仅在数据为空且未在加载中时执行动态导入，同时更新 loadingCount
   const wrapLoader = useCallback(async (key: keyof typeof loadingRef.current, loader: () => Promise<void>) => {
     if (loadingRef.current[key]) return
     loadingRef.current[key] = true
@@ -324,6 +334,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setNinjaTags(prev => prev.filter(t => t !== tag))
   }, [])
 
+  // --- Acquisition Options ---
+  const addAcquisitionOption = useCallback((option: string) => {
+    setAcquisitionOptions(prev => {
+      if (prev.includes(option)) return prev
+      return [...prev, option]
+    })
+  }, [])
+
+  const removeAcquisitionOption = useCallback((option: string) => {
+    setAcquisitionOptions(prev => prev.filter(o => o !== option))
+  }, [])
+
   // --- Blind Pick ---
   const updateNinjaBlindPick = useCallback((id: string, blindPick: boolean) => {
     setNinjas((prev) => {
@@ -368,6 +390,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setRecommendations([])
     setSummons([])
     setNinjaTags(DEFAULT_NINJA_TAGS)
+    setAcquisitionOptions(DEFAULT_ACQUISITION_OPTIONS)
     setCounters([])
     setBlindPickOrder(DEFAULT_BLIND_PICK_ORDER)
     saveToStorage(NINJAS_KEY, [])
@@ -375,6 +398,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     saveToStorage(RECS_KEY, [])
     saveToStorage(SUMMONS_KEY, [])
     saveToStorage(NINJA_TAGS_KEY, DEFAULT_NINJA_TAGS)
+    saveToStorage(ACQUISITION_OPTIONS_KEY, DEFAULT_ACQUISITION_OPTIONS)
     saveToStorage(COUNTERS_KEY, [])
     saveToStorage(BLIND_PICK_ORDER_KEY, DEFAULT_BLIND_PICK_ORDER)
     loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false }
@@ -389,6 +413,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         recommendations,
         summons,
         ninjaTags,
+        acquisitionOptions,
         counters,
         blindPickOrder,
         loadingCount,
@@ -412,6 +437,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deleteSummon,
         addNinjaTag,
         removeNinjaTag,
+        addAcquisitionOption,
+        removeAcquisitionOption,
         updateNinjaBlindPick,
         addCounter,
         updateCounter,

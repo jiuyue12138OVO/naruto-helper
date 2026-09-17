@@ -25,7 +25,7 @@ const TIER_COLORS: Record<string, string> = {
   't0中': 'bg-green-500/10 text-green-500 border-green-500/20',
   't0下': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   '准t0': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',   // 新颜色
+  't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',
 }
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
@@ -168,6 +168,14 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
                     <span className="text-sm font-medium">趋势：</span>
                     <Badge variant="secondary" className={`text-xs ${selectedNinja.trend === 'up' ? 'text-red-500' : 'text-green-500'}`}>
                       {selectedNinja.trend === 'up' ? '上升' : '下降'}
+                    </Badge>
+                  </div>
+                )}
+                {selectedNinja.acquisition && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">获取方式：</span>
+                    <Badge variant="outline" className="text-xs">
+                      {selectedNinja.acquisition}
                     </Badge>
                   </div>
                 )}
