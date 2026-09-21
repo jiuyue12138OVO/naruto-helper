@@ -2434,19 +2434,24 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349488627",
+          "scrollName": "通灵·雷光剑化",
+          "priority": 2
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 3
+          "priority": 4
         },
         {
           "scrollId": "12",
           "scrollName": "火遁·烈焰弹",
-          "priority": 4
+          "priority": 5
         }
       ]
     },
@@ -2456,14 +2461,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "黑土【四代目土影】",
       "scrolls": [
         {
+          "scrollId": "9",
+          "scrollName": "火遁·鬼灯笼",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -2556,13 +2566,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "宇智波止水",
       "scrolls": [
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "1783350480900",
+          "scrollName": "忍法·蛙变之术",
           "priority": 1
         },
         {
-          "scrollId": "1783350480900",
-          "scrollName": "忍法·蛙变之术",
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
           "priority": 2
         },
         {
@@ -2571,19 +2581,24 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 3
         },
         {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 4
+        },
+        {
           "scrollId": "1783349977627",
           "scrollName": "解术·复",
-          "priority": 4
+          "priority": 5
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 5
+          "priority": 6
         },
         {
           "scrollId": "12",
           "scrollName": "火遁·烈焰弹",
-          "priority": 6
+          "priority": 7
         }
       ]
     },
@@ -2782,6 +2797,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350518958",
           "scrollName": "忍体术·毅力",
           "priority": 2
+        },
+        {
+          "scrollId": "1783350438746",
+          "scrollName": "通灵·操手里剑",
+          "priority": 3
         }
       ]
     },
@@ -3871,14 +3891,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "漩涡鸣人·自来也【修行之旅】",
       "scrolls": [
         {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -4034,13 +4059,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "大野木【侠影江湖】",
       "scrolls": [
         {
-          "scrollId": "1",
-          "scrollName": "风遁·风沙阵",
+          "scrollId": "1783350438746",
+          "scrollName": "通灵·操手里剑",
           "priority": 1
         },
         {
-          "scrollId": "1783350438746",
-          "scrollName": "通灵·操手里剑",
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
           "priority": 2
         }
       ]
@@ -4619,9 +4644,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
+          "priority": 2
+        },
+        {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 2
+          "priority": 3
         }
       ]
     }

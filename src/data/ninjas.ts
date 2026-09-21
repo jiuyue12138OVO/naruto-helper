@@ -220,7 +220,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "拉扯"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "高招"
     },
     {
@@ -353,7 +353,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "位移"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "高招"
     },
     {
@@ -1099,7 +1099,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "金刚体"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "忍法帖"
     },
     {
@@ -1434,7 +1434,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "大招特殊情况可接"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "点券"
     },
     {
@@ -1556,7 +1556,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "位移"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "蓝券"
     },
     {
@@ -1973,7 +1973,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高机动性",
         "瞬发"
       ],
-      "blindPick": false,
+      "blindPick": true,
       "acquisition": "高招"
     },
     {
@@ -2403,7 +2403,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "高输出",
         "大招可接",
         "金刚体",
-        "防反"
+        "防反",
+        "位移"
       ],
       "blindPick": false,
       "acquisition": "金币"

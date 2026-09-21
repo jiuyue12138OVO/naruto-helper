@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Swords, ArrowUpDown, Search, X, LayoutGrid, Table2, Layers, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -130,10 +130,9 @@ export default function NinjaManageTab() {
   const [batchDialogOpen, setBatchDialogOpen] = useState(false)
   const [batchAttr, setBatchAttr] = useState<'tags' | 'acquisition'>('tags')
   const [batchTagValue, setBatchTagValue] = useState('')
-  const [batchTagAction, setBatchTagAction] = useState<'add' | 'remove'>('add')
   const [batchAcquisitionValue, setBatchAcquisitionValue] = useState('')
-  const [batchAcquisitionAction, setBatchAcquisitionAction] = useState<'set' | 'clear'>('set')
   const [batchSelectedIds, setBatchSelectedIds] = useState<Set<string>>(new Set())
+  const [batchOriginalIds, setBatchOriginalIds] = useState<Set<string>>(new Set())
   const [batchSearchKeyword, setBatchSearchKeyword] = useState('')
 
   const handleAddTag = () => {
@@ -221,6 +220,22 @@ export default function NinjaManageTab() {
     })).filter(g => g.ninjas.length > 0)
   }, [ninjas, batchSearchKeyword])
 
+  // 自动根据当前选中的属性值初始化批量勾选状态
+  useEffect(() => {
+    if (!batchDialogOpen) return
+    const original = new Set<string>()
+    ninjas.forEach(n => {
+      if (batchAttr === 'tags') {
+        if (batchTagValue && n.tags?.includes(batchTagValue)) original.add(n.id)
+      } else {
+        if (batchAcquisitionValue && n.acquisition === batchAcquisitionValue) original.add(n.id)
+      }
+    })
+    setBatchOriginalIds(original)
+    setBatchSelectedIds(new Set(original))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [batchDialogOpen, batchAttr, batchTagValue, batchAcquisitionValue])
+
   const toggleBatchSelect = (id: string) => {
     setBatchSelectedIds(prev => {
       const next = new Set(prev)
@@ -240,25 +255,47 @@ export default function NinjaManageTab() {
   }
 
   const handleBatchSave = () => {
-    if (batchSelectedIds.size === 0) return
+    if (batchSelectedIds.size === 0 && batchOriginalIds.size === 0) {
+      setBatchDialogOpen(false)
+      return
+    }
 
+    // 需要添加的：现在勾选但原本没有
+    const toAdd: string[] = []
     batchSelectedIds.forEach(id => {
+      if (!batchOriginalIds.has(id)) toAdd.push(id)
+    })
+
+    // 需要移除的：原本有但现在未勾选
+    const toRemove: string[] = []
+    batchOriginalIds.forEach(id => {
+      if (!batchSelectedIds.has(id)) toRemove.push(id)
+    })
+
+    toAdd.forEach(id => {
       const ninja = ninjas.find(n => n.id === id)
       if (!ninja) return
-
       if (batchAttr === 'tags') {
-        if (!batchTagValue) return
-        const has = ninja.tags?.includes(batchTagValue)
-        if (batchTagAction === 'add' && !has) {
+        if (batchTagValue && !ninja.tags?.includes(batchTagValue)) {
           updateNinja(id, { tags: [...(ninja.tags || []), batchTagValue] })
-        } else if (batchTagAction === 'remove' && has) {
+        }
+      } else {
+        if (batchAcquisitionValue) {
+          updateNinja(id, { acquisition: batchAcquisitionValue })
+        }
+      }
+    })
+
+    toRemove.forEach(id => {
+      const ninja = ninjas.find(n => n.id === id)
+      if (!ninja) return
+      if (batchAttr === 'tags') {
+        if (batchTagValue) {
           updateNinja(id, { tags: (ninja.tags || []).filter(t => t !== batchTagValue) })
         }
       } else {
-        if (batchAcquisitionAction === 'set') {
-          if (!batchAcquisitionValue) return
-          updateNinja(id, { acquisition: batchAcquisitionValue })
-        } else {
+        // 仅当当前获取方式匹配时才清除
+        if (batchAcquisitionValue && ninja.acquisition === batchAcquisitionValue) {
           updateNinja(id, { acquisition: undefined })
         }
       }
@@ -266,15 +303,15 @@ export default function NinjaManageTab() {
 
     setBatchDialogOpen(false)
     setBatchSelectedIds(new Set())
+    setBatchOriginalIds(new Set())
   }
 
   const openBatchDialog = () => {
     setBatchAttr('tags')
     setBatchTagValue(ninjaTags[0] || '')
-    setBatchTagAction('add')
     setBatchAcquisitionValue(acquisitionOptions[0] || '')
-    setBatchAcquisitionAction('set')
     setBatchSelectedIds(new Set())
+    setBatchOriginalIds(new Set())
     setBatchSearchKeyword('')
     setBatchDialogOpen(true)
   }
@@ -590,11 +627,6 @@ export default function NinjaManageTab() {
                           >
                             {ninja.trend === 'up' ? '▲' : ninja.trend === 'down' ? '▼' : '●'}
                           </button>
-                          {ninja.acquisition && (
-                            <span className="absolute top-1 left-1 bg-background/70 backdrop-blur-sm text-[10px] rounded px-1 py-0.5 font-medium text-muted-foreground">
-                              {ninja.acquisition}
-                            </span>
-                          )}
                         </Card>
                         <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
                         <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -705,7 +737,6 @@ export default function NinjaManageTab() {
                 </Button>
               </div>
 
-              {/* 获取方式选择与删除 */}
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {acquisitionOptions.map((option) => {
                   const selected = form.acquisition === option
@@ -824,7 +855,7 @@ export default function NinjaManageTab() {
           <DialogHeader>
             <DialogTitle>批量管理</DialogTitle>
             <DialogDescription>
-              选择要调整的属性和值，勾选忍者后点击保存
+              选择要调整的属性值，已拥有该值的忍者会自动勾选。点击忍者可切换勾选状态，保存后将同步变更。
             </DialogDescription>
           </DialogHeader>
 
@@ -848,12 +879,12 @@ export default function NinjaManageTab() {
               </div>
             </div>
 
-            {/* 定位模式 */}
+            {/* 属性值选择 */}
             {batchAttr === 'tags' && (
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-muted-foreground">定位值：</span>
+                <span className="text-sm text-muted-foreground">选择定位：</span>
                 <Select value={batchTagValue} onValueChange={setBatchTagValue}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-[160px]">
                     <SelectValue placeholder="选择定位" />
                   </SelectTrigger>
                   <SelectContent>
@@ -862,31 +893,17 @@ export default function NinjaManageTab() {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <span className="text-sm text-muted-foreground">操作：</span>
-                <div className="flex bg-muted rounded-lg p-1 gap-1">
-                  <button
-                    onClick={() => setBatchTagAction('add')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${batchTagAction === 'add' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    添加
-                  </button>
-                  <button
-                    onClick={() => setBatchTagAction('remove')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${batchTagAction === 'remove' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    移除
-                  </button>
-                </div>
+                {ninjaTags.length === 0 && (
+                  <span className="text-xs text-muted-foreground">暂无定位标签</span>
+                )}
               </div>
             )}
 
-            {/* 获取方式模式 */}
             {batchAttr === 'acquisition' && (
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-muted-foreground">获取方式：</span>
+                <span className="text-sm text-muted-foreground">选择获取方式：</span>
                 <Select value={batchAcquisitionValue} onValueChange={setBatchAcquisitionValue}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-[160px]">
                     <SelectValue placeholder="选择获取方式" />
                   </SelectTrigger>
                   <SelectContent>
@@ -895,22 +912,9 @@ export default function NinjaManageTab() {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <span className="text-sm text-muted-foreground">操作：</span>
-                <div className="flex bg-muted rounded-lg p-1 gap-1">
-                  <button
-                    onClick={() => setBatchAcquisitionAction('set')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${batchAcquisitionAction === 'set' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    设置
-                  </button>
-                  <button
-                    onClick={() => setBatchAcquisitionAction('clear')}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors ${batchAcquisitionAction === 'clear' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    清除
-                  </button>
-                </div>
+                {acquisitionOptions.length === 0 && (
+                  <span className="text-xs text-muted-foreground">暂无获取方式</span>
+                )}
               </div>
             )}
 
@@ -924,7 +928,7 @@ export default function NinjaManageTab() {
                   className="pl-9"
                 />
               </div>
-              <span className="text-sm text-muted-foreground">已选 {batchSelectedIds.size} 位</span>
+              <span className="text-sm text-muted-foreground">已勾选 {batchSelectedIds.size} 位</span>
             </div>
 
             {/* 忍者列表 */}
@@ -981,8 +985,8 @@ export default function NinjaManageTab() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setBatchDialogOpen(false)}>取消</Button>
-            <Button onClick={handleBatchSave} disabled={batchSelectedIds.size === 0}>
-              保存 ({batchSelectedIds.size})
+            <Button onClick={handleBatchSave}>
+              保存
             </Button>
           </DialogFooter>
         </DialogContent>
