@@ -3870,6 +3870,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350583210",
           "scrollName": "幻术·一叶障",
           "priority": 2
+        },
+        {
+          "scrollId": "1783350886684",
+          "scrollName": "冰遁·爆雪",
+          "priority": 3
         }
       ]
     },
@@ -4496,23 +4501,23 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "宇智波鼬【晓·朱】",
       "scrolls": [
         {
+          "scrollId": "1783349114634",
+          "scrollName": "风遁·斩空波",
+          "priority": 1
+        },
+        {
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 3
-        },
-        {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
           "priority": 4
         }
       ]
@@ -4570,6 +4575,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "12",
           "scrollName": "火遁·烈焰弹",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 3
         }
       ]
     },
@@ -4652,6 +4662,30 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
           "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790213317604",
+      "ninjaId": "1790212950413",
+      "ninjaName": "大蛇丸【传说中的三忍】",
+      "scrolls": [
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790213333400",
+      "ninjaId": "1790213191185",
+      "ninjaName": "角度【晓·北】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
         }
       ]
     }
