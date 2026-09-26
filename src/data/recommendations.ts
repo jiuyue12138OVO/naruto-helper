@@ -606,14 +606,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783350008444",
           "scrollName": "秘卷·查克拉",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -1667,13 +1672,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1",
-          "scrollName": "风遁·风沙阵",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 2
         },
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
           "priority": 3
         }
       ]
@@ -1909,14 +1914,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
           "priority": 3
         },
         {
           "scrollId": "1783349379011",
           "scrollName": "风遁·真空波",
           "priority": 4
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 5
         }
       ]
     },
@@ -2799,13 +2809,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "艾【青年】",
       "scrolls": [
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "1783350518958",
+          "scrollName": "忍体术·毅力",
           "priority": 1
         },
         {
-          "scrollId": "1783350518958",
-          "scrollName": "忍体术·毅力",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 2
         },
         {
@@ -4780,6 +4790,415 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "id": "1790309491121",
       "ninjaId": "1790309407485",
       "ninjaName": "飞段",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790395751088",
+      "ninjaId": "1790395736001",
+      "ninjaName": "白【中秋限定】",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790396343253",
+      "ninjaId": "1790396327811",
+      "ninjaName": "夕日红【少女】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790396838808",
+      "ninjaId": "1790396811670",
+      "ninjaName": "佐井【中秋限定】",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1790397500512",
+      "ninjaId": "1790397483276",
+      "ninjaName": "宇智波带土【少年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349842473",
+          "scrollName": "木遁·扦插之术",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1790397798456",
+      "ninjaId": "1790397769770",
+      "ninjaName": "卯月夕颜【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790398090008",
+      "ninjaId": "1790398050154",
+      "ninjaName": "宇智波鼬【红夜之刃】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790398527096",
+      "ninjaId": "1790398468018",
+      "ninjaName": "萨姆伊【新春限定】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790398770257",
+      "ninjaId": "1790398737992",
+      "ninjaName": "奥摩伊",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1790399103251",
+      "ninjaId": "1790399043148",
+      "ninjaName": "君麻吕【漂泊浪客】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1790399552949",
+      "ninjaId": "1790399491995",
+      "ninjaName": "药师兜【新春限定】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1",
+          "scrollName": "风遁·风沙阵",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790399899041",
+      "ninjaId": "1790399847047",
+      "ninjaName": "重吾【忍界大战】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790400139424",
+      "ninjaId": "1790400124420",
+      "ninjaName": "二位由木人【新佩恩六道】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790400294302",
+      "ninjaId": "1790400268224",
+      "ninjaName": "矢仓【新佩恩六道】",
+      "scrolls": [
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 2
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790400466152",
+      "ninjaId": "1790400451030",
+      "ninjaName": "枫【七尾人柱力】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790400701110",
+      "ninjaId": "1790400687728",
+      "ninjaName": "枫【新佩恩六道】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790417380448",
+      "ninjaId": "1790417370499",
+      "ninjaName": "猿飞阿斯玛",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790430075659",
+      "ninjaId": "1790430061845",
+      "ninjaName": "佐井【最终章】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432908625",
+      "ninjaId": "1790431069404",
+      "ninjaName": "千手扉间【少年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432917947",
+      "ninjaId": "1790431282374",
+      "ninjaName": "宇智波斑【少年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432926880",
+      "ninjaId": "1790431443918",
+      "ninjaName": "千手柱间【少年】",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432942848",
+      "ninjaId": "1790431810337",
+      "ninjaName": "木叶丸军团",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 3
+        }
+      ]
+    },
+    {
+      "id": "1790432951869",
+      "ninjaId": "1790432078983",
+      "ninjaName": "神月出云",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432963018",
+      "ninjaId": "1790432141511",
+      "ninjaName": "不知火玄间",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790432976778",
+      "ninjaId": "1790432207733",
+      "ninjaName": "钢子铁",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783350008444",
+          "scrollName": "秘卷·查克拉",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1790432993671",
+      "ninjaId": "1790432406944",
+      "ninjaName": "次郎坊【秽土转生】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790433001899",
+      "ninjaId": "1790432687957",
+      "ninjaName": "并足雷同",
+      "scrolls": [
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1790433010884",
+      "ninjaId": "1790432893282",
+      "ninjaName": "月光疾风",
       "scrolls": [
         {
           "scrollId": "1783349647927",

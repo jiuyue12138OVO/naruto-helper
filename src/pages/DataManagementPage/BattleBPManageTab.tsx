@@ -38,7 +38,8 @@ export default function BattleBPManageTab() {
   const [searchCounterScroll, setSearchCounterScroll] = useState('')
   const [searchCounterSummon, setSearchCounterSummon] = useState('')
   const [searchConfigNinja, setSearchConfigNinja] = useState('')
-  const [currentTab, setCurrentTab] = useState('blind-pick')
+  // 默认标签页改为克制关系配置
+  const [currentTab, setCurrentTab] = useState('counter-config')
 
   // 当前忍者对应的克制关系
   const currentCounter = useMemo(() => {
@@ -215,7 +216,6 @@ export default function BattleBPManageTab() {
 
   const handleSaveCounter = () => {
     if (!selectedNinjaId) return
-    // 保存时按当前 counterNinjaIds 顺序保存
     const data: IBPCounter = {
       id: selectedCounterId || Date.now().toString(),
       ninjaId: selectedNinjaId,
@@ -246,69 +246,9 @@ export default function BattleBPManageTab() {
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab}>
       <TabsList className="grid w-full max-w-md grid-cols-2">
-        <TabsTrigger value="blind-pick">盲选位设置</TabsTrigger>
         <TabsTrigger value="counter-config">克制关系配置</TabsTrigger>
+        <TabsTrigger value="blind-pick">盲选位设置</TabsTrigger>
       </TabsList>
-
-      {/* ========== 盲选位设置 ========== */}
-      <TabsContent value="blind-pick" className="mt-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="space-y-6">
-              <div className="relative max-w-xs">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={searchNinja} onChange={e => setSearchNinja(e.target.value)} placeholder="搜索忍者..." className="pl-9" />
-              </div>
-
-              {sortedGroupedNinjas.length === 0 ? (
-                <div className="text-sm text-muted-foreground text-center py-12">未找到忍者</div>
-              ) : (
-                <div className="space-y-10">
-                  {sortedGroupedNinjas.map(group => (
-                    <div key={group.tier}>
-                      <div className="flex items-center gap-3 mb-4">
-                        <Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge>
-                        <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
-                      </div>
-                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
-                        {group.ninjas.map(ninja => (
-                          <div
-                            key={ninja.id}
-                            draggable={ninja.blindPick}
-                            onDragStart={ninja.blindPick ? (e) => handleDragStartBlind(e, ninja.id) : undefined}
-                            onDragOver={ninja.blindPick ? handleDragOverBlind : undefined}
-                            onDrop={ninja.blindPick ? (e) => handleDropBlind(e, ninja.id, group.tier) : undefined}
-                            className={`relative cursor-pointer group ${ninja.blindPick ? 'cursor-grab active:cursor-grabbing' : ''}`}
-                          >
-                            <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
-                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
-                              <div className="absolute bottom-0.5 right-0.5 z-10 flex items-center gap-0.5 bg-background/60 rounded p-0.5 backdrop-blur-sm">
-                                <input
-                                  type="checkbox"
-                                  checked={ninja.blindPick || false}
-                                  onChange={(e) => {
-                                    e.stopPropagation()
-                                    handleToggleBlind(ninja.id, e.target.checked)
-                                  }}
-                                  className="size-3.5 rounded border-border accent-primary"
-                                />
-                                {ninja.blindPick && (
-                                  <span className="text-[10px] text-primary font-bold leading-none">盲</span>
-                                )}
-                              </div>
-                            </Card>
-                            <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
 
       {/* ========== 克制关系配置（分数滑块 + 输入框） ========== */}
       <TabsContent value="counter-config" className="mt-6">
@@ -419,7 +359,6 @@ export default function BattleBPManageTab() {
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
-                              {/* 范围滑块 */}
                               <input
                                 type="range"
                                 min={-50}
@@ -428,7 +367,6 @@ export default function BattleBPManageTab() {
                                 onChange={(e) => handleScoreChange(id, Number(e.target.value))}
                                 className="w-32 h-2 accent-primary cursor-pointer"
                               />
-                              {/* 数字输入框 */}
                               <Input
                                 type="number"
                                 min={-50}
@@ -455,7 +393,6 @@ export default function BattleBPManageTab() {
                   )}
                 </div>
 
-                {/* 密卷 / 通灵（保持不变） */}
                 <div>
                   <Label>克制该忍者的密卷（可多选）</Label>
                   <div className="relative mt-2 mb-2">
@@ -517,6 +454,66 @@ export default function BattleBPManageTab() {
                 </Button>
               </>
             )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* ========== 盲选位设置 ========== */}
+      <TabsContent value="blind-pick" className="mt-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-6">
+              <div className="relative max-w-xs">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={searchNinja} onChange={e => setSearchNinja(e.target.value)} placeholder="搜索忍者..." className="pl-9" />
+              </div>
+
+              {sortedGroupedNinjas.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-12">未找到忍者</div>
+              ) : (
+                <div className="space-y-10">
+                  {sortedGroupedNinjas.map(group => (
+                    <div key={group.tier}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge>
+                        <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                      </div>
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
+                        {group.ninjas.map(ninja => (
+                          <div
+                            key={ninja.id}
+                            draggable={ninja.blindPick}
+                            onDragStart={ninja.blindPick ? (e) => handleDragStartBlind(e, ninja.id) : undefined}
+                            onDragOver={ninja.blindPick ? handleDragOverBlind : undefined}
+                            onDrop={ninja.blindPick ? (e) => handleDropBlind(e, ninja.id, group.tier) : undefined}
+                            className={`relative cursor-pointer group ${ninja.blindPick ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                          >
+                            <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
+                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
+                              <div className="absolute bottom-0.5 right-0.5 z-10 flex items-center gap-0.5 bg-background/60 rounded p-0.5 backdrop-blur-sm">
+                                <input
+                                  type="checkbox"
+                                  checked={ninja.blindPick || false}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleBlind(ninja.id, e.target.checked)
+                                  }}
+                                  className="size-3.5 rounded border-border accent-primary"
+                                />
+                                {ninja.blindPick && (
+                                  <span className="text-[10px] text-primary font-bold leading-none">盲</span>
+                                )}
+                              </div>
+                            </Card>
+                            <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </TabsContent>

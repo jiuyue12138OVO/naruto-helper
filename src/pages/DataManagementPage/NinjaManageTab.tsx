@@ -120,8 +120,8 @@ export default function NinjaManageTab() {
   const [newAcquisition, setNewAcquisition] = useState('')
   const [acquisitionToDelete, setAcquisitionToDelete] = useState<string | null>(null)
 
-  // 当前选中的选项卡
-  const [currentTab, setCurrentTab] = useState('table')
+  // 当前选中的选项卡（默认梯度视图）
+  const [currentTab, setCurrentTab] = useState('grid')
 
   // 梯度视图的搜索关键词
   const [gridSearchKeyword, setGridSearchKeyword] = useState('')
@@ -424,15 +424,106 @@ export default function NinjaManageTab() {
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
         <TabsList className="grid w-full max-w-xs grid-cols-2">
-          <TabsTrigger value="table" className="gap-1.5">
-            <Table2 className="size-4" />
-            表格模式
-          </TabsTrigger>
           <TabsTrigger value="grid" className="gap-1.5">
             <LayoutGrid className="size-4" />
             梯度视图
           </TabsTrigger>
+          <TabsTrigger value="table" className="gap-1.5">
+            <Table2 className="size-4" />
+            表格模式
+          </TabsTrigger>
         </TabsList>
+
+        {/* 梯度视图 */}
+        <TabsContent value="grid" className="mt-6">
+          <div className="relative max-w-xs mb-6">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={gridSearchKeyword}
+              onChange={(e) => setGridSearchKeyword(e.target.value)}
+              placeholder="搜索忍者..."
+              className="pl-9"
+            />
+            {gridSearchKeyword && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
+                onClick={() => setGridSearchKeyword('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-10">
+            {groupedNinjas.map(group => (
+              <div
+                key={group.tier}
+                onDragOver={handleGridDragOver}
+                onDrop={(e) => handleGridDrop(e, group.tier)}
+                className={`rounded-lg border-2 border-dashed border-transparent hover:border-primary/30 transition-colors p-2`}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <Badge variant="outline" className={cn('text-sm font-bold px-3 py-1', TIER_COLORS[group.tier])}>
+                    {group.tier}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                </div>
+
+                {group.ninjas.length === 0 ? (
+                  <div className="text-sm text-muted-foreground text-center py-8">拖拽忍者到此梯度</div>
+                ) : (
+                  <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
+                    {group.ninjas.map(ninja => (
+                      <div
+                        key={ninja.id}
+                        draggable
+                        onDragStart={(e) => handleGridDragStart(e, ninja.id)}
+                        className="cursor-grab active:cursor-grabbing group relative"
+                      >
+                        <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
+                          <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
+                          <button
+                            className={`absolute bottom-1 left-1 z-10 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold bg-background/60 backdrop-blur-sm transition-colors ${
+                              ninja.trend === 'up' ? 'text-red-500' : ninja.trend === 'down' ? 'text-green-500' : 'text-muted-foreground/60'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleTrend(ninja.id);
+                            }}
+                            title="点击切换升降标记"
+                          >
+                            {ninja.trend === 'up' ? '▲' : ninja.trend === 'down' ? '▼' : '●'}
+                          </button>
+                        </Card>
+                        <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
+                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="h-6 w-6 rounded-full"
+                            onClick={() => openEdit(ninja)}
+                          >
+                            <Pencil className="size-3" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            className="h-6 w-6 rounded-full"
+                            onClick={() => setDeleteId(ninja.id)}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </TabsContent>
 
         {/* 表格模式 */}
         <TabsContent value="table" className="mt-6">
@@ -563,97 +654,6 @@ export default function NinjaManageTab() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* 梯度视图 */}
-        <TabsContent value="grid" className="mt-6">
-          <div className="relative max-w-xs mb-6">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={gridSearchKeyword}
-              onChange={(e) => setGridSearchKeyword(e.target.value)}
-              placeholder="搜索忍者..."
-              className="pl-9"
-            />
-            {gridSearchKeyword && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
-                onClick={() => setGridSearchKeyword('')}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          <div className="space-y-10">
-            {groupedNinjas.map(group => (
-              <div
-                key={group.tier}
-                onDragOver={handleGridDragOver}
-                onDrop={(e) => handleGridDrop(e, group.tier)}
-                className={`rounded-lg border-2 border-dashed border-transparent hover:border-primary/30 transition-colors p-2`}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="outline" className={cn('text-sm font-bold px-3 py-1', TIER_COLORS[group.tier])}>
-                    {group.tier}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
-                </div>
-
-                {group.ninjas.length === 0 ? (
-                  <div className="text-sm text-muted-foreground text-center py-8">拖拽忍者到此梯度</div>
-                ) : (
-                  <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
-                    {group.ninjas.map(ninja => (
-                      <div
-                        key={ninja.id}
-                        draggable
-                        onDragStart={(e) => handleGridDragStart(e, ninja.id)}
-                        className="cursor-grab active:cursor-grabbing group relative"
-                      >
-                        <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
-                          <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
-                          <button
-                            className={`absolute bottom-1 left-1 z-10 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold bg-background/60 backdrop-blur-sm transition-colors ${
-                              ninja.trend === 'up' ? 'text-red-500' : ninja.trend === 'down' ? 'text-green-500' : 'text-muted-foreground/60'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleTrend(ninja.id);
-                            }}
-                            title="点击切换升降标记"
-                          >
-                            {ninja.trend === 'up' ? '▲' : ninja.trend === 'down' ? '▼' : '●'}
-                          </button>
-                        </Card>
-                        <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
-                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="h-6 w-6 rounded-full"
-                            onClick={() => openEdit(ninja)}
-                          >
-                            <Pencil className="size-3" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            className="h-6 w-6 rounded-full"
-                            onClick={() => setDeleteId(ninja.id)}
-                          >
-                            <Trash2 className="size-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
 

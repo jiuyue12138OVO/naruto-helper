@@ -61,7 +61,7 @@ const DEFAULT_NINJA_TAGS = [
   "高机动性", "大招特殊情况可接", "防反", "瞬发"
 ]
 
-const DEFAULT_ACQUISITION_OPTIONS = [' 高招 ',' 点券 ',' 忍法帖 ',' 蓝券 ',' 直购 ',' 金币 ',' 免费 ',' 组织限定 ',' 巅峰对决 ',' 生存挑战 ',' 积分赛 ',' 祈愿夺宝 ',' 其它方式 ',' 幸运贩售屋 ',' 特权商店']
+const DEFAULT_ACQUISITION_OPTIONS = [' 高招 ',' 点券 ',' 忍法帖 ',' 蓝券 ',' 直购 ',' 金币 ',' 免费 ',' 组织限定 ',' 巅峰对决 ',' 生存挑战 ',' 积分赛 ',' 祈愿夺宝 ',' 幸运贩售屋 ',' 特权商店',' 充值领取',' 其它方式 ']
 
 interface DataContextType {
   ninjas: INinja[]
