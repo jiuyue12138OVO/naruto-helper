@@ -440,7 +440,7 @@ export default function BattleBPManageTab() {
                             : [...prev.counterSummonIds, s.id]
                         }))}
                       >
-                        <div className="w-5 h-5 rounded overflow-hidden shrink-0">
+                        <div className="w-5 h-5 rounded-full overflow-hidden shrink-0">
                           <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
                         </div>
                         <span className="text-xs">{s.name}</span>

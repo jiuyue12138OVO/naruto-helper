@@ -633,7 +633,7 @@ export default function BPRoomPage() {
                         <span className="text-xs text-muted-foreground">?</span>
                       )}
                     </div>
-                    <div className="w-6 h-6 rounded border flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full border overflow-hidden flex items-center justify-center">
                       {showSummons ? (
                         roomState!.summons1P[i] ? <Image src={summons.find(s => s.id === roomState!.summons1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>
                       ) : (
@@ -664,7 +664,7 @@ export default function BPRoomPage() {
                         <span className="text-xs text-muted-foreground">?</span>
                       )}
                     </div>
-                    <div className="w-6 h-6 rounded border flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full border overflow-hidden flex items-center justify-center">
                       {showSummons ? (
                         roomState!.summons2P[i] ? <Image src={summons.find(s => s.id === roomState!.summons2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>
                       ) : (
@@ -959,7 +959,7 @@ export default function BPRoomPage() {
                               <div className="w-6 h-6 border rounded flex items-center justify-center">
                                 {record.scrolls1P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
-                              <div className="w-6 h-6 border rounded flex items-center justify-center">
+                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
                                 {record.summons1P[i] ? <Image src={summons.find(s => s.id === record.summons1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
                             </div>
@@ -981,7 +981,7 @@ export default function BPRoomPage() {
                               <div className="w-6 h-6 border rounded flex items-center justify-center">
                                 {record.scrolls2P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
-                              <div className="w-6 h-6 border rounded flex items-center justify-center">
+                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
                                 {record.summons2P[i] ? <Image src={summons.find(s => s.id === record.summons2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
                             </div>

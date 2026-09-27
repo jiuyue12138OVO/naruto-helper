@@ -58,7 +58,7 @@ export default function ScrollsPhase({
                   <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
                     {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
                   </div>
-                  <div className="w-8 h-8 border rounded flex items-center justify-center opacity-50">
+                  <div className="w-8 h-8 border rounded-full flex items-center justify-center opacity-50">
                     <span className="text-xs text-muted-foreground">-</span>
                   </div>
                 </div>
@@ -145,7 +145,7 @@ export default function ScrollsPhase({
                 >
                   {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">+</span>}
                 </div>
-                <div className="w-8 h-8 border rounded flex items-center justify-center opacity-50">
+                <div className="w-8 h-8 border rounded-full flex items-center justify-center opacity-50">
                   <span className="text-xs text-muted-foreground">-</span>
                 </div>
               </div>

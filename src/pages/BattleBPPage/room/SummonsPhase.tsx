@@ -64,7 +64,7 @@ export default function SummonsPhase({
                   <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
                     {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
                   </div>
-                  <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
+                  <div className="w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center bg-muted/30">
                     {summon ? <Image src={summon.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function SummonsPhase({
                   {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
                 </div>
                 <div
-                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${
+                  className={`w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center cursor-pointer hover:border-primary ${
                     isActive ? 'border-primary ring-2 ring-primary' : ''
                   } ${isConfirmed ? 'bg-red-500/20 border-red-500' : ''}`}
                   onClick={() => toggleActive(i)}
@@ -178,7 +178,7 @@ export default function SummonsPhase({
                 className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg ${isUsed ? 'opacity-50' : 'hover:bg-muted/50'}`}
                 onClick={() => !isUsed && handleSelectFromGrid(summon.id)}
               >
-                <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-border/40 bg-card">
                   <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs text-center leading-tight">{summon.name}</span>

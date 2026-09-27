@@ -121,6 +121,20 @@ export default function ScrollPage() {
               <TabsTrigger value="ninjaToScroll">选忍者看密卷</TabsTrigger>
             </TabsList>
 
+            {mode === 'scrollToNinja' && (
+              <div className="flex items-center gap-2">
+                <Label htmlFor="scroll-exclusive-toggle" className="text-sm cursor-pointer select-none flex items-center gap-1.5">
+                  {showExclusive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  显示专属
+                </Label>
+                <Switch
+                  id="scroll-exclusive-toggle"
+                  checked={showExclusive}
+                  onCheckedChange={setShowExclusive}
+                />
+              </div>
+            )}
+
             {mode === 'ninjaToScroll' && (
               <div className="flex items-center gap-2">
                 <Label htmlFor="ninja-best-toggle" className="text-sm cursor-pointer select-none">
@@ -137,20 +151,6 @@ export default function ScrollPage() {
 
           {/* ===== A 模式：选密卷看忍者 ===== */}
           <TabsContent value="scrollToNinja" className="mt-6 space-y-6">
-            {/* 显示专属开关 */}
-            <div className="flex items-center justify-end">
-              <Label htmlFor="scroll-exclusive-toggle" className="text-sm cursor-pointer select-none flex items-center gap-1.5">
-                {showExclusive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                显示专属
-              </Label>
-              <Switch
-                id="scroll-exclusive-toggle"
-                checked={showExclusive}
-                onCheckedChange={setShowExclusive}
-                className="ml-2"
-              />
-            </div>
-
             <div className="relative max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={searchScroll} onChange={e => setSearchScroll(e.target.value)} placeholder="搜索密卷名称..." className="pl-9 pr-9" />

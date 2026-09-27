@@ -336,12 +336,12 @@ export default function SimulateBPTab() {
             </div>
             <div
               onClick={() => handleScrollSummonSlotClick(player, index, 'summon')}
-              className={`w-8 h-8 rounded border flex items-center justify-center cursor-pointer hover:border-primary ${
+              className={`w-8 h-8 rounded-full overflow-hidden border flex items-center justify-center cursor-pointer hover:border-primary ${
                 activeSummonSlot ? 'ring-2 ring-primary' : 'border-border/40'
               } ${!isSummons ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {summonId ? (
-                <Image src={summons.find(s => s.id === summonId)!.imageUrl} className="w-full h-full object-cover rounded" alt="" />
+                <Image src={summons.find(s => s.id === summonId)!.imageUrl} className="w-full h-full object-cover" alt="" />
               ) : (
                 <span className="text-xs text-muted-foreground">{isSummons ? '+' : '-'}</span>
               )}
@@ -369,7 +369,7 @@ export default function SimulateBPTab() {
             <span className="text-xs text-muted-foreground">-</span>
           )}
         </div>
-        <div className="w-8 h-8 rounded overflow-hidden border border-border/40 bg-card flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full overflow-hidden border border-border/40 bg-card flex items-center justify-center">
           {summonId ? (
             <Image src={summons.find(s => s.id === summonId)!.imageUrl} alt="" className="w-full h-full object-cover" />
           ) : (

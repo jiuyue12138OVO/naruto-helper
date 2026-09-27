@@ -1453,7 +1453,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "大招特殊情况可接"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "点券"
     },
     {
@@ -4291,7 +4291,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1790431443918",
       "name": "千手柱间【少年】",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "霸体",
@@ -4304,7 +4304,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1790431810337",
       "name": "木叶丸军团",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "抓取",
@@ -4318,7 +4318,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1790432078983",
       "name": "神月出云",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "抓取",
@@ -4333,7 +4333,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1790432141511",
       "name": "不知火玄间",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "突进",
@@ -4393,7 +4393,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1790432893282",
       "name": "月光疾风",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "突进",

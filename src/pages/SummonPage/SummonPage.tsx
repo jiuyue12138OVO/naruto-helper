@@ -83,10 +83,10 @@ export default function SummonPage() {
               <motion.div key={summon.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.03 }}
                 whileHover={{ y: -4 }} className="cursor-pointer" onClick={() => setSelectedSummon(summon)}
               >
-                <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
-                  <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
+                <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center rounded-full relative">
+                  <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover rounded-full hover:scale-105 transition-transform duration-300" />
                   {showExclusive && summon.isExclusive && (
-                    <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium">专属</span>
+                    <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium whitespace-nowrap">专属</span>
                   )}
                 </Card>
                 <p className="text-xs text-muted-foreground truncate text-center mt-1">{summon.name}</p>
