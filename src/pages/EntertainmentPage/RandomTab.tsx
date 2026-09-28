@@ -289,7 +289,7 @@ export default function RandomTab() {
                       const status = scrollStatus[scroll.id]
                       return (
                         <div key={scroll.id} className="cursor-pointer flex flex-col items-center w-14" onClick={() => cycleStatus(scroll.id, setScrollStatus)}>
-                          <div className={`w-10 h-10 rounded-md overflow-hidden border-2 ${status === 'include' ? 'border-primary' : status === 'exclude' ? 'border-destructive' : 'border-border/40'} bg-card`}>
+                          <div className={`w-10 h-10 rounded-full overflow-hidden border-2 ${status === 'include' ? 'border-primary' : status === 'exclude' ? 'border-destructive' : 'border-border/40'} bg-card`}>
                             <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
                           </div>
                           <span className={`text-xs mt-0.5 text-center leading-tight truncate max-w-full ${status === 'exclude' ? 'text-destructive' : 'text-muted-foreground'}`}>
@@ -384,7 +384,7 @@ export default function RandomTab() {
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-sm text-muted-foreground">随机密卷</span>
                     <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5">
-                      <div className="w-8 h-8 rounded overflow-hidden border border-border/40 bg-card">
+                      <div className="w-8 h-8 rounded-full overflow-hidden border border-border/40 bg-card">
                         <Image src={scrolls.find(s => s.id === resultScroll)?.imageUrl ?? ''} alt="" className="w-full h-full object-cover" />
                       </div>
                       <span className="text-sm">{scrolls.find(s => s.id === resultScroll)?.name}</span>

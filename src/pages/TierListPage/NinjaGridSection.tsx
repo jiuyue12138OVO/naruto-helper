@@ -139,7 +139,7 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
           </DialogHeader>
           {selectedNinja && (
             <div className="space-y-4">
-              <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+              <div className="w-32 h-32 mx-auto rounded-lg overflow-hidden bg-muted">
                 <Image
                   src={selectedNinja.imageUrl}
                   alt={selectedNinja.name}

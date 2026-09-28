@@ -102,7 +102,7 @@ export default function SharedTeamTab({
                   </div>
                   {randomScrollEnabled && teamScrolls[idx] && (
                     <div className="flex items-center gap-1 mt-1">
-                      <div className="w-6 h-6 rounded overflow-hidden border border-border/40 bg-card">
+                      <div className="w-6 h-6 rounded-full overflow-hidden border border-border/40 bg-card">
                         <Image src={scrolls.find(s => s.id === teamScrolls[idx])?.imageUrl ?? ''} alt="" className="w-full h-full object-cover" />
                       </div>
                       <span className="text-xs text-muted-foreground">{scrolls.find(s => s.id === teamScrolls[idx])?.name}</span>

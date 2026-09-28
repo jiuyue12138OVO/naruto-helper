@@ -55,7 +55,7 @@ export default function ScrollsPhase({
                   {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>}
                 </div>
                 <div className="flex gap-1">
-                  <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
+                  <div className="w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center bg-muted/30">
                     {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
                   </div>
                   <div className="w-8 h-8 border rounded-full flex items-center justify-center opacity-50">
@@ -138,7 +138,7 @@ export default function ScrollsPhase({
               </div>
               <div className="flex gap-1">
                 <div
-                  className={`w-8 h-8 border rounded flex items-center justify-center cursor-pointer hover:border-primary ${
+                  className={`w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center cursor-pointer hover:border-primary ${
                     isActive ? 'border-primary ring-2 ring-primary' : ''
                   } ${isConfirmed ? 'bg-red-500/20 border-red-500' : ''}`}
                   onClick={() => toggleActive(i)}
@@ -170,7 +170,7 @@ export default function ScrollsPhase({
                 className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg ${isUsed ? 'opacity-50' : 'hover:bg-muted/50'}`}
                 onClick={() => !isUsed && handleSelectFromGrid(scroll.id)}
               >
-                <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-border/40 bg-card">
                   <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs text-center leading-tight">{scroll.name}</span>

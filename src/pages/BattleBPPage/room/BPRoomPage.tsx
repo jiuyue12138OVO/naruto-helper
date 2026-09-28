@@ -626,7 +626,7 @@ export default function BPRoomPage() {
                     {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">空</span>}
                   </div>
                   <div className="flex gap-1">
-                    <div className="w-6 h-6 rounded border flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full overflow-hidden border flex items-center justify-center">
                       {showScrolls ? (
                         roomState!.scrolls1P[i] ? <Image src={scrolls.find(s => s.id === roomState!.scrolls1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>
                       ) : (
@@ -657,7 +657,7 @@ export default function BPRoomPage() {
                     {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">空</span>}
                   </div>
                   <div className="flex gap-1">
-                    <div className="w-6 h-6 rounded border flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full overflow-hidden border flex items-center justify-center">
                       {showScrolls ? (
                         roomState!.scrolls2P[i] ? <Image src={scrolls.find(s => s.id === roomState!.scrolls2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>
                       ) : (
@@ -956,7 +956,7 @@ export default function BPRoomPage() {
                               ) : <span className="text-xs text-muted-foreground">-</span>}
                             </div>
                             <div className="flex gap-1">
-                              <div className="w-6 h-6 border rounded flex items-center justify-center">
+                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
                                 {record.scrolls1P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
                               <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
@@ -978,7 +978,7 @@ export default function BPRoomPage() {
                               ) : <span className="text-xs text-muted-foreground">-</span>}
                             </div>
                             <div className="flex gap-1">
-                              <div className="w-6 h-6 border rounded flex items-center justify-center">
+                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
                                 {record.scrolls2P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
                               </div>
                               <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">

@@ -374,7 +374,7 @@ export default function ScrollManageTab() {
                     const ninjaCount = ninjaIds.length
                     return (
                       <div key={variant.id} className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
-                        <div className="w-10 h-10 rounded-md overflow-hidden border shrink-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border shrink-0">
                           <Image src={variant.imageUrl || form.imageUrl} alt={variant.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">

@@ -145,7 +145,7 @@ export default function SummonsPhase({
                 {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>}
               </div>
               <div className="flex gap-1">
-                <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
+                <div className="w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center bg-muted/30">
                   {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
                 </div>
                 <div

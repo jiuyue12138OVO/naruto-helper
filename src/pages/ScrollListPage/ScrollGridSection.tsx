@@ -56,7 +56,7 @@ export default function ScrollGridSection({ scrolls, showExclusive }: ScrollGrid
             <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors group aspect-square flex items-center justify-center p-1 relative">
               <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
               {showExclusive && scroll.variants && scroll.variants.length > 0 && (
-                <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium">专属</span>
+                <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium whitespace-nowrap">专属</span>
               )}
             </Card>
             <p className="text-xs text-muted-foreground truncate text-center mt-1 leading-tight">{scroll.name}</p>

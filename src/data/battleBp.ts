@@ -131,7 +131,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783349280153",
         "1783349379011",
         "1783349488627",
-        "9"
+        "9",
+        "1783350438746"
       ],
       "counterSummonIds": [
         "1783587352179",
@@ -786,7 +787,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterScrollIds": [],
       "counterSummonIds": [
-        "1"
+        "1",
+        "1783588906858"
       ],
       "counterNinjaScores": {
         "1783309398928": 45,
@@ -901,6 +903,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309880298",
         "1783309398928",
         "2",
+        "18",
         "10"
       ],
       "counterScrollIds": [
@@ -918,6 +921,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "counterNinjaScores": {
         "2": 25,
         "10": 10,
+        "18": 20,
         "1783309783866": 40,
         "1783310541594": 40,
         "1783309880298": 30,
@@ -1122,6 +1126,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309829510",
         "1783309627781",
         "1783309046156",
+        "1783308961488",
         "11",
         "9"
       ],
@@ -1151,7 +1156,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309850660": 40,
         "1783309829510": 30,
         "1783308767737": 50,
-        "1783309627781": 30
+        "1783309627781": 30,
+        "1783308961488": 15
       }
     },
     {
@@ -1173,7 +1179,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783349328947",
         "1783350886684",
         "1783349488627",
-        "1783349062619"
+        "1783349062619",
+        "1783350480900"
       ],
       "counterSummonIds": [
         "1783588233106",
@@ -1187,7 +1194,7 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309783866": 35,
         "1783309208477": 50,
         "1783308767737": 50,
-        "1783310586721": 40,
+        "1783310586721": 45,
         "1783309627781": 30,
         "1783315526387": 30
       }
@@ -1290,7 +1297,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783587352179",
         "1783587626528",
         "1783588906858",
-        "1783590454028"
+        "1783590454028",
+        "1783589300960"
       ],
       "counterNinjaScores": {
         "1783309415054": 30,
@@ -1596,14 +1604,21 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1783763642711",
       "ninjaId": "1783309749818",
       "counterNinjaIds": [
+        "1783309186224",
         "1783309162593"
       ],
       "counterScrollIds": [
         "1783349062619",
         "1783349114634"
       ],
-      "counterSummonIds": [],
-      "counterNinjaScores": {}
+      "counterSummonIds": [
+        "1783587234386",
+        "1783587352179"
+      ],
+      "counterNinjaScores": {
+        "1783309162593": 30,
+        "1783309186224": 40
+      }
     },
     {
       "id": "1783763692699",
@@ -2074,13 +2089,23 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       "id": "1784369811865",
       "ninjaId": "1784343865068",
       "counterNinjaIds": [
+        "3",
         "1783310187740",
         "1783315719485",
         "1783310494403",
         "9"
       ],
       "counterScrollIds": [],
-      "counterSummonIds": []
+      "counterSummonIds": [
+        "1783588339092"
+      ],
+      "counterNinjaScores": {
+        "3": 45,
+        "9": -10,
+        "1783315719485": 30,
+        "1783310494403": 30,
+        "1783310187740": 30
+      }
     },
     {
       "id": "1784382188732",
@@ -2213,7 +2238,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783588271625",
         "1783587820594",
         "1783588411488",
-        "1783589093236"
+        "1783589093236",
+        "1783588233106"
       ],
       "counterNinjaScores": {
         "1783309415054": 50,
@@ -2274,12 +2300,14 @@ export const MOCK_COUNTERS: IBPCounter[] = [
         "1783309186224",
         "1783309783866"
       ],
-      "counterScrollIds": [],
+      "counterScrollIds": [
+        "1783349488627"
+      ],
       "counterSummonIds": [],
       "counterNinjaScores": {
         "1783309783866": 30,
         "1783308767737": 50,
-        "1783309186224": 40
+        "1783309186224": 50
       }
     },
     {

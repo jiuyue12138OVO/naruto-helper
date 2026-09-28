@@ -454,7 +454,7 @@ export default function RecommendationManageTab() {
                           onChange={() => toggleScrollSelection(scroll.id)}
                           className="size-4 rounded border-border accent-primary disabled:cursor-not-allowed"
                         />
-                        <div className="w-8 h-8 rounded overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
                           {scroll.imageUrl ? (
                             <img src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
                           ) : (
@@ -500,7 +500,7 @@ export default function RecommendationManageTab() {
                           <Badge variant="outline" className="text-xs font-mono">
                             {idx + 1}
                           </Badge>
-                          <div className="w-6 h-6 rounded overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
                             {scroll?.imageUrl ? (
                               <img src={scroll.imageUrl} alt={entry.scrollName} className="w-full h-full object-cover" />
                             ) : (

@@ -214,7 +214,7 @@ export default function CounterTab() {
                             <div className="flex flex-wrap gap-2 mt-1">
                               {scrollList.map(s => (
                                 <div key={s.id} className="flex flex-col items-center w-14">
-                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                  <div className="w-10 h-10 rounded-full overflow-hidden border border-border/40 bg-card">
                                     <Image src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
                                   </div>
                                   <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{s.name}</span>

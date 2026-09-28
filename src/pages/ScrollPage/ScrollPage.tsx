@@ -162,10 +162,10 @@ export default function ScrollPage() {
               <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
                 {filteredScrolls.map((scroll, i) => (
                   <motion.div key={scroll.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.03 }} whileHover={{ y: -4 }} className="cursor-pointer" onClick={() => setSelectedScroll(scroll)}>
-                    <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
-                      <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
+                    <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center rounded-full relative">
+                      <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover rounded-full hover:scale-105 transition-transform duration-300" />
                       {showExclusive && scroll.variants && scroll.variants.length > 0 && (
-                        <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium">专属</span>
+                        <span className="absolute top-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded px-1 py-0.5 font-medium whitespace-nowrap">专属</span>
                       )}
                     </Card>
                     <p className="text-xs text-muted-foreground truncate text-center mt-1">{scroll.name}</p>
@@ -197,7 +197,7 @@ export default function ScrollPage() {
                             <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
                               <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
                               {bestScroll && (
-                                <div className="absolute bottom-0.5 right-0.5 w-5 h-5 rounded overflow-hidden border border-border/60 bg-card shadow-sm" title={`最优密卷：${bestScroll.name}`}>
+                                <div className="absolute bottom-0.5 right-0.5 w-5 h-5 rounded-full overflow-hidden border border-border/60 bg-card shadow-sm" title={`最优密卷：${bestScroll.name}`}>
                                   <Image src={bestScroll.imageUrl} alt={bestScroll.name} className="w-full h-full object-cover" />
                                 </div>
                               )}
@@ -254,7 +254,7 @@ export default function ScrollPage() {
                     </TabsList>
 
                     <TabsContent value="original" className="space-y-4">
-                      <div className="aspect-video rounded-lg overflow-hidden bg-muted"><Image src={selectedScroll.imageUrl} alt={selectedScroll.name} className="w-full h-full object-cover" /></div>
+                      <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-muted"><Image src={selectedScroll.imageUrl} alt={selectedScroll.name} className="w-full h-full object-cover" /></div>
                       <div className="space-y-2 text-sm">
                         <p><span className="font-medium">效果：</span>{selectedScroll.description}</p>
                         <p className="flex items-center gap-1"><Clock className="size-3.5 text-muted-foreground" /><span className="font-medium">冷却：</span>{selectedScroll.cooldown}</p>
@@ -269,7 +269,7 @@ export default function ScrollPage() {
                             return (
                               <div key={variant.id} className="flex gap-3 bg-muted/40 rounded-lg p-3">
                                 <div className="flex flex-col items-center w-1/3 shrink-0">
-                                  <div className="w-full aspect-square rounded-md overflow-hidden border bg-card">
+                                  <div className="w-full aspect-square rounded-full overflow-hidden border bg-card">
                                     <Image src={variant.imageUrl || selectedScroll.imageUrl} alt={variant.name} className="w-full h-full object-cover" />
                                   </div>
                                   <p className="text-sm font-medium mt-1 text-center">{variant.name}</p>
@@ -314,7 +314,7 @@ export default function ScrollPage() {
                                     <div className="relative w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
                                       <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                                       {bestScroll && (
-                                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded overflow-hidden border border-border/60 bg-card" title={`最优密卷：${bestScroll.name}`}>
+                                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full overflow-hidden border border-border/60 bg-card" title={`最优密卷：${bestScroll.name}`}>
                                           <Image src={bestScroll.imageUrl} alt={bestScroll.name} className="w-full h-full object-cover" />
                                         </div>
                                       )}
@@ -356,14 +356,14 @@ export default function ScrollPage() {
                           return (
                             <div key={s.scrollId} className="flex items-center gap-2 bg-muted/40 rounded px-2 py-1">
                               <Badge variant="outline" className="text-xs font-mono shrink-0 w-5 h-5 flex items-center justify-center rounded-full p-0">{idx + 1}</Badge>
-                              <div className="w-8 h-8 rounded overflow-hidden shrink-0">
+                              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
                                 {s.detail?.imageUrl ? <Image src={s.detail.imageUrl} alt={s.scrollName} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-muted"><ScrollText className="size-4 text-muted-foreground" /></div>}
                               </div>
                               <span className="text-sm flex-1 truncate">{s.scrollName}</span>
                               {variant && (
                                 <div className="flex items-center gap-1 shrink-0">
                                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                  <div className="w-6 h-6 rounded overflow-hidden border">
+                                  <div className="w-6 h-6 rounded-full overflow-hidden border">
                                     <Image src={variant.imageUrl || s.detail?.imageUrl || ''} alt="" className="w-full h-full object-cover" />
                                   </div>
                                   <span className="text-xs text-muted-foreground truncate max-w-[60px]">{variant.name}</span>

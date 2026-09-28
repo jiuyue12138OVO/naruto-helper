@@ -324,12 +324,12 @@ export default function SimulateBPTab() {
           <div className="flex gap-1 mt-1">
             <div
               onClick={() => handleScrollSummonSlotClick(player, index, 'scroll')}
-              className={`w-8 h-8 rounded border flex items-center justify-center cursor-pointer hover:border-primary ${
+              className={`w-8 h-8 rounded-full overflow-hidden border flex items-center justify-center cursor-pointer hover:border-primary ${
                 activeScrollSlot ? 'ring-2 ring-primary' : 'border-border/40'
               } ${!isScrolls ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {scrollId ? (
-                <Image src={scrolls.find(s => s.id === scrollId)!.imageUrl} className="w-full h-full object-cover rounded" alt="" />
+                <Image src={scrolls.find(s => s.id === scrollId)!.imageUrl} className="w-full h-full object-cover" alt="" />
               ) : (
                 <span className="text-xs text-muted-foreground">{isScrolls ? '+' : '-'}</span>
               )}
@@ -362,7 +362,7 @@ export default function SimulateBPTab() {
         )}
       </div>
       <div className="flex gap-1 mt-1 items-center">
-        <div className="w-8 h-8 rounded overflow-hidden border border-border/40 bg-card flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full overflow-hidden border border-border/40 bg-card flex items-center justify-center">
           {scrollId ? (
             <Image src={scrolls.find(s => s.id === scrollId)!.imageUrl} alt="" className="w-full h-full object-cover" />
           ) : (

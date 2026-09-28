@@ -100,7 +100,7 @@ export default function SummonPage() {
             <DialogHeader><DialogTitle>{selectedSummon?.name}</DialogTitle></DialogHeader>
             {selectedSummon && (
               <div className="space-y-4">
-                <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden bg-muted">
                   <Image src={selectedSummon.imageUrl} alt={selectedSummon.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="space-y-1">
