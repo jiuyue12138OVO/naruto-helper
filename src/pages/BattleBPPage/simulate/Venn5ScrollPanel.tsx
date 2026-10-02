@@ -31,6 +31,7 @@ export default function Venn5ScrollPanel({
   const [search, setSearch] = useState('')
   const [scoreItem, setScoreItem] = useState<IScroll | ISummon | null>(null)
   const [expandedRegion, setExpandedRegion] = useState<RegionKey | null>(null)
+  const [showAll, setShowAll] = useState(false)
 
   const [T2, T1, T3] = targets
 
@@ -76,11 +77,27 @@ export default function Venn5ScrollPanel({
     return map
   }, [availableItems, T1, T2, T3, counters, type])
 
+  // 全部可用（合并所有区域 + 不克制任何目标的）
+  const allAvailableScored = useMemo(() => {
+    const merged = new Map<string, { item: IScroll | ISummon; sr: ScoreResult }>()
+    Object.values(regions).forEach(arr => {
+      arr.forEach(x => {
+        if (!merged.has(x.item.id)) merged.set(x.item.id, x)
+      })
+    })
+    availableItems.forEach(item => {
+      if (!merged.has(item.id)) {
+        merged.set(item.id, { item, sr: scoreOf(item.id) })
+      }
+    })
+    return Array.from(merged.values()).sort((a, b) => b.sr.total - a.sr.total)
+  }, [regions, availableItems, type])
+
   const filteredAll = useMemo(() => {
-    if (!search.trim()) return []
+    if (!search.trim()) return allAvailableScored
     const kw = search.toLowerCase()
-    return Object.values(regions).flat().filter(x => x.item.name.toLowerCase().includes(kw))
-  }, [regions, search])
+    return allAvailableScored.filter(x => x.item.name.toLowerCase().includes(kw))
+  }, [allAvailableScored, search])
 
   const renderItemIcon = (item: IScroll | ISummon, sr: ScoreResult) => {
     const isPending = pendingItemId === item.id
@@ -136,30 +153,58 @@ export default function Venn5ScrollPanel({
 
   return (
     <div className="space-y-4 mt-4">
-      <div className="relative max-w-md mx-auto">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`搜索${type === 'scroll' ? '密卷' : '通灵'}...`} className="pl-9 pr-9" />
-        {search && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSearch('')}><X className="h-4 w-4" /></Button>}
+      {/* 搜索 + 切换 */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="relative max-w-md flex-1 min-w-50">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`搜索${type === 'scroll' ? '密卷' : '通灵'}...`} className="pl-9 pr-9" />
+          {search && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSearch('')}><X className="h-4 w-4" /></Button>}
+        </div>
+        <div className="flex gap-1 bg-muted rounded-lg p-1">
+          <button
+            onClick={() => setShowAll(false)}
+            className={`px-3 py-1 text-sm rounded-md transition-colors ${!showAll ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            推荐
+          </button>
+          <button
+            onClick={() => setShowAll(true)}
+            className={`px-3 py-1 text-sm rounded-md transition-colors ${showAll ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            全部可用
+          </button>
+        </div>
       </div>
 
-      {search.trim() && (
-        <div className="max-h-60 overflow-y-auto">
+      {/* 全部可用视图 */}
+      {showAll && (
+        <div className="max-h-[600px] overflow-y-auto">
           {filteredAll.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">无匹配</p>
+            <p className="text-sm text-muted-foreground text-center py-8">无匹配</p>
           ) : (
-            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+            <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {filteredAll.map(({ item, sr }) => (
                 <div
                   key={item.id}
-                  className={`cursor-pointer flex flex-col items-center gap-0.5 p-1 rounded ${
-                    pendingItemId === item.id ? 'bg-primary/10 border-2 border-red-500' : 'hover:bg-muted/50'
+                  className={`cursor-pointer flex flex-col items-center gap-0.5 p-1 rounded-lg transition-colors ${
+                    pendingItemId === item.id
+                      ? 'bg-primary/10 border-2 border-red-500'
+                      : 'border-2 border-transparent hover:bg-muted/50'
                   }`}
                   onClick={() => onSelect(item)}
                 >
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-border/40 bg-card">
                     <Image src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-[10px] text-center truncate w-full">{item.name}</span>
+                  <span className="text-[10px] text-center leading-tight truncate w-full">{item.name}</span>
+                  <button
+                    className={`text-[10px] font-bold rounded px-1 ${
+                      sr.total > 0 ? 'text-green-500' : sr.total < 0 ? 'text-red-500' : 'text-muted-foreground'
+                    } hover:bg-muted/60`}
+                    onClick={(e) => { e.stopPropagation(); setScoreItem(item) }}
+                  >
+                    {sr.total > 0 ? `+${sr.total.toFixed(2)}` : sr.total.toFixed(2)}
+                  </button>
                 </div>
               ))}
             </div>
@@ -167,7 +212,8 @@ export default function Venn5ScrollPanel({
         </div>
       )}
 
-      {!search.trim() && (
+      {/* 推荐视图（三圆图） */}
+      {!showAll && (
         <div className="overflow-x-auto">
           <div className="relative w-[720px] h-[680px] mx-auto">
             <div className="absolute rounded-full border-2 border-red-500/40 bg-red-500/5 pointer-events-none"
