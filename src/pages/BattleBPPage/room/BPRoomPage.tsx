@@ -18,6 +18,7 @@ import DonePhase from './DonePhase'
 import type { INinja } from '@/data/ninjas'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
+const RATING_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 }
 const COUNTDOWN_SECONDS = 60
 const MAX_PUBLIC_BAN = 10
 const MAX_SPECTATORS = 5
@@ -140,6 +141,8 @@ export default function BPRoomPage() {
 
   // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
   const [showTierGrouping, setShowTierGrouping] = useState(false)
+  // 公 ban 阶段：是否按梯度分组（默认关闭）
+  const [publicBanTierGrouping, setPublicBanTierGrouping] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -360,18 +363,38 @@ export default function BPRoomPage() {
     return ninjas.filter(n => !roomState.usedNinjas.includes(n.id) && !banned.has(n.id) && !publicBanSet.has(n.id))
   }, [roomState, ninjas])
 
+  // 通用排序：优先 gameOrder，缺失时退化到 评级 → 名字
+  const sortNinjasBase = useCallback((a: INinja, b: INinja) => {
+    const ga = a.gameOrder
+    const gb = b.gameOrder
+    if (ga !== undefined || gb !== undefined) {
+      const va = ga ?? Infinity
+      const vb = gb ?? Infinity
+      if (va !== vb) return va - vb
+    }
+    const ra = RATING_ORDER[a.rating] ?? 99
+    const rb = RATING_ORDER[b.rating] ?? 99
+    if (ra !== rb) return ra - rb
+    return a.name.localeCompare(b.name)
+  }, [])
+
   const publicBanNinjas = useMemo(() => {
     const searchTerm = publicBanSearch.toLowerCase()
     const bannedIds = new Set(roomState?.publicBan || [])
     let list = ninjas.filter(n => !bannedIds.has(n.id))
     if (searchTerm) list = list.filter(n => n.name.toLowerCase().includes(searchTerm))
-    const groups: { tier: string; ninjas: INinja[] }[] = []
-    TIER_ORDER.forEach(tier => {
-      const tierNinjas = list.filter(n => n.tier === tier)
-      if (tierNinjas.length > 0) groups.push({ tier, ninjas: tierNinjas })
-    })
-    return groups
-  }, [ninjas, roomState?.publicBan, publicBanSearch])
+    list = [...list].sort(sortNinjasBase)
+
+    if (publicBanTierGrouping) {
+      const groups: { tier: string; ninjas: INinja[] }[] = []
+      TIER_ORDER.forEach(tier => {
+        const tierNinjas = list.filter(n => n.tier === tier)
+        if (tierNinjas.length > 0) groups.push({ tier, ninjas: tierNinjas })
+      })
+      return groups
+    }
+    return [{ tier: '全部', ninjas: list }]
+  }, [ninjas, roomState?.publicBan, publicBanSearch, publicBanTierGrouping, sortNinjasBase])
 
   // 按游戏内编号排序辅助
   const sortByGameOrder = useCallback((a: INinja, b: INinja) => {
@@ -822,7 +845,24 @@ export default function BPRoomPage() {
         </div>
         <Card className="p-6 space-y-4">
           <div>
-            <h3 className="font-semibold text-center mb-2">公 ban（全局禁用忍者）</h3>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="flex-1" />
+              <h3 className="font-semibold text-center">公 ban（全局禁用忍者）</h3>
+              <div className="flex-1 flex justify-end">
+                {!isSpectator && (
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="public-ban-tier-toggle" className="text-xs cursor-pointer select-none">
+                      按梯度分组
+                    </Label>
+                    <Switch
+                      id="public-ban-tier-toggle"
+                      checked={publicBanTierGrouping}
+                      onCheckedChange={setPublicBanTierGrouping}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground text-center mb-3">
               双方共同选择最多 {MAX_PUBLIC_BAN} 名忍者，本局对战全程禁用
             </p>
@@ -860,18 +900,24 @@ export default function BPRoomPage() {
                   />
                   {publicBanSearch && <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setPublicBanSearch('')}><X className="h-4 w-4" /></Button>}
                 </div>
-                <div className="max-h-48 overflow-y-auto space-y-3 mt-2">
+                <div className="max-h-48 overflow-y-auto space-y-2 mt-2">
                   {publicBanNinjas.map(group => (
                     <div key={group.tier}>
-                      <Badge variant="outline" className="mb-1 text-sm font-bold">{group.tier}</Badge>
-                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                      {group.tier !== '全部' && (
+                        <Badge variant="outline" className="mb-1 text-sm font-bold">{group.tier}</Badge>
+                      )}
+                      <div className="flex flex-wrap gap-1">
                         {group.ninjas.map(ninja => (
                           <div
                             key={ninja.id}
-                            className="cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg hover:bg-muted/50 transition-colors"
+                            className={`cursor-pointer rounded-md overflow-hidden border transition-colors ${
+                              (roomState?.publicBan || []).includes(ninja.id)
+                                ? 'border-primary ring-2 ring-primary'
+                                : 'border-border/40 hover:border-primary/60'
+                            }`}
                             onClick={() => togglePublicBan(ninja.id)}
                           >
-                            <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                            <div className="w-11 h-11 bg-card">
                               <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
                             </div>
                           </div>
