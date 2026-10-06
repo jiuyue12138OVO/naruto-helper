@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
-import { RotateCcw, Undo2, Check, History, Info } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
+import { RotateCcw, Undo2, Check, History, Info, Search, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
+import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useData } from '@/contexts/DataContext'
 import BanPanel from './BanPanel'
@@ -13,6 +14,9 @@ import NinjaInfoDialog from './NinjaInfoDialog'
 import type { INinja } from '@/data/ninjas'
 
 type Phase = 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
+
+const MAX_PUBLIC_BAN = 10
+const RATING_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 }
 
 const BAN_STEPS: { player: '1P' | '2P'; index: number }[] = [
   { player: '1P', index: 1 },
@@ -74,6 +78,10 @@ export default function SimulateBPTab() {
 
   const [usedNinjas, setUsedNinjas] = useState<Set<string>>(new Set())
 
+  // 公 ban：整个大局禁用
+  const [publicBanIds, setPublicBanIds] = useState<Set<string>>(new Set())
+  const [publicBanSearch, setPublicBanSearch] = useState('')
+
   const [myScrollHistory, setMyScrollHistory] = useState<Set<string>>(new Set())
   const [opponentScrollHistory, setOpponentScrollHistory] = useState<Set<string>>(new Set())
   const [mySummonHistory, setMySummonHistory] = useState<Set<string>>(new Set())
@@ -99,6 +107,48 @@ export default function SimulateBPTab() {
 
   // 撤回历史栈
   const [history, setHistory] = useState<Snapshot[]>([])
+
+  // 合并 usedNinjas 与 publicBanIds（供 Ban/Pick 面板使用）
+  const effectiveUsedNinjas = useMemo(() => {
+    const s = new Set(usedNinjas)
+    publicBanIds.forEach(id => s.add(id))
+    return s
+  }, [usedNinjas, publicBanIds])
+
+  // 公 ban 排序
+  const sortNinjasForPublicBan = useCallback((a: INinja, b: INinja) => {
+    const ga = a.gameOrder
+    const gb = b.gameOrder
+    if (ga !== undefined || gb !== undefined) {
+      const va = ga ?? Infinity
+      const vb = gb ?? Infinity
+      if (va !== vb) return va - vb
+    }
+    const ra = RATING_ORDER[a.rating] ?? 99
+    const rb = RATING_ORDER[b.rating] ?? 99
+    if (ra !== rb) return ra - rb
+    return a.name.localeCompare(b.name)
+  }, [])
+
+  const publicBanCandidates = useMemo(() => {
+    const kw = publicBanSearch.trim().toLowerCase()
+    const list = kw ? ninjas.filter(n => n.name.toLowerCase().includes(kw)) : [...ninjas]
+    return list.sort(sortNinjasForPublicBan)
+  }, [ninjas, publicBanSearch, sortNinjasForPublicBan])
+
+  const togglePublicBan = (ninjaId: string) => {
+    setPublicBanIds(prev => {
+      const next = new Set(prev)
+      if (next.has(ninjaId)) {
+        next.delete(ninjaId)
+      } else if (next.size < MAX_PUBLIC_BAN) {
+        next.add(ninjaId)
+      }
+      return next
+    })
+  }
+
+  const clearPublicBan = () => setPublicBanIds(new Set())
 
   const pushHistory = () => {
     setHistory(prev => [...prev, {
@@ -163,6 +213,8 @@ export default function SimulateBPTab() {
     setTeam2P([null, null, null])
     setPickStep(0)
     setUsedNinjas(new Set())
+    setPublicBanIds(new Set())
+    setPublicBanSearch('')
     setMyScrollHistory(new Set())
     setOpponentScrollHistory(new Set())
     setMySummonHistory(new Set())
@@ -192,6 +244,7 @@ export default function SimulateBPTab() {
     setTeam2P([null, null, null])
     setPickStep(0)
     setUsedNinjas(new Set())
+    // 注意：公 ban 保留（开局前设置）
     setMyScrollHistory(new Set())
     setOpponentScrollHistory(new Set())
     setMySummonHistory(new Set())
@@ -223,6 +276,7 @@ export default function SimulateBPTab() {
     }
     setGameHistory(prev => [...prev, record])
 
+    // 本局使用过的忍者加入历史池
     setUsedNinjas(prev => {
       const next = new Set(prev)
       team1P.forEach(n => n && next.add(n.id))
@@ -230,6 +284,9 @@ export default function SimulateBPTab() {
       return next
     })
 
+    // 本局使用过的密卷 / 通灵加入「我」或「对手」的历史池
+    // 说明：myScrollHistory / mySummonHistory 语义为「我方玩家用过的池」
+    // 切边后我仍是我，所以这两个池不需要交换，只按当前 myRole 累加即可
     if (myRole === '1P') {
       setMyScrollHistory(prev => { const next = new Set(prev); currentScrolls1P.forEach(id => id && next.add(id)); return next })
       setOpponentScrollHistory(prev => { const next = new Set(prev); currentScrolls2P.forEach(id => id && next.add(id)); return next })
@@ -315,15 +372,17 @@ export default function SimulateBPTab() {
     setScrollActiveSlot({ player: '1P', index: 0 })
   }
 
-  // ===== 密卷/通灵 =====
+  // ===== 密卷/通灵（关键修复：按「我这个玩家在哪个位置」取历史池） =====
   const availableScrollsFor = (player: '1P' | '2P') => {
-    const hist = player === '1P' ? myScrollHistory : opponentScrollHistory
+    const myPosition = myRole
+    const hist = player === myPosition ? myScrollHistory : opponentScrollHistory
     const current = player === '1P' ? currentScrolls1P : currentScrolls2P
     const used = new Set(current.filter(Boolean) as string[])
     return scrolls.filter(s => !hist.has(s.id) && !used.has(s.id))
   }
   const availableSummonsFor = (player: '1P' | '2P') => {
-    const hist = player === '1P' ? mySummonHistory : opponentSummonHistory
+    const myPosition = myRole
+    const hist = player === myPosition ? mySummonHistory : opponentSummonHistory
     const current = player === '1P' ? currentSummons1P : currentSummons2P
     const used = new Set(current.filter(Boolean) as string[])
     return summons.filter(s => !hist.has(s.id) && !used.has(s.id))
@@ -567,7 +626,80 @@ export default function SimulateBPTab() {
 
   if (myRole === null) {
     return (
-      <div className="max-w-md mx-auto space-y-4">
+      <div className="max-w-3xl mx-auto space-y-4">
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold">公 ban（全局禁用忍者）</h2>
+            {publicBanIds.size > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearPublicBan} className="text-xs h-7">
+                清空
+              </Button>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            可选，最多选择 {MAX_PUBLIC_BAN} 名忍者，整个大局禁用（所有小局均不可选）。已选 {publicBanIds.size}/{MAX_PUBLIC_BAN}
+          </p>
+
+          {publicBanIds.size > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {Array.from(publicBanIds).map(id => {
+                const ninja = ninjas.find(n => n.id === id)
+                if (!ninja) return null
+                return (
+                  <div key={id} className="relative group">
+                    <div className="w-12 h-12 rounded-md overflow-hidden border-2 border-red-500/60">
+                      <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => togglePublicBan(id)}
+                    >
+                      ✕
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="relative mb-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={publicBanSearch}
+              onChange={e => setPublicBanSearch(e.target.value)}
+              placeholder="搜索忍者..."
+              className="pl-9 pr-9"
+            />
+            {publicBanSearch && (
+              <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setPublicBanSearch('')}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="max-h-72 overflow-y-auto">
+            <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+              {publicBanCandidates.map(ninja => {
+                const isSelected = publicBanIds.has(ninja.id)
+                return (
+                  <div
+                    key={ninja.id}
+                    className={`cursor-pointer flex flex-col items-center gap-0.5 p-1 rounded-lg border-2 transition-all ${
+                      isSelected ? 'border-red-500 bg-red-500/10' : 'border-transparent hover:bg-muted/50'
+                    }`}
+                    onClick={() => togglePublicBan(ninja.id)}
+                  >
+                    <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                      <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[10px] text-center leading-tight truncate w-full">{ninja.name}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">选择你的身份</h2>
           <p className="text-sm text-muted-foreground mb-6">请选择你在大局中的初始位置，后续小局将自动换边。</p>
@@ -588,6 +720,9 @@ export default function SimulateBPTab() {
           <Badge variant="secondary">你当前是 {myRole}</Badge>
           {phase === 'scrolls' && <Badge variant="default">密卷配置</Badge>}
           {phase === 'summons' && <Badge variant="default">通灵配置</Badge>}
+          {publicBanIds.size > 0 && (
+            <Badge variant="destructive">公 ban {publicBanIds.size}</Badge>
+          )}
         </div>
       </div>
 
@@ -644,7 +779,7 @@ export default function SimulateBPTab() {
             <BanPanel
               myRole={myRole!}
               currentSlot={currentActiveSlotInfo}
-              usedNinjas={usedNinjas}
+              usedNinjas={effectiveUsedNinjas}
               banned1P={ban1P}
               banned2P={ban2P}
               onSelect={handleBanSelect}
@@ -676,7 +811,7 @@ export default function SimulateBPTab() {
                 currentSlot={currentActiveSlotInfo}
                 team1P={team1P}
                 team2P={team2P}
-                usedNinjas={usedNinjas}
+                usedNinjas={effectiveUsedNinjas}
                 banned1P={ban1P}
                 banned2P={ban2P}
                 onSelect={handlePickSelect}
