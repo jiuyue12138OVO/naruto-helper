@@ -52,7 +52,7 @@ import { IRecommendation } from '@/data/recommendations'
 import { Image } from '@/components/ui/image'
 import { cn } from '@/lib/utils'
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
 const TIER_COLORS: Record<string, string> = {
   '天王': 'bg-red-500/10 text-red-500 border-red-500/20',
@@ -63,6 +63,10 @@ const TIER_COLORS: Record<string, string> = {
   't0下': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   '准t0': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+  '准t1': 'bg-gray-400/10 text-gray-400 border-gray-400/20',
+  't2': 'bg-neutral-500/10 text-neutral-500 border-neutral-500/20',
+  't3': 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
+  '...': 'bg-stone-500/10 text-stone-500 border-stone-500/20',
 }
 
 interface ScrollEntry {

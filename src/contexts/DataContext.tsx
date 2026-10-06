@@ -61,7 +61,7 @@ const DEFAULT_NINJA_TAGS = [
   "高机动性", "大招特殊情况可接", "防反", "瞬发"
 ]
 
-const DEFAULT_ACQUISITION_OPTIONS = [' 高招 ',' 点券 ',' 忍法帖 ',' 蓝券 ',' 直购 ',' 金币 ',' 免费 ',' 组织限定 ',' 巅峰对决 ',' 生存挑战 ',' 积分赛 ',' 祈愿夺宝 ',' 幸运贩售屋 ',' 特权商店',' 充值领取',' 其它方式 ']
+const DEFAULT_ACQUISITION_OPTIONS = ['高招','点券','忍法帖','蓝券','直购','金币','免费','组织限定','巅峰对决','生存挑战','积分赛','祈愿夺宝','幸运贩售屋','特权商店','充值领取','其它方式']
 
 interface DataContextType {
   ninjas: INinja[]
@@ -81,6 +81,7 @@ interface DataContextType {
   ensureCounters: () => Promise<void>
   addNinja: (ninja: INinja) => void
   updateNinja: (id: string, data: Partial<INinja>) => void
+  updateNinjasBatch: (updates: Record<string, Partial<INinja>>) => void
   deleteNinja: (id: string) => void
   addScroll: (scroll: IScroll) => void
   updateScroll: (id: string, data: Partial<IScroll>) => void
@@ -234,6 +235,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateNinja = useCallback((id: string, data: Partial<INinja>) => {
     setNinjas((prev) => {
       const next = prev.map((n) => (n.id === id ? { ...n, ...data } : n))
+      saveToStorage(NINJAS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const updateNinjasBatch = useCallback((updates: Record<string, Partial<INinja>>) => {
+    setNinjas((prev) => {
+      const next = prev.map((n) => updates[n.id] ? { ...n, ...updates[n.id] } : n)
       saveToStorage(NINJAS_KEY, next)
       return next
     })
@@ -425,6 +434,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ensureCounters,
         addNinja,
         updateNinja,
+        updateNinjasBatch,
         deleteNinja,
         addScroll,
         updateScroll,

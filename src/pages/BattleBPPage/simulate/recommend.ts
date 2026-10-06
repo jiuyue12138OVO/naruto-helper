@@ -4,7 +4,8 @@ import type { IBPCounter } from '@/data/battleBp'
 /** 梯度权重 */
 export const TIER_WEIGHT: Record<string, number> = {
   '天王': 30, '伪天王': 25, 't0顶': 20, 't0上': 15,
-  't0中': 10, 't0下': 5, '准t0': 3, 't1': 0,
+  't0中': 10, 't0下': 5, '准t0': 3, 't1': 0, '准t1': -1, 't2': -2,
+  't3': -4, '...': -6,
 }
 
 /** 盲选加成 */

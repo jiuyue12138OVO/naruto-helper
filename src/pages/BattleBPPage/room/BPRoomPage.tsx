@@ -17,7 +17,7 @@ import SummonsPhase from './SummonsPhase'
 import DonePhase from './DonePhase'
 import type { INinja } from '@/data/ninjas'
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 const COUNTDOWN_SECONDS = 60
 const MAX_PUBLIC_BAN = 10
 const MAX_SPECTATORS = 5
@@ -68,7 +68,7 @@ interface RoomState {
   nextGameConfirmed2P: boolean
   startConfirmed1P: boolean
   startConfirmed2P: boolean
-  reuseScrollSummon?: boolean    // 通灵密卷复用开关
+  reuseScrollSummon?: boolean
 }
 
 const BAN_STEPS = [
@@ -137,6 +137,9 @@ export default function BPRoomPage() {
 
   // 创建房间时的复用开关
   const [reuseSwitch, setReuseSwitch] = useState(false)
+
+  // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
+  const [showTierGrouping, setShowTierGrouping] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -318,7 +321,6 @@ export default function BPRoomPage() {
     localStorage.removeItem('bp_player_id')
   }, [roomId, myRole, myPlayerId, roomState])
 
-  // 双方确认开始
   const confirmStart = useCallback(async () => {
     if (!roomState || !isPlayer || roomState.phase !== 'waiting') return
     if (isSpectator) return
@@ -371,15 +373,33 @@ export default function BPRoomPage() {
     return groups
   }, [ninjas, roomState?.publicBan, publicBanSearch])
 
+  // 按游戏内编号排序辅助
+  const sortByGameOrder = useCallback((a: INinja, b: INinja) => {
+    const ga = a.gameOrder ?? Infinity
+    const gb = b.gameOrder ?? Infinity
+    if (ga !== gb) return ga - gb
+    return a.name.localeCompare(b.name)
+  }, [])
+
+  // ban/pick 阶段的忍者分组
   const groupedNinjas = useMemo(() => {
-    const filtered = search ? availableNinjas.filter(n => n.name.toLowerCase().includes(search.toLowerCase())) : availableNinjas
-    const groups: { tier: string; ninjas: INinja[] }[] = []
-    TIER_ORDER.forEach(tier => {
-      const tierNinjas = filtered.filter(n => n.tier === tier)
-      if (tierNinjas.length > 0) groups.push({ tier, ninjas: tierNinjas })
-    })
-    return groups
-  }, [availableNinjas, search])
+    const filtered = search
+      ? availableNinjas.filter(n => n.name.toLowerCase().includes(search.toLowerCase()))
+      : availableNinjas
+
+    if (showTierGrouping) {
+      const groups: { tier: string; ninjas: INinja[] }[] = []
+      TIER_ORDER.forEach(tier => {
+        const list = filtered.filter(n => n.tier === tier).sort(sortByGameOrder)
+        if (list.length > 0) groups.push({ tier, ninjas: list })
+      })
+      return groups
+    } else {
+      // 全部一起，按游戏内编号排序
+      const sorted = [...filtered].sort(sortByGameOrder)
+      return [{ tier: '全部', ninjas: sorted }]
+    }
+  }, [availableNinjas, search, showTierGrouping, sortByGameOrder])
 
   const isMyTurn = useMemo(() => {
     if (!roomState || !isPlayer) return false
@@ -528,7 +548,7 @@ export default function BPRoomPage() {
         spectators: state.spectators,
         startConfirmed1P: false,
         startConfirmed2P: false,
-        reuseScrollSummon: reuse,   // 保持该设置
+        reuseScrollSummon: reuse,
       })
     } finally {
       setTransitioning(false)
@@ -915,6 +935,20 @@ export default function BPRoomPage() {
           <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
         </div>
       </div>
+
+      {/* ban/pick 阶段的显示开关 */}
+      {(roomState.phase === 'ban' || roomState.phase === 'pick') && !isSpectator && (
+        <div className="flex items-center justify-end gap-2">
+          <Label htmlFor="tier-grouping-toggle" className="text-sm cursor-pointer select-none">
+            按梯度分组
+          </Label>
+          <Switch
+            id="tier-grouping-toggle"
+            checked={showTierGrouping}
+            onCheckedChange={setShowTierGrouping}
+          />
+        </div>
+      )}
 
       <Card className="p-6">
         {roomState.deadline && (

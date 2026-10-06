@@ -45,7 +45,9 @@ export default function PickPhase({
       <div className="max-h-80 overflow-y-auto space-y-4">
         {groupedNinjas.map(group => (
           <div key={group.tier}>
-            <Badge variant="outline" className="mb-2 text-sm font-bold">{group.tier}</Badge>
+            {group.tier !== '全部' && (
+              <Badge variant="outline" className="mb-2 text-sm font-bold">{group.tier}</Badge>
+            )}
             <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
               {group.ninjas.map(ninja => (
                 <div

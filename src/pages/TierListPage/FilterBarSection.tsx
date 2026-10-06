@@ -25,6 +25,10 @@ const TIERS = [
   { value: 't0下', label: 't0下' },
   { value: '准t0', label: '准t0' },
   { value: 't1', label: 't1' },
+  { value: '准t1', label: '准t1' },
+  { value: 't2', label: 't2' },
+  { value: 't3', label: 't3' },
+  { value: '...', label: '...' },
 ]
 
 const RATINGS = ['all', 'S', 'A', 'B', 'C']

@@ -2512,7 +2512,8 @@ export const MOCK_COUNTERS: IBPCounter[] = [
       ],
       "counterScrollIds": [
         "1783349488627",
-        "1783349062619"
+        "1783349062619",
+        "1783349802096"
       ],
       "counterSummonIds": [],
       "counterNinjaScores": {

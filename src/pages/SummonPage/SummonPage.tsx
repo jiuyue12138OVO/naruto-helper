@@ -14,7 +14,7 @@ import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 
 export default function SummonPage() {
-  const { summons, ensureSummons } = useData()
+  const { summons, ninjas, ensureSummons } = useData()
   const [loading, setLoading] = useState(true)
 
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -115,6 +115,24 @@ export default function SummonPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-medium">专属效果：</p>
                     <p className="text-sm text-muted-foreground">{selectedSummon.exclusiveEffect}</p>
+                  </div>
+                )}
+                {selectedSummon.isExclusive && selectedSummon.exclusiveNinjaIds && selectedSummon.exclusiveNinjaIds.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">专属对应忍者：</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {selectedSummon.exclusiveNinjaIds.map(id => {
+                        const ninja = ninjas.find(n => n.id === id)
+                        return ninja ? (
+                          <div key={id} className="flex flex-col items-center w-14">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-border/40 bg-card">
+                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{ninja.name}</span>
+                          </div>
+                        ) : null
+                      })}
+                    </div>
                   </div>
                 )}
               </div>

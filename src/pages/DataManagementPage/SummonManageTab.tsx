@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -19,11 +19,15 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
 import ImageUpload from '@/components/ImageUpload'
+import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 import { ISummon } from '@/data/summons'
+import type { INinja } from '@/data/ninjas'
 
 const DEFAULT_IMG = ''
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
 interface FormData {
   name: string
@@ -32,6 +36,7 @@ interface FormData {
   imageUrl: string
   isExclusive: boolean
   exclusiveEffect: string
+  exclusiveNinjaIds: string[]
 }
 
 const EMPTY_FORM: FormData = {
@@ -41,13 +46,14 @@ const EMPTY_FORM: FormData = {
   imageUrl: DEFAULT_IMG,
   isExclusive: false,
   exclusiveEffect: '',
+  exclusiveNinjaIds: [],
 }
 
 type SortField = 'name' | 'skill' | 'description'
 type SortOrder = 'asc' | 'desc'
 
 export default function SummonManageTab() {
-  const { summons, addSummon, updateSummon, deleteSummon } = useData()
+  const { summons, ninjas, addSummon, updateSummon, deleteSummon } = useData()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
@@ -57,6 +63,22 @@ export default function SummonManageTab() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+
+  // 弹窗里的忍者搜索
+  const [ninjaSearch, setNinjaSearch] = useState('')
+
+  // 忍者按梯度分组（用于选择）
+  const groupedNinjasForExclusive = useMemo(() => {
+    let list = ninjas
+    if (ninjaSearch.trim()) {
+      const kw = ninjaSearch.toLowerCase()
+      list = list.filter(n => n.name.toLowerCase().includes(kw))
+    }
+    return TIER_ORDER.map(tier => ({
+      tier,
+      ninjas: list.filter(n => n.tier === tier),
+    })).filter(g => g.ninjas.length > 0)
+  }, [ninjas, ninjaSearch])
 
   const filteredAndSorted = useMemo(() => {
     let list = [...summons]
@@ -78,7 +100,14 @@ export default function SummonManageTab() {
     return list
   }, [summons, searchKeyword, sortField, sortOrder])
 
-  function openAdd() { setEditingId(null); setForm(EMPTY_FORM); setErrors({}); setDialogOpen(true) }
+  function openAdd() {
+    setEditingId(null)
+    setForm(EMPTY_FORM)
+    setErrors({})
+    setNinjaSearch('')
+    setDialogOpen(true)
+  }
+
   function openEdit(summon: ISummon) {
     setEditingId(summon.id)
     setForm({
@@ -88,8 +117,23 @@ export default function SummonManageTab() {
       imageUrl: summon.imageUrl || '',
       isExclusive: summon.isExclusive || false,
       exclusiveEffect: summon.exclusiveEffect || '',
+      exclusiveNinjaIds: summon.exclusiveNinjaIds || [],
     })
-    setErrors({}); setDialogOpen(true)
+    setErrors({})
+    setNinjaSearch('')
+    setDialogOpen(true)
+  }
+
+  function toggleExclusiveNinja(id: string) {
+    setForm(prev => {
+      const has = prev.exclusiveNinjaIds.includes(id)
+      return {
+        ...prev,
+        exclusiveNinjaIds: has
+          ? prev.exclusiveNinjaIds.filter(x => x !== id)
+          : [...prev.exclusiveNinjaIds, id],
+      }
+    })
   }
 
   function validate(): boolean {
@@ -112,12 +156,26 @@ export default function SummonManageTab() {
       imageUrl: form.imageUrl.trim() || DEFAULT_IMG,
       isExclusive: form.isExclusive,
       exclusiveEffect: form.isExclusive ? form.exclusiveEffect.trim() : undefined,
+      exclusiveNinjaIds: form.isExclusive && form.exclusiveNinjaIds.length > 0 ? form.exclusiveNinjaIds : undefined,
     }
-    if (editingId) { updateSummon(editingId, data) } else { addSummon(data) }
+    if (editingId) {
+      updateSummon(editingId, data)
+    } else {
+      addSummon(data)
+    }
     setDialogOpen(false)
   }
 
-  function handleDelete() { if (deleteId) { deleteSummon(deleteId); setDeleteId(null) } }
+  function handleDelete() {
+    if (deleteId) {
+      deleteSummon(deleteId)
+      setDeleteId(null)
+    }
+  }
+
+  function getNinjaName(id: string) {
+    return ninjas.find(n => n.id === id)?.name || '未知'
+  }
 
   return (
     <div className="space-y-4">
@@ -166,7 +224,14 @@ export default function SummonManageTab() {
                     <TableCell className="text-muted-foreground text-sm truncate max-w-[200px]">{s.description}</TableCell>
                     <TableCell>
                       {s.isExclusive ? (
-                        <span className="text-xs text-primary font-medium">是</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-primary font-medium">是</span>
+                          {s.exclusiveNinjaIds && s.exclusiveNinjaIds.length > 0 && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {s.exclusiveNinjaIds.length} 位对应忍者
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">否</span>
                       )}
@@ -185,9 +250,9 @@ export default function SummonManageTab() {
 
       {/* 编辑弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] flex flex-col">
           <DialogHeader><DialogTitle>{editingId ? '编辑通灵兽' : '新增通灵兽'}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto flex-1 -mx-6 px-6">
             <div>
               <Label>名称 *</Label>
               <Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
@@ -214,24 +279,101 @@ export default function SummonManageTab() {
               <Switch
                 id="exclusive-switch"
                 checked={form.isExclusive}
-                onCheckedChange={checked => setForm({ ...form, isExclusive: checked, exclusiveEffect: checked ? form.exclusiveEffect : '' })}
+                onCheckedChange={checked => setForm({
+                  ...form,
+                  isExclusive: checked,
+                  exclusiveEffect: checked ? form.exclusiveEffect : '',
+                  exclusiveNinjaIds: checked ? form.exclusiveNinjaIds : [],
+                })}
               />
             </div>
 
             {form.isExclusive && (
-              <div>
-                <Label>专属效果 *</Label>
-                <Textarea
-                  value={form.exclusiveEffect}
-                  onChange={e => setForm({ ...form, exclusiveEffect: e.target.value })}
-                  rows={2}
-                  placeholder="输入专属通灵兽效果描述..."
-                />
-                {errors.exclusiveEffect && <p className="text-destructive text-xs">{errors.exclusiveEffect}</p>}
-              </div>
+              <>
+                <div>
+                  <Label>专属效果 *</Label>
+                  <Textarea
+                    value={form.exclusiveEffect}
+                    onChange={e => setForm({ ...form, exclusiveEffect: e.target.value })}
+                    rows={2}
+                    placeholder="输入专属通灵兽效果描述..."
+                  />
+                  {errors.exclusiveEffect && <p className="text-destructive text-xs">{errors.exclusiveEffect}</p>}
+                </div>
+
+                {/* 专属对应忍者 */}
+                <div className="space-y-2">
+                  <Label>专属对应忍者（可多选）</Label>
+                  {form.exclusiveNinjaIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {form.exclusiveNinjaIds.map(id => {
+                        const ninja = ninjas.find(n => n.id === id)
+                        return ninja ? (
+                          <Badge
+                            key={id}
+                            variant="secondary"
+                            className="gap-1 cursor-pointer"
+                            onClick={() => toggleExclusiveNinja(id)}
+                          >
+                            <Image src={ninja.imageUrl} className="w-4 h-4 rounded" />
+                            {ninja.name}
+                            <X className="h-3 w-3" />
+                          </Badge>
+                        ) : null
+                      })}
+                    </div>
+                  )}
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={ninjaSearch}
+                      onChange={(e) => setNinjaSearch(e.target.value)}
+                      placeholder="搜索忍者..."
+                      className="pl-9 pr-9"
+                    />
+                    {ninjaSearch && (
+                      <Button variant="ghost" size="icon" className="absolute! right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setNinjaSearch('')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-3 mt-2 max-h-72 overflow-y-auto border rounded-md p-2">
+                    {groupedNinjasForExclusive.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-4">无匹配忍者</p>
+                    ) : (
+                      groupedNinjasForExclusive.map(group => (
+                        <div key={group.tier}>
+                          <Badge variant="outline" className="mb-1.5 text-xs font-bold">{group.tier}</Badge>
+                          <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+                            {group.ninjas.map(ninja => {
+                              const isSelected = form.exclusiveNinjaIds.includes(ninja.id)
+                              return (
+                                <div
+                                  key={ninja.id}
+                                  className={`cursor-pointer flex flex-col items-center gap-0.5 p-1 rounded-lg border-2 transition-all ${
+                                    isSelected
+                                      ? 'border-primary bg-primary/10'
+                                      : 'border-transparent hover:bg-muted/50'
+                                  }`}
+                                  onClick={() => toggleExclusiveNinja(ninja.id)}
+                                >
+                                  <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
+                                    <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <span className="text-[10px] text-center leading-tight truncate w-full">{ninja.name}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
             <Button onClick={handleSubmit}>{editingId ? '保存' : '添加'}</Button>
           </DialogFooter>

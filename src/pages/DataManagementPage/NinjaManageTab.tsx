@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Plus, Pencil, Trash2, Swords, ArrowUpDown, Search, X, LayoutGrid, Table2, Layers, Check } from 'lucide-react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { Plus, Pencil, Trash2, Swords, ArrowUpDown, Search, X, LayoutGrid, Table2, Layers, Check, Gamepad2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -51,7 +51,7 @@ import { INinja } from '@/data/ninjas'
 import { cn } from '@/lib/utils'
 import { Image } from '@/components/ui/image'
 
-const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
+const TIER_OPTIONS = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 const TIER_ORDER = Object.fromEntries(TIER_OPTIONS.map((t, i) => [t, i]))
 const RATING_OPTIONS = ['S', 'A', 'B', 'C']
 
@@ -64,6 +64,10 @@ const TIER_COLORS: Record<string, string> = {
   't0下': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   '准t0': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+  '准t1': 'bg-gray-400/10 text-gray-400 border-gray-400/20',
+  't2': 'bg-neutral-500/10 text-neutral-500 border-neutral-500/20',
+  't3': 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
+  '...': 'bg-stone-500/10 text-stone-500 border-stone-500/20',
 }
 
 const DEFAULT_IMG = ''
@@ -94,6 +98,7 @@ export default function NinjaManageTab() {
     ninjas,
     addNinja,
     updateNinja,
+    updateNinjasBatch,
     deleteNinja,
     ninjaTags,
     addNinjaTag,
@@ -109,21 +114,17 @@ export default function NinjaManageTab() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  // 搜索和排序状态
   const [searchKeyword, setSearchKeyword] = useState('')
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
 
-  // 新增标签与获取方式状态
   const [newTagName, setNewTagName] = useState('')
   const [tagToDelete, setTagToDelete] = useState<string | null>(null)
   const [newAcquisition, setNewAcquisition] = useState('')
   const [acquisitionToDelete, setAcquisitionToDelete] = useState<string | null>(null)
 
-  // 当前选中的选项卡（默认梯度视图）
   const [currentTab, setCurrentTab] = useState('grid')
 
-  // 梯度视图的搜索关键词
   const [gridSearchKeyword, setGridSearchKeyword] = useState('')
 
   // ---------- 批量管理状态 ----------
@@ -134,6 +135,69 @@ export default function NinjaManageTab() {
   const [batchSelectedIds, setBatchSelectedIds] = useState<Set<string>>(new Set())
   const [batchOriginalIds, setBatchOriginalIds] = useState<Set<string>>(new Set())
   const [batchSearchKeyword, setBatchSearchKeyword] = useState('')
+
+  // ---------- 编序分页状态 ----------
+  // 每个评级对应一个 id 顺序数组
+  const [orderState, setOrderState] = useState<Record<string, string[]>>({ S: [], A: [], B: [], C: [] })
+  const dragOrderRef = useRef<{ rating: string; index: number } | null>(null)
+
+  // 初始化编序视图（按 gameOrder 排序）
+  useEffect(() => {
+    const map: Record<string, INinja[]> = { S: [], A: [], B: [], C: [] }
+    ninjas.forEach(n => {
+      if (map[n.rating]) map[n.rating].push(n)
+    })
+    const newState: Record<string, string[]> = {}
+    ;['S', 'A', 'B', 'C'].forEach(r => {
+      map[r].sort((a, b) => (a.gameOrder ?? Infinity) - (b.gameOrder ?? Infinity))
+      newState[r] = map[r].map(n => n.id)
+    })
+    setOrderState(newState)
+  }, [ninjas])
+
+  // 拖动：开始
+  const handleOrderDragStart = (rating: string, index: number) => {
+    dragOrderRef.current = { rating, index }
+  }
+
+  const handleOrderDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleOrderDrop = (rating: string, targetIndex: number) => {
+    const src = dragOrderRef.current
+    if (!src || src.rating !== rating) return
+    const fromIdx = src.index
+    if (fromIdx === targetIndex) return
+
+    const newState = (() => {
+      const arr = [...(orderState[rating] || [])]
+      const [moved] = arr.splice(fromIdx, 1)
+      arr.splice(targetIndex, 0, moved)
+      return { ...orderState, [rating]: arr }
+    })()
+
+    setOrderState(newState)
+    saveGameOrder(newState)
+    dragOrderRef.current = null
+  }
+
+  // 将 orderState 一次性批量写入每个忍者的 gameOrder
+  const saveGameOrder = useCallback((state: Record<string, string[]>) => {
+    const updates: Record<string, Partial<INinja>> = {}
+    let counter = 1
+    ;['S', 'A', 'B', 'C'].forEach(r => {
+      (state[r] || []).forEach(id => {
+        updates[id] = { gameOrder: counter++ }
+      })
+    })
+    updateNinjasBatch(updates)
+  }, [updateNinjasBatch])
+
+  // 手动保存按钮（备用）
+  const handleSaveOrder = () => {
+    saveGameOrder(orderState)
+  }
 
   const handleAddTag = () => {
     const tag = newTagName.trim()
@@ -151,7 +215,6 @@ export default function NinjaManageTab() {
     setNewAcquisition('')
   }
 
-  // 切换趋势标记
   const handleToggleTrend = useCallback((ninjaId: string) => {
     const ninja = ninjas.find(n => n.id === ninjaId)
     if (!ninja) return
@@ -159,7 +222,6 @@ export default function NinjaManageTab() {
     updateNinja(ninjaId, { trend: nextTrend })
   }, [ninjas, updateNinja])
 
-  // 表格过滤 + 排序
   const filteredAndSorted = useMemo(() => {
     let list = [...ninjas]
 
@@ -196,7 +258,6 @@ export default function NinjaManageTab() {
     return list
   }, [ninjas, searchKeyword, sortField, sortOrder])
 
-  // 梯度视图：按梯度分组，可搜索
   const groupedNinjas = useMemo(() => {
     let list = ninjas
     if (gridSearchKeyword.trim()) {
@@ -208,7 +269,6 @@ export default function NinjaManageTab() {
     }))
   }, [ninjas, gridSearchKeyword])
 
-  // ---------- 批量管理：分组后的忍者列表 ----------
   const batchGroupedNinjas = useMemo(() => {
     let list = ninjas
     if (batchSearchKeyword.trim()) {
@@ -220,7 +280,6 @@ export default function NinjaManageTab() {
     })).filter(g => g.ninjas.length > 0)
   }, [ninjas, batchSearchKeyword])
 
-  // 自动根据当前选中的属性值初始化批量勾选状态
   useEffect(() => {
     if (!batchDialogOpen) return
     const original = new Set<string>()
@@ -259,18 +318,10 @@ export default function NinjaManageTab() {
       setBatchDialogOpen(false)
       return
     }
-
-    // 需要添加的：现在勾选但原本没有
     const toAdd: string[] = []
-    batchSelectedIds.forEach(id => {
-      if (!batchOriginalIds.has(id)) toAdd.push(id)
-    })
-
-    // 需要移除的：原本有但现在未勾选
+    batchSelectedIds.forEach(id => { if (!batchOriginalIds.has(id)) toAdd.push(id) })
     const toRemove: string[] = []
-    batchOriginalIds.forEach(id => {
-      if (!batchSelectedIds.has(id)) toRemove.push(id)
-    })
+    batchOriginalIds.forEach(id => { if (!batchSelectedIds.has(id)) toRemove.push(id) })
 
     toAdd.forEach(id => {
       const ninja = ninjas.find(n => n.id === id)
@@ -294,7 +345,6 @@ export default function NinjaManageTab() {
           updateNinja(id, { tags: (ninja.tags || []).filter(t => t !== batchTagValue) })
         }
       } else {
-        // 仅当当前获取方式匹配时才清除
         if (batchAcquisitionValue && ninja.acquisition === batchAcquisitionValue) {
           updateNinja(id, { acquisition: undefined })
         }
@@ -316,7 +366,6 @@ export default function NinjaManageTab() {
     setBatchDialogOpen(true)
   }
 
-  // 拖动开始：存储忍者 ID
   const handleGridDragStart = (e: React.DragEvent, ninjaId: string) => {
     e.dataTransfer.setData('text/plain', ninjaId)
     e.dataTransfer.effectAllowed = 'move'
@@ -337,7 +386,6 @@ export default function NinjaManageTab() {
     }
   }
 
-  // 编辑/新增相关函数
   function openAdd() {
     setEditingId(null)
     setForm(EMPTY_FORM)
@@ -423,7 +471,7 @@ export default function NinjaManageTab() {
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="grid w-full max-w-xs grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="grid" className="gap-1.5">
             <LayoutGrid className="size-4" />
             梯度视图
@@ -431,6 +479,10 @@ export default function NinjaManageTab() {
           <TabsTrigger value="table" className="gap-1.5">
             <Table2 className="size-4" />
             表格模式
+          </TabsTrigger>
+          <TabsTrigger value="order" className="gap-1.5">
+            <Gamepad2 className="size-4" />
+            编序
           </TabsTrigger>
         </TabsList>
 
@@ -448,7 +500,7 @@ export default function NinjaManageTab() {
               <Button
                 size="icon"
                 variant="ghost"
-                className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
+                className="absolute! right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
                 onClick={() => setGridSearchKeyword('')}
               >
                 <X className="h-4 w-4" />
@@ -540,7 +592,7 @@ export default function NinjaManageTab() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
+                  className="absolute! right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
                   onClick={() => setSearchKeyword('')}
                 >
                   <X className="h-4 w-4" />
@@ -579,6 +631,7 @@ export default function NinjaManageTab() {
                       <TableHead className="whitespace-nowrap w-[80px]">T级</TableHead>
                       <TableHead className="whitespace-nowrap w-[60px]">评级</TableHead>
                       <TableHead className="whitespace-nowrap w-[100px]">获取方式</TableHead>
+                      <TableHead className="whitespace-nowrap w-[80px]">编号</TableHead>
                       <TableHead className="whitespace-nowrap">定位</TableHead>
                       <TableHead className="whitespace-nowrap text-right w-[120px]">操作</TableHead>
                     </TableRow>
@@ -586,7 +639,7 @@ export default function NinjaManageTab() {
                   <TableBody>
                     {filteredAndSorted.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-12">
                           <Swords className="size-8 mx-auto mb-2 opacity-30" />
                           暂无匹配的忍者
                         </TableCell>
@@ -616,6 +669,11 @@ export default function NinjaManageTab() {
                             ) : (
                               <span className="text-xs text-muted-foreground">-</span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs font-mono text-muted-foreground">
+                              {n.gameOrder ?? '-'}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
@@ -654,6 +712,82 @@ export default function NinjaManageTab() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* 编序分页 */}
+        <TabsContent value="order" className="mt-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <p className="text-sm text-muted-foreground">
+              拖动忍者头像调整顺序，全局编号从 S→A→B→C 连续递增。拖动后自动保存。
+            </p>
+            <Button size="sm" variant="outline" onClick={handleSaveOrder}>
+              重新编号
+            </Button>
+          </div>
+
+          <div className="space-y-10">
+            {(() => {
+              // 计算每个评级的全局起始编号
+              const ratings = ['S', 'A', 'B', 'C']
+              const startMap: Record<string, number> = {}
+              let cursor = 1
+              ratings.forEach(r => {
+                startMap[r] = cursor
+                cursor += (orderState[r] || []).length
+              })
+
+              return ratings.map(rating => {
+                const ids = orderState[rating] || []
+                const startNum = startMap[rating]
+                return (
+                  <div key={rating}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Badge variant="secondary" className="text-sm font-bold px-3 py-1">{rating}</Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {ids.length} 位忍者
+                        {ids.length > 0 && (
+                          <span className="ml-2 font-mono text-xs">
+                            （编号 {startNum}–{startNum + ids.length - 1}）
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    {ids.length === 0 ? (
+                      <div className="text-sm text-muted-foreground text-center py-8 border-2 border-dashed border-border/40 rounded-lg">
+                        暂无 {rating} 级忍者
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14 gap-2 md:gap-3">
+                        {ids.map((id, index) => {
+                          const ninja = ninjas.find(n => n.id === id)
+                          if (!ninja) return null
+                          const globalNum = startNum + index
+                          return (
+                            <div
+                              key={id}
+                              draggable
+                              onDragStart={() => handleOrderDragStart(rating, index)}
+                              onDragOver={handleOrderDragOver}
+                              onDrop={() => handleOrderDrop(rating, index)}
+                              className="cursor-grab active:cursor-grabbing group relative"
+                            >
+                              <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-0.5 relative">
+                                <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
+                                <span className="absolute top-0.5 left-0.5 bg-background/70 backdrop-blur-sm text-[9px] font-mono rounded px-0.5 py-0 leading-tight text-muted-foreground">
+                                  {globalNum}
+                                </span>
+                              </Card>
+                              <p className="text-[10px] text-muted-foreground truncate text-center mt-0.5 leading-tight">{ninja.name}</p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            })()}
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -719,7 +853,6 @@ export default function NinjaManageTab() {
               </div>
             </div>
 
-            {/* 获取方式（可动态添加） */}
             <div className="space-y-2">
               <Label>获取方式</Label>
               <div className="flex gap-2">
@@ -860,7 +993,6 @@ export default function NinjaManageTab() {
           </DialogHeader>
 
           <div className="overflow-y-auto flex-1 -mx-6 px-6 space-y-4">
-            {/* 属性选择 */}
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm text-muted-foreground">调整属性：</span>
               <div className="flex bg-muted rounded-lg p-1 gap-1">
@@ -879,7 +1011,6 @@ export default function NinjaManageTab() {
               </div>
             </div>
 
-            {/* 属性值选择 */}
             {batchAttr === 'tags' && (
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm text-muted-foreground">选择定位：</span>
@@ -931,7 +1062,6 @@ export default function NinjaManageTab() {
               <span className="text-sm text-muted-foreground">已勾选 {batchSelectedIds.size} 位</span>
             </div>
 
-            {/* 忍者列表 */}
             <div className="space-y-6">
               {batchGroupedNinjas.map(group => {
                 const groupIds = group.ninjas.map(n => n.id)
@@ -992,7 +1122,6 @@ export default function NinjaManageTab() {
         </DialogContent>
       </Dialog>
 
-      {/* 删除忍者确认 */}
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1008,7 +1137,6 @@ export default function NinjaManageTab() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 删除标签确认 */}
       <AlertDialog open={!!tagToDelete} onOpenChange={(v) => !v && setTagToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1024,7 +1152,6 @@ export default function NinjaManageTab() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 删除获取方式确认 */}
       <AlertDialog open={!!acquisitionToDelete} onOpenChange={(v) => !v && setAcquisitionToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

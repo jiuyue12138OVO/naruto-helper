@@ -15,6 +15,7 @@ import { Image } from '@/components/ui/image'
 
 interface NinjaGridSectionProps {
   ninjas: INinja[]
+  sortByGameOrder?: boolean
 }
 
 const TIER_COLORS: Record<string, string> = {
@@ -26,11 +27,15 @@ const TIER_COLORS: Record<string, string> = {
   't0下': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   '准t0': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   't1': 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+  '准t1': 'bg-gray-400/10 text-gray-400 border-gray-400/20',
+  't2': 'bg-neutral-500/10 text-neutral-500 border-neutral-500/20',
+  't3': 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
+  '...': 'bg-stone-500/10 text-stone-500 border-stone-500/20',
 }
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
-export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
+export default function NinjaGridSection({ ninjas, sortByGameOrder = false }: NinjaGridSectionProps) {
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
 
   // 按梯度分组
@@ -40,13 +45,23 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
     return acc
   }, {})
 
-  // 每个梯度内部排序：下降趋势优先，无趋势居中，上升趋势最后
+  // 每个梯度内部排序：
+  // - 先按趋势分组（down 优先，无趋势居中，up 最后）
+  // - 组内：若打开 gameOrder 开关，则按 gameOrder 排序（未编号排末尾，同值按名称）；否则保持原顺序（已由筛选/上游决定）
   Object.keys(grouped).forEach(tier => {
     grouped[tier].sort((a, b) => {
       const trendOrder = { down: 0, undefined: 1, up: 2 }
       const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
       const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
-      return trendA - trendB
+      if (trendA !== trendB) return trendA - trendB
+
+      if (sortByGameOrder) {
+        const ga = a.gameOrder ?? Infinity
+        const gb = b.gameOrder ?? Infinity
+        if (ga !== gb) return ga - gb
+        return a.name.localeCompare(b.name)
+      }
+      return 0
     })
   })
 
@@ -99,7 +114,6 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
                         alt={ninja.name}
                         className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                       />
-                      {/* 动态升降箭头（右上角） */}
                       {ninja.trend && (
                         <motion.span
                           className={`absolute top-1 right-1 text-xs font-bold bg-background/60 rounded-full px-1 py-0.5 backdrop-blur-sm ${
@@ -129,7 +143,6 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
         })}
       </div>
 
-      {/* 详情弹窗（包含趋势信息） */}
       <Dialog open={!!selectedNinja} onOpenChange={(open) => !open && setSelectedNinja(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -163,6 +176,14 @@ export default function NinjaGridSection({ ninjas }: NinjaGridSectionProps) {
                     {selectedNinja.rating}
                   </Badge>
                 </div>
+                {selectedNinja.gameOrder !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">编号：</span>
+                    <Badge variant="outline" className="text-xs">
+                      {selectedNinja.gameOrder}
+                    </Badge>
+                  </div>
+                )}
                 {selectedNinja.trend && (
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">趋势：</span>

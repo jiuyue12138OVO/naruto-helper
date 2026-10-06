@@ -7,16 +7,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 import type { INinja } from '@/data/ninjas'
 
-const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1']
+const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
 export default function CounterTab() {
   const { ninjas, scrolls, summons, counters, blindPickOrder } = useData()
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedNinja, setSelectedNinja] = useState<INinja | null>(null)
+
+  // 排序开关
+  const [sortByGameOrder, setSortByGameOrder] = useState(false)
+  const [removeTierGrouping, setRemoveTierGrouping] = useState(false)
+
+  // 关闭按游戏内编号排序时，同时关闭取消梯度排行
+  const handleGameOrderToggle = (checked: boolean) => {
+    setSortByGameOrder(checked)
+    if (!checked) setRemoveTierGrouping(false)
+  }
 
   const filtered = useMemo(() => {
     let list = ninjas
@@ -29,6 +41,12 @@ export default function CounterTab() {
 
   const groupedNinjas = useMemo(() => {
     const blindOrderMap = new Map(blindPickOrder.map((id, idx) => [id, idx]))
+    const sortByGameOrderFn = (a: INinja, b: INinja) => {
+      const ga = a.gameOrder ?? Infinity
+      const gb = b.gameOrder ?? Infinity
+      if (ga !== gb) return ga - gb
+      return a.name.localeCompare(b.name)
+    }
     const sortByBlindOrderAndName = (a: INinja, b: INinja) => {
       if (a.blindPick && !b.blindPick) return -1
       if (!a.blindPick && b.blindPick) return 1
@@ -40,16 +58,27 @@ export default function CounterTab() {
       return a.name.localeCompare(b.name)
     }
 
+    // 取消梯度排行：所有忍者合为一组，按游戏内编号排序
+    if (removeTierGrouping) {
+      const all = [...filtered].sort(sortByGameOrderFn)
+      return [{ tier: '', ninjas: all }]
+    }
+
+    // 按梯度分组
     const groups: { tier: string; ninjas: INinja[] }[] = []
     TIER_ORDER.forEach(tier => {
       const tierNinjas = filtered.filter(n => n.tier === tier)
       if (tierNinjas.length > 0) {
-        tierNinjas.sort(sortByBlindOrderAndName)
+        if (sortByGameOrder) {
+          tierNinjas.sort(sortByGameOrderFn)
+        } else {
+          tierNinjas.sort(sortByBlindOrderAndName)
+        }
         groups.push({ tier, ninjas: tierNinjas })
       }
     })
     return groups
-  }, [filtered, blindPickOrder])
+  }, [filtered, blindPickOrder, sortByGameOrder, removeTierGrouping])
 
   const getCounterData = (ninjaId: string) => counters.find(c => c.ninjaId === ninjaId)
   const getNinjaById = (id: string) => ninjas.find(n => n.id === id)
@@ -88,13 +117,40 @@ export default function CounterTab() {
         </span>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* 顶部操作行：3D图按钮 + 右侧排序开关 */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <Link to="/counter-graph-3d">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Network className="size-4" />
             查看 3D 克制关系图
           </Button>
         </Link>
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="counter-game-order-toggle" className="text-sm cursor-pointer select-none">
+              按游戏内编号排序
+            </Label>
+            <Switch
+              id="counter-game-order-toggle"
+              checked={sortByGameOrder}
+              onCheckedChange={handleGameOrderToggle}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label
+              htmlFor="counter-remove-tier-toggle"
+              className={`text-sm select-none ${sortByGameOrder ? 'cursor-pointer' : 'cursor-not-allowed text-muted-foreground/60'}`}
+            >
+              取消梯度排行
+            </Label>
+            <Switch
+              id="counter-remove-tier-toggle"
+              checked={removeTierGrouping}
+              onCheckedChange={setRemoveTierGrouping}
+              disabled={!sortByGameOrder}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="relative max-w-md">
@@ -110,14 +166,21 @@ export default function CounterTab() {
         </div>
       ) : (
         <div className="space-y-10">
-          {groupedNinjas.map(group => (
-            <div key={group.tier}>
-              <div className="flex items-center gap-3 mb-4">
-                <Badge variant="outline" className="text-sm font-bold px-3 py-1">
-                  {group.tier}
-                </Badge>
-                <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
-              </div>
+          {groupedNinjas.map((group, groupIdx) => (
+            <div key={group.tier || `all-${groupIdx}`}>
+              {group.tier && (
+                <div className="flex items-center gap-3 mb-4">
+                  <Badge variant="outline" className="text-sm font-bold px-3 py-1">
+                    {group.tier}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                </div>
+              )}
+              {!group.tier && (
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                </div>
+              )}
               <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
                 {group.ninjas.map((ninja, i) => (
                   <motion.div
@@ -135,6 +198,11 @@ export default function CounterTab() {
                     </Card>
                     {ninja.blindPick && (
                       <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs rounded px-1.5 py-0.5">盲</span>
+                    )}
+                    {ninja.gameOrder !== undefined && (
+                      <span className="absolute top-1 right-1 bg-background/70 backdrop-blur-sm text-[10px] font-mono rounded px-1 py-0.5 text-muted-foreground">
+                        {ninja.gameOrder}
+                      </span>
                     )}
                     <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
                   </motion.div>
