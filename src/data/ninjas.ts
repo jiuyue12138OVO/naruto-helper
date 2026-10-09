@@ -3157,7 +3157,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1784005699565",
       "name": "新希",
-      "tier": "准t0",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "抓取",
@@ -3245,7 +3245,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1784014504732",
       "name": "自来也【少年】",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "C",
       "tags": [
         "抓取",
@@ -4082,7 +4082,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1789372944362",
       "name": "阿茨伊",
-      "tier": "t0上",
+      "tier": "t0顶",
       "rating": "C",
       "tags": [
         "抓取",
@@ -4918,7 +4918,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791002694399",
       "name": "金·槌",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "C",
       "tags": [
         "高输出",
@@ -5196,7 +5196,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791041418200",
       "name": "漩涡玖辛奈【少女】",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "C",
       "tags": [
         "抓取",
@@ -5227,7 +5227,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791041755537",
       "name": "药师野乃宇",
-      "tier": "准t1",
+      "tier": "t1",
       "rating": "C",
       "tags": [
         "高输出",
@@ -5332,7 +5332,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791080220742",
       "name": "小南",
-      "tier": "...",
+      "tier": "t2",
       "rating": "C",
       "tags": [
         "高输出",
@@ -5405,7 +5405,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791080912830",
       "name": "左近右近【秽土转生】",
-      "tier": "t2",
+      "tier": "准t1",
       "rating": "C",
       "tags": [
         "抓取",
@@ -5613,7 +5613,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791083315089",
       "name": "奈良鹿台",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "C",
       "tags": [
         "抓取",
@@ -5847,7 +5847,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791091191760",
       "name": "漩涡玖辛奈",
-      "tier": "t3",
+      "tier": "t2",
       "rating": "B",
       "tags": [
         "高输出",
@@ -5999,7 +5999,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791104026118",
       "name": "奈良鹿丸【最终章】",
-      "tier": "准t1",
+      "tier": "t1",
       "rating": "B",
       "tags": [
         "抓取",
@@ -6711,7 +6711,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791124933516",
       "name": "夕日红【冬日限定】",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "B",
       "tags": [
         "抓取",
@@ -6874,7 +6874,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791127676562",
       "name": "黑土【新春限定】",
-      "tier": "t2",
+      "tier": "准t1",
       "rating": "B",
       "tags": [
         "格挡",
@@ -7377,7 +7377,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791178414780",
       "name": "静音【元气夏日】",
-      "tier": "t2",
+      "tier": "准t1",
       "rating": "B",
       "tags": [
         "高空优势",
@@ -7658,7 +7658,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791212468386",
       "name": "黑土",
-      "tier": "准t1",
+      "tier": "t1",
       "rating": "B",
       "tags": [
         "突进",
@@ -7717,7 +7717,7 @@ export const MOCK_NINJAS: INinja[] =  [
     {
       "id": "1791213103960",
       "name": "佩恩【畜生道】",
-      "tier": "t1",
+      "tier": "准t0",
       "rating": "B",
       "tags": [
         "抓取",
