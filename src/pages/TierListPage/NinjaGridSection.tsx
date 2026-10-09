@@ -46,22 +46,21 @@ export default function NinjaGridSection({ ninjas, sortByGameOrder = false }: Ni
   }, {})
 
   // 每个梯度内部排序：
-  // - 先按趋势分组（down 优先，无趋势居中，up 最后）
-  // - 组内：若打开 gameOrder 开关，则按 gameOrder 排序（未编号排末尾，同值按名称）；否则保持原顺序（已由筛选/上游决定）
+  // - 打开"按游戏内编号排序"：同一梯度内直接按 gameOrder 升序（不再分趋势）
+  // - 未打开：按趋势分组（down 优先，无趋势居中，up 最后）
   Object.keys(grouped).forEach(tier => {
     grouped[tier].sort((a, b) => {
-      const trendOrder = { down: 0, undefined: 1, up: 2 }
-      const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
-      const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
-      if (trendA !== trendB) return trendA - trendB
-
       if (sortByGameOrder) {
         const ga = a.gameOrder ?? Infinity
         const gb = b.gameOrder ?? Infinity
         if (ga !== gb) return ga - gb
         return a.name.localeCompare(b.name)
       }
-      return 0
+
+      const trendOrder = { down: 0, undefined: 1, up: 2 }
+      const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
+      const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
+      return trendA - trendB
     })
   })
 
@@ -114,6 +113,7 @@ export default function NinjaGridSection({ ninjas, sortByGameOrder = false }: Ni
                         alt={ninja.name}
                         className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                       />
+                      {/* 趋势标记：始终保留显示 */}
                       {ninja.trend && (
                         <motion.span
                           className={`absolute top-1 right-1 text-xs font-bold bg-background/60 rounded-full px-1 py-0.5 backdrop-blur-sm ${
