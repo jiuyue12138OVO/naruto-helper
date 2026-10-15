@@ -50,6 +50,7 @@ import {
 import { useData } from '@/contexts/DataContext'
 import { IRecommendation } from '@/data/recommendations'
 import { Image } from '@/components/ui/image'
+import { Switch } from '@/components/ui/switch' // ✨ 新增：开关组件
 import { cn } from '@/lib/utils'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
@@ -122,6 +123,9 @@ export default function RecommendationManageTab() {
   // 梯度视图搜索关键词
   const [gridSearchKeyword, setGridSearchKeyword] = useState('')
 
+  // ✨ 新增：取消梯度排行开关（默认关闭=梯度视图；打开=整体按游戏内编号平铺）
+  const [flatMode, setFlatMode] = useState(false)
+
   // 忍者 id → 推荐记录
   const recByNinjaId = useMemo(() => {
     const map = new Map<string, IRecommendation>()
@@ -168,18 +172,25 @@ export default function RecommendationManageTab() {
     return list
   }, [recommendations, searchKeyword, sortField, sortOrder])
 
-  // 梯度视图：按梯度分组显示全部忍者（含未配置的）
+  // ✨ 修改：梯度视图
+  // - 默认（flatMode=false）：按梯度分组，组内按游戏内编号升序
+  // - 开启（flatMode=true）：取消梯度排行，整体按游戏内编号升序（平铺）
   const groupedNinjasForGrid = useMemo(() => {
     let list = ninjas
     if (gridSearchKeyword.trim()) {
       const kw = gridSearchKeyword.toLowerCase()
       list = list.filter(n => n.name.toLowerCase().includes(kw))
     }
+    const sortByGameOrder = (arr: typeof ninjas) =>
+      [...arr].sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
+    if (flatMode) {
+      return [{ tier: null as string | null, ninjas: sortByGameOrder(list) }]
+    }
     return TIER_ORDER.map(tier => ({
       tier,
-      ninjas: list.filter(n => n.tier === tier),
+      ninjas: sortByGameOrder(list.filter(n => n.tier === tier)),
     })).filter(g => g.ninjas.length > 0)
-  }, [ninjas, gridSearchKeyword])
+  }, [ninjas, gridSearchKeyword, flatMode])
 
   // 过滤密卷列表（用于多选）
   const filteredScrolls = useMemo(() => {
@@ -333,35 +344,52 @@ export default function RecommendationManageTab() {
 
         {/* ========== 梯度视图 ========== */}
         <TabsContent value="grid" className="mt-6">
-          <div className="relative max-w-xs mb-6">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={gridSearchKeyword}
-              onChange={(e) => setGridSearchKeyword(e.target.value)}
-              placeholder="搜索忍者..."
-              className="pl-9 pr-9"
-            />
-            {gridSearchKeyword && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
-                onClick={() => setGridSearchKeyword('')}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+          {/* ✨ 修改：搜索框与"取消梯度排行"开关同一行，开关在右上角 */}
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
+            <div className="relative max-w-xs flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={gridSearchKeyword}
+                onChange={(e) => setGridSearchKeyword(e.target.value)}
+                placeholder="搜索忍者..."
+                className="pl-9 pr-9"
+              />
+              {gridSearchKeyword && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="!absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
+                  onClick={() => setGridSearchKeyword('')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label htmlFor="rec-flat-toggle" className="text-sm cursor-pointer select-none">
+                取消梯度排行
+              </Label>
+              <Switch
+                id="rec-flat-toggle"
+                checked={flatMode}
+                onCheckedChange={setFlatMode}
+              />
+            </div>
           </div>
 
           <div className="space-y-10">
             {groupedNinjasForGrid.map(group => (
-              <div key={group.tier}>
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge variant="outline" className={cn('text-sm font-bold px-3 py-1', TIER_COLORS[group.tier])}>
-                    {group.tier}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
-                </div>
+              <div key={group.tier ?? '__flat__'}>
+                {/* ✨ 修改：平铺模式（取消梯度排行）不显示梯度标题 */}
+                {group.tier && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <Badge variant="outline" className={cn('text-sm font-bold px-3 py-1', TIER_COLORS[group.tier])}>
+                      {group.tier}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                  </div>
+                )}
                 <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
                   {group.ninjas.map(ninja => {
                     const rec = recByNinjaId.get(ninja.id)

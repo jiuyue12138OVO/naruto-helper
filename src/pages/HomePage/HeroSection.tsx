@@ -113,7 +113,7 @@ export default function HeroSection() {
               火影忍者<span className="text-primary">辅助助手</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-              强度排行 · 密卷推荐 · 通灵兽大全 · 武斗赛BP
+              强度排行 · 密卷推荐 · 通灵兽大全 · 武斗赛BP · 娱乐彩蛋
             </p>
 
             <Button

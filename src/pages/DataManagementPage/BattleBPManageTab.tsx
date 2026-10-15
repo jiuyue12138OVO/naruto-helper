@@ -11,6 +11,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch' // ✨ 新增：开关组件
 import { toast } from 'sonner'
 import { useData } from '@/contexts/DataContext'
 import { IBPCounter } from '@/data/battleBp'
@@ -40,6 +41,9 @@ export default function BattleBPManageTab() {
   const [searchConfigNinja, setSearchConfigNinja] = useState('')
   // 默认标签页改为克制关系配置
   const [currentTab, setCurrentTab] = useState('counter-config')
+
+  // ✨ 新增：取消梯度排行开关（默认关闭=梯度视图；打开=整体按游戏内编号平铺）
+  const [flatMode, setFlatMode] = useState(false)
 
   // 当前忍者对应的克制关系
   const currentCounter = useMemo(() => {
@@ -201,16 +205,24 @@ export default function BattleBPManageTab() {
     return summons.filter(s => s.name.toLowerCase().includes(searchCounterSummon.toLowerCase()))
   }, [summons, searchCounterSummon])
 
+  // ✨ 修改：克制关系配置的忍者选择列表
+  // - 默认（flatMode=false）：按梯度分组，组内按游戏内编号升序
+  // - 开启（flatMode=true）：取消梯度排行，整体按游戏内编号升序（平铺）
   const groupedNinjasForConfig = useMemo(() => {
     let list = ninjas
     if (searchConfigNinja.trim()) {
       list = ninjas.filter(n => n.name.toLowerCase().includes(searchConfigNinja.toLowerCase()))
     }
+    const sortByGameOrder = (arr: typeof ninjas) =>
+      [...arr].sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
+    if (flatMode) {
+      return [{ tier: null as string | null, ninjas: sortByGameOrder(list) }]
+    }
     return TIER_ORDER.map(tier => ({
       tier,
-      ninjas: list.filter(n => n.tier === tier)
+      ninjas: sortByGameOrder(list.filter(n => n.tier === tier))
     })).filter(g => g.ninjas.length > 0)
-  }, [ninjas, searchConfigNinja])
+  }, [ninjas, searchConfigNinja, flatMode])
 
   const selectedNinja = ninjas.find(n => n.id === selectedNinjaId)
 
@@ -256,14 +268,28 @@ export default function BattleBPManageTab() {
           <CardContent className="p-4 space-y-4">
             {!selectedNinjaId ? (
               <>
-                <div className="relative max-w-xs">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={searchConfigNinja}
-                    onChange={(e) => setSearchConfigNinja(e.target.value)}
-                    placeholder="搜索忍者..."
-                    className="pl-9"
-                  />
+                {/* ✨ 修改：搜索框与"取消梯度排行"开关同一行，开关在右上角 */}
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="relative max-w-xs flex-1">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={searchConfigNinja}
+                      onChange={(e) => setSearchConfigNinja(e.target.value)}
+                      placeholder="搜索忍者..."
+                      className="pl-9"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="bp-flat-toggle" className="text-sm cursor-pointer select-none">
+                      取消梯度排行
+                    </Label>
+                    <Switch
+                      id="bp-flat-toggle"
+                      checked={flatMode}
+                      onCheckedChange={setFlatMode}
+                    />
+                  </div>
                 </div>
 
                 {groupedNinjasForConfig.length === 0 ? (
@@ -271,11 +297,14 @@ export default function BattleBPManageTab() {
                 ) : (
                   <div className="space-y-10">
                     {groupedNinjasForConfig.map(group => (
-                      <div key={group.tier}>
-                        <div className="flex items-center gap-3 mb-4">
-                          <Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge>
-                          <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
-                        </div>
+                      <div key={group.tier ?? '__flat__'}>
+                        {/* ✨ 修改：平铺模式（取消梯度排行）不显示梯度标题 */}
+                        {group.tier && (
+                          <div className="flex items-center gap-3 mb-4">
+                            <Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge>
+                            <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
+                          </div>
+                        )}
                         <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
                           {group.ninjas.map(ninja => (
                             <div

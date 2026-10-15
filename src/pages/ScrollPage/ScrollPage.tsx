@@ -16,6 +16,10 @@ import { INinja } from '@/data/ninjas'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
+// 按游戏内编号升序（缺失 gameOrder 的排最后）
+const sortByGameOrder = (list: INinja[]): INinja[] =>
+  [...list].sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
+
 export default function ScrollPage() {
   const { scrolls, ninjas, recommendations, ensureScrolls, ensureRecommendations, ensureNinjas } = useData()
   const [loading, setLoading] = useState(true)
@@ -28,8 +32,12 @@ export default function ScrollPage() {
 
   // 选忍者看密卷模式下，显示忍者最优密卷
   const [showBestInNinjaView, setShowBestInNinjaView] = useState(false)
+  // 选忍者看密卷模式下，默认按游戏内编号排序；开启后按强度梯度分组
+  const [sortByTier, setSortByTier] = useState(false)
   // 密卷详情弹窗内，适配忍者标签页显示忍者最优密卷
   const [showBestInAdapted, setShowBestInAdapted] = useState(false)
+  // ✨ 新增：密卷详情弹窗"适配忍者"标签页，默认按游戏内编号排序；开启后按强度梯度分组
+  const [sortAdaptedByTier, setSortAdaptedByTier] = useState(false)
   // 密卷详情弹窗内的子标签状态
   const [detailTab, setDetailTab] = useState<'info' | 'ninjas'>('info')
 
@@ -42,6 +50,8 @@ export default function ScrollPage() {
     if (!selectedScroll) {
       setDetailTab('info')
       setShowBestInAdapted(false)
+      // ✨ 新增：关闭弹窗时重置适配忍者排序
+      setSortAdaptedByTier(false)
     }
   }, [selectedScroll])
 
@@ -88,16 +98,22 @@ export default function ScrollPage() {
     }) || null
   }
 
+  // 选忍者看密卷的列表
+  // - 默认（sortByTier=false）：平铺，按游戏内编号升序
+  // - 开启（sortByTier=true）：按强度梯度分组，组内按游戏内编号升序
   const groupedNinjas = useMemo(() => {
     const ninjaIds = new Set(recommendations.map(r => r.ninjaId))
     let filtered = ninjas.filter(n => ninjaIds.has(n.id))
     if (searchNinja.trim()) filtered = filtered.filter(n => n.name.toLowerCase().includes(searchNinja.toLowerCase()))
+    if (!sortByTier) {
+      return [{ tier: null as string | null, ninjas: sortByGameOrder(filtered) }]
+    }
     return TIER_ORDER.map(tier => {
-      const tierNinjas = filtered.filter(n => n.tier === tier)
+      const tierNinjas = sortByGameOrder(filtered.filter(n => n.tier === tier))
       if (tierNinjas.length > 0) return { tier, ninjas: tierNinjas }
       return null
-    }).filter(Boolean) as { tier: string; ninjas: INinja[] }[]
-  }, [ninjas, recommendations, searchNinja])
+    }).filter(Boolean) as { tier: string | null; ninjas: INinja[] }[]
+  }, [ninjas, recommendations, searchNinja, sortByTier])
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground text-lg">加载密卷数据中...</p></div>
 
@@ -136,15 +152,27 @@ export default function ScrollPage() {
             )}
 
             {mode === 'ninjaToScroll' && (
-              <div className="flex items-center gap-2">
-                <Label htmlFor="ninja-best-toggle" className="text-sm cursor-pointer select-none">
-                  显示最优密卷
-                </Label>
-                <Switch
-                  id="ninja-best-toggle"
-                  checked={showBestInNinjaView}
-                  onCheckedChange={setShowBestInNinjaView}
-                />
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="ninja-tier-sort-toggle" className="text-sm cursor-pointer select-none">
+                    按强度排行
+                  </Label>
+                  <Switch
+                    id="ninja-tier-sort-toggle"
+                    checked={sortByTier}
+                    onCheckedChange={setSortByTier}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="ninja-best-toggle" className="text-sm cursor-pointer select-none">
+                    显示最优密卷
+                  </Label>
+                  <Switch
+                    id="ninja-best-toggle"
+                    checked={showBestInNinjaView}
+                    onCheckedChange={setShowBestInNinjaView}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -187,8 +215,11 @@ export default function ScrollPage() {
             ) : (
               <div className="space-y-10">
                 {groupedNinjas.map(group => (
-                  <div key={group.tier}>
-                    <div className="flex items-center gap-3 mb-4"><Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge><span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span></div>
+                  <div key={group.tier ?? '__flat__'}>
+                    {/* 平铺模式（默认）不显示梯度标题，只有强度排行模式显示 */}
+                    {group.tier && (
+                      <div className="flex items-center gap-3 mb-4"><Badge variant="outline" className="text-sm font-bold px-3 py-1">{group.tier}</Badge><span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span></div>
+                    )}
                     <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
                       {group.ninjas.map((ninja, i) => {
                         const bestScroll = showBestInNinjaView ? getBestScrollForNinja(ninja.id) : null
@@ -228,15 +259,28 @@ export default function ScrollPage() {
                   </TabsList>
 
                   {detailTab === 'ninjas' && (
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="adapted-best-toggle" className="text-sm cursor-pointer select-none">
-                        显示最优密卷
-                      </Label>
-                      <Switch
-                        id="adapted-best-toggle"
-                        checked={showBestInAdapted}
-                        onCheckedChange={setShowBestInAdapted}
-                      />
+                    // ✨ 修改：新增"按强度排行"开关，与"显示最优密卷"同排
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="adapted-tier-sort-toggle" className="text-sm cursor-pointer select-none">
+                          按强度排行
+                        </Label>
+                        <Switch
+                          id="adapted-tier-sort-toggle"
+                          checked={sortAdaptedByTier}
+                          onCheckedChange={setSortAdaptedByTier}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="adapted-best-toggle" className="text-sm cursor-pointer select-none">
+                          显示最优密卷
+                        </Label>
+                        <Switch
+                          id="adapted-best-toggle"
+                          checked={showBestInAdapted}
+                          onCheckedChange={setShowBestInAdapted}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -296,16 +340,23 @@ export default function ScrollPage() {
                   </Tabs>
                 </TabsContent>
 
+                {/* ✨ 修改：适配忍者标签页 - 默认按游戏内编号平铺；开启"按强度排行"后按梯度分组，组内按游戏内编号排序 */}
                 <TabsContent value="ninjas" className="flex-1 overflow-y-auto -mx-6 px-6">
                   {(() => {
                     const ninjasForScroll = getNinjasForScroll(selectedScroll.id)
                     if (ninjasForScroll.length === 0) return <p className="text-sm text-muted-foreground text-center py-8">暂无适配忍者</p>
-                    const grouped = TIER_ORDER.map(tier => ({ tier, ninjas: ninjasForScroll.filter(n => n.tier === tier) })).filter(g => g.ninjas.length > 0)
+                    const sorted = sortByGameOrder(ninjasForScroll)
+                    // 开启"按强度排行"：按梯度分组，组内按游戏内编号排序
+                    const grouped = sortAdaptedByTier
+                      ? TIER_ORDER.map(tier => ({ tier, ninjas: sorted.filter(n => n.tier === tier) })).filter(g => g.ninjas.length > 0)
+                      : [{ tier: null as string | null, ninjas: sorted }]
                     return (
                       <div className="space-y-4">
                         {grouped.map(group => (
-                          <div key={group.tier}>
-                            <h4 className="text-sm font-semibold text-muted-foreground mb-2">{group.tier}</h4>
+                          <div key={group.tier ?? '__flat__'}>
+                            {group.tier && (
+                              <h4 className="text-sm font-semibold text-muted-foreground mb-2">{group.tier}</h4>
+                            )}
                             <div className="flex flex-wrap gap-2">
                               {group.ninjas.map(n => {
                                 const bestScroll = showBestInAdapted ? getBestScrollForNinja(n.id) : null

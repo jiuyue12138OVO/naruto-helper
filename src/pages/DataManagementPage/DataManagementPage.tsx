@@ -17,6 +17,8 @@ import NinjaManageTab from './NinjaManageTab'
 import SummonManageTab from './SummonManageTab'
 import BattleBPManageTab from './BattleBPManageTab'
 import ScrollAndRecommendManageTab from './ScrollAndRecommendManageTab'
+import EasterEggManageTab from './EasterEggManageTab'
+import { EasterEggIcon } from '@/components/EasterEggIcon'
 import { useData } from '@/contexts/DataContext'
 
 export default function DataManagementPage() {
@@ -29,6 +31,7 @@ export default function DataManagementPage() {
     summons,
     counters,
     blindPickOrder,
+    easterEggs,
     resetAllData,
   } = useData()
 
@@ -44,7 +47,8 @@ export default function DataManagementPage() {
     { label: '定位标签', count: ninjaTags.length },
     { label: '获取方式', count: acquisitionOptions.length },
     { label: '盲选位', count: blindPickOrder.length },
-  ]), [ninjas, scrolls, recommendations, summons, counters, ninjaTags, acquisitionOptions, blindPickOrder])
+    { label: '彩蛋', count: easterEggs.length },
+  ]), [ninjas, scrolls, recommendations, summons, counters, ninjaTags, acquisitionOptions, blindPickOrder, easterEggs])
 
   const handleExportAll = useCallback(() => {
     const data = {
@@ -56,6 +60,7 @@ export default function DataManagementPage() {
       summons,
       counters,
       blindPickOrder,
+      easterEggs,
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -67,7 +72,7 @@ export default function DataManagementPage() {
     a.download = `naruto-data-${ymd}-${hm}.json`
     a.click()
     URL.revokeObjectURL(url)
-  }, [ninjas, scrolls, recommendations, ninjaTags, acquisitionOptions, summons, counters, blindPickOrder])
+  }, [ninjas, scrolls, recommendations, ninjaTags, acquisitionOptions, summons, counters, blindPickOrder, easterEggs])
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +85,7 @@ export default function DataManagementPage() {
               数据<span className="text-primary">管理</span>
             </h1>
             <p className="text-muted-foreground text-sm">
-              管理忍者、密卷、通灵兽和武斗赛 BP 数据
+              管理忍者、密卷、通灵兽、武斗赛 BP 和彩蛋数据
             </p>
             {/* 数据统计 */}
             <div className="flex flex-wrap gap-1.5 mt-3">
@@ -113,9 +118,9 @@ export default function DataManagementPage() {
           </div>
         </div>
 
-        {/* 标签页：4 个主标签 */}
+        {/* 标签页：5 个主标签 */}
         <Tabs defaultValue="ninjas" className="w-full">
-          <TabsList className="w-full max-w-xl grid grid-cols-4">
+          <TabsList className="w-full max-w-2xl grid grid-cols-5">
             <TabsTrigger value="ninjas" className="gap-1.5">
               <Swords className="size-4" />
               <span className="hidden sm:inline">忍者管理</span>
@@ -131,6 +136,10 @@ export default function DataManagementPage() {
             <TabsTrigger value="battlebp" className="gap-1.5">
               <Shield className="size-4" />
               <span className="hidden sm:inline">武斗赛 BP</span>
+            </TabsTrigger>
+            <TabsTrigger value="easter-eggs" className="gap-1.5">
+              <EasterEggIcon className="size-4" />
+              <span className="hidden sm:inline">彩蛋管理</span>
             </TabsTrigger>
           </TabsList>
 
@@ -149,6 +158,10 @@ export default function DataManagementPage() {
 
           <TabsContent value="battlebp" className="mt-6">
             <BattleBPManageTab />
+          </TabsContent>
+
+          <TabsContent value="easter-eggs" className="mt-6">
+            <EasterEggManageTab />
           </TabsContent>
         </Tabs>
       </div>
@@ -170,6 +183,7 @@ export default function DataManagementPage() {
                   <li>武斗赛克制关系（{counters.length} 条）</li>
                   <li>定位标签（{ninjaTags.length} 条）、获取方式（{acquisitionOptions.length} 条）</li>
                   <li>盲选位顺序（{blindPickOrder.length} 条）</li>
+                  <li>彩蛋数据（{easterEggs.length} 条）</li>
                 </ul>
               </div>
             </AlertDialogDescription>

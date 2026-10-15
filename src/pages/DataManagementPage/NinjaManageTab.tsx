@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { Plus, Pencil, Trash2, Swords, ArrowUpDown, Search, X, LayoutGrid, Table2, Layers, Check, Gamepad2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Swords, ArrowUpDown, Search, X, LayoutGrid, Table2, Layers, Check, Gamepad2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -48,6 +48,7 @@ import {
 import ImageUpload from '@/components/ImageUpload'
 import { useData } from '@/contexts/DataContext'
 import { INinja } from '@/data/ninjas'
+import { Switch } from '@/components/ui/switch' // ✨ 新增：开关组件
 import { cn } from '@/lib/utils'
 import { Image } from '@/components/ui/image'
 
@@ -126,6 +127,12 @@ export default function NinjaManageTab() {
   const [currentTab, setCurrentTab] = useState('grid')
 
   const [gridSearchKeyword, setGridSearchKeyword] = useState('')
+
+  // ✨ 新增：按趋势分开的已应用快照（只有点击"更新"后才会刷新）
+  const [trendOrderSnapshot, setTrendOrderSnapshot] = useState<Record<string, string[]>>({})
+
+  // ✨ 新增：按趋势分开开关（默认关闭=保持数据顺序；打开=每梯度内下降在前、无趋势居中、上升在后）
+  const [splitByTrend, setSplitByTrend] = useState(false)
 
   // ---------- 批量管理状态 ----------
   const [batchDialogOpen, setBatchDialogOpen] = useState(false)
@@ -258,16 +265,61 @@ export default function NinjaManageTab() {
     return list
   }, [ninjas, searchKeyword, sortField, sortOrder])
 
+  // ✨ 新增：点击"更新"时，将当前数据按趋势排序并写入快照（之后不再随趋势变化实时更新）
+  const applyTrendSplit = useCallback(() => {
+    const trendOrder: Record<string, number> = { down: 0, up: 2 }
+    const snapshot: Record<string, string[]> = {}
+    TIER_OPTIONS.forEach(tier => {
+      const list = ninjas.filter(n => n.tier === tier)
+      list.sort((a, b) => {
+        const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
+        const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
+        return ta - tb
+      })
+      snapshot[tier] = list.map(n => n.id)
+    })
+    setTrendOrderSnapshot(snapshot)
+  }, [ninjas])
+
+  // ✨ 新增：打开"按趋势分开"时立即生成一次快照；之后只有点击"更新"按钮才刷新
+  useEffect(() => {
+    if (!splitByTrend) return
+    const trendOrder: Record<string, number> = { down: 0, up: 2 }
+    const snapshot: Record<string, string[]> = {}
+    TIER_OPTIONS.forEach(tier => {
+      const list = ninjas.filter(n => n.tier === tier)
+      list.sort((a, b) => {
+        const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
+        const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
+        return ta - tb
+      })
+      snapshot[tier] = list.map(n => n.id)
+    })
+    setTrendOrderSnapshot(snapshot)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [splitByTrend])
+
+  // ✨ 修改：梯度视图分组
+  // - 默认（splitByTrend=false）：保持数据原顺序
+  // - 开启（splitByTrend=true）：按已应用快照顺序排列（点击"更新"后才刷新）
   const groupedNinjas = useMemo(() => {
     let list = ninjas
     if (gridSearchKeyword.trim()) {
       list = ninjas.filter(n => n.name.toLowerCase().includes(gridSearchKeyword.toLowerCase()))
     }
-    return TIER_OPTIONS.map(tier => ({
-      tier,
-      ninjas: list.filter(n => n.tier === tier),
-    }))
-  }, [ninjas, gridSearchKeyword])
+    return TIER_OPTIONS.map(tier => {
+      let tierNinjas = list.filter(n => n.tier === tier)
+      if (splitByTrend) {
+        const orderMap = new Map((trendOrderSnapshot[tier] || []).map((id, idx) => [id, idx]))
+        tierNinjas = [...tierNinjas].sort((a, b) => {
+          const ia = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity
+          const ib = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
+          return ia - ib
+        })
+      }
+      return { tier, ninjas: tierNinjas }
+    })
+  }, [ninjas, gridSearchKeyword, splitByTrend, trendOrderSnapshot])
 
   const batchGroupedNinjas = useMemo(() => {
     let list = ninjas
@@ -488,24 +540,46 @@ export default function NinjaManageTab() {
 
         {/* 梯度视图 */}
         <TabsContent value="grid" className="mt-6">
-          <div className="relative max-w-xs mb-6">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={gridSearchKeyword}
-              onChange={(e) => setGridSearchKeyword(e.target.value)}
-              placeholder="搜索忍者..."
-              className="pl-9"
-            />
-            {gridSearchKeyword && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute! right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
-                onClick={() => setGridSearchKeyword('')}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+          {/* ✨ 修改：搜索框与"按趋势分开"开关同一行，开关在右上角 */}
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
+            <div className="relative max-w-xs flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={gridSearchKeyword}
+                onChange={(e) => setGridSearchKeyword(e.target.value)}
+                placeholder="搜索忍者..."
+                className="pl-9"
+              />
+              {gridSearchKeyword && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute! right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
+                  onClick={() => setGridSearchKeyword('')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="ninja-trend-toggle" className="text-sm cursor-pointer select-none">
+                  按趋势分开
+                </Label>
+                <Switch
+                  id="ninja-trend-toggle"
+                  checked={splitByTrend}
+                  onCheckedChange={setSplitByTrend}
+                />
+              </div>
+              {splitByTrend && (
+                <Button size="sm" variant="outline" onClick={applyTrendSplit} className="gap-1">
+                  <RefreshCw className="size-3.5" />
+                  更新
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-10">

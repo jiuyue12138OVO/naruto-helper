@@ -5,6 +5,7 @@ import type { IScroll } from '@/data/scrolls'
 import type { IRecommendation } from '@/data/recommendations'
 import type { ISummon } from '@/data/summons'
 import type { IBPCounter } from '@/data/battleBp'
+import type { IEasterEgg } from '@/data/easterEggs'
 
 // 新增导入
 import { DEFAULT_BLIND_PICK_ORDER } from '@/data/blindPickOrder'
@@ -17,6 +18,7 @@ const SUMMONS_KEY = 'naruto_summons'
 const COUNTERS_KEY = 'naruto_counters'
 const BLIND_PICK_ORDER_KEY = 'naruto_blind_pick_order'
 const ACQUISITION_OPTIONS_KEY = 'naruto_acquisition_options'
+const EASTER_EGGS_KEY = 'naruto_easter_eggs'
 const VERSION_KEY = 'naruto_data_version'
 
 import { DATA_VERSION } from '@/version'
@@ -50,6 +52,7 @@ function checkVersionAndClearIfNeeded() {
       scopedStorage.removeItem(NINJA_TAGS_KEY)
       scopedStorage.removeItem(BLIND_PICK_ORDER_KEY)
       scopedStorage.removeItem(ACQUISITION_OPTIONS_KEY)
+      scopedStorage.removeItem(EASTER_EGGS_KEY)
     } catch (e) { /* 忽略清除错误 */ }
     saveToStorage(VERSION_KEY, DATA_VERSION)
   }
@@ -72,6 +75,7 @@ interface DataContextType {
   acquisitionOptions: string[]
   counters: IBPCounter[]
   blindPickOrder: string[]
+  easterEggs: IEasterEgg[]
   loadingCount: number
   setBlindPickOrder: (order: string[] | ((prev: string[]) => string[])) => void
   ensureNinjas: () => Promise<void>
@@ -79,6 +83,7 @@ interface DataContextType {
   ensureRecommendations: () => Promise<void>
   ensureSummons: () => Promise<void>
   ensureCounters: () => Promise<void>
+  ensureEasterEggs: () => Promise<void>
   addNinja: (ninja: INinja) => void
   updateNinja: (id: string, data: Partial<INinja>) => void
   updateNinjasBatch: (updates: Record<string, Partial<INinja>>) => void
@@ -100,6 +105,8 @@ interface DataContextType {
   addCounter: (counter: IBPCounter) => void
   updateCounter: (id: string, data: Partial<IBPCounter>) => void
   deleteCounter: (id: string) => void
+  upsertEasterEgg: (egg: IEasterEgg) => void
+  deleteEasterEgg: (ninjaId: string) => void
   resetAllData: () => void
 }
 
@@ -122,6 +129,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     loadFromStorage(ACQUISITION_OPTIONS_KEY, DEFAULT_ACQUISITION_OPTIONS)
   )
   const [counters, setCounters] = useState<IBPCounter[]>(() => loadFromStorage(COUNTERS_KEY, []))
+  const [easterEggs, setEasterEggs] = useState<IEasterEgg[]>(() => loadFromStorage(EASTER_EGGS_KEY, []))
 
   const [blindPickOrder, setBlindPickOrder] = useState<string[]>(() => {
     const stored = loadFromStorage(BLIND_PICK_ORDER_KEY, null)
@@ -138,6 +146,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     recs: false,
     summons: false,
     counters: false,
+    easterEggs: false,
   })
 
   useEffect(() => { saveToStorage(NINJA_TAGS_KEY, ninjaTags) }, [ninjaTags])
@@ -145,6 +154,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveToStorage(SUMMONS_KEY, summons) }, [summons])
   useEffect(() => { saveToStorage(COUNTERS_KEY, counters) }, [counters])
   useEffect(() => { saveToStorage(BLIND_PICK_ORDER_KEY, blindPickOrder) }, [blindPickOrder])
+  useEffect(() => { saveToStorage(EASTER_EGGS_KEY, easterEggs) }, [easterEggs])
 
   const wrapLoader = useCallback(async (key: keyof typeof loadingRef.current, loader: () => Promise<void>) => {
     if (loadingRef.current[key]) return
@@ -222,6 +232,113 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
     })
   }, [counters.length, wrapLoader])
+
+  const ensureEasterEggs = useCallback(async () => {
+    if (easterEggs.length > 0 || loadingRef.current.easterEggs) return
+    await wrapLoader('easterEggs', async () => {
+      const { MOCK_EASTER_EGGS } = await import('@/data/easterEggs')
+      setEasterEggs(prev => {
+        if (prev.length > 0) return prev
+        saveToStorage(EASTER_EGGS_KEY, MOCK_EASTER_EGGS)
+        return MOCK_EASTER_EGGS
+      })
+    })
+  }, [easterEggs.length, wrapLoader])
+
+  // --- Easter Egg CRUD（按 ninjaId upsert）---
+  // 保存彩蛋：写入当前忍者的同时自动同步镜像关系（互通）
+  // A.defeatTarget 包含 B  ⟺  B.defeatBy 包含 A
+  const upsertEasterEgg = useCallback((egg: IEasterEgg) => {
+    setEasterEggs(prev => {
+      const map = new Map<string, IEasterEgg>()
+      prev.forEach(e => map.set(e.ninjaId, { ...e }))
+
+      const old = map.get(egg.ninjaId)
+      const oldTargets = old?.defeatTargetNinjaIds ?? []
+      const oldBys = old?.defeatByNinjaIds ?? []
+
+      // 写入当前忍者新记录
+      map.set(egg.ninjaId, { ...egg })
+
+      // 确保某忍者存在记录
+      const ensure = (ninjaId: string): IEasterEgg => {
+        let rec = map.get(ninjaId)
+        if (!rec) {
+          rec = { ninjaId, defeatByNinjaIds: [], defeatTargetNinjaIds: [] }
+          map.set(ninjaId, rec)
+        }
+        return rec
+      }
+
+      // 新增关系 → 镜像写入对方
+      egg.defeatTargetNinjaIds.forEach(b => {
+        const rec = ensure(b)
+        if (!rec.defeatByNinjaIds.includes(egg.ninjaId)) {
+          rec.defeatByNinjaIds = [...rec.defeatByNinjaIds, egg.ninjaId]
+        }
+      })
+      egg.defeatByNinjaIds.forEach(b => {
+        const rec = ensure(b)
+        if (!rec.defeatTargetNinjaIds.includes(egg.ninjaId)) {
+          rec.defeatTargetNinjaIds = [...rec.defeatTargetNinjaIds, egg.ninjaId]
+        }
+      })
+
+      // 已移除的关系 → 从对方镜像中删除
+      oldTargets.forEach(b => {
+        const rec = map.get(b)
+        if (rec && !egg.defeatTargetNinjaIds.includes(b)) {
+          rec.defeatByNinjaIds = rec.defeatByNinjaIds.filter(x => x !== egg.ninjaId)
+        }
+      })
+      oldBys.forEach(b => {
+        const rec = map.get(b)
+        if (rec && !egg.defeatByNinjaIds.includes(b)) {
+          rec.defeatTargetNinjaIds = rec.defeatTargetNinjaIds.filter(x => x !== egg.ninjaId)
+        }
+      })
+
+      // 清理完全空白的关系记录（保留当前忍者）
+      for (const [id, rec] of map) {
+        if (id !== egg.ninjaId && rec.defeatByNinjaIds.length === 0 && rec.defeatTargetNinjaIds.length === 0) {
+          map.delete(id)
+        }
+      }
+
+      const next = Array.from(map.values())
+      saveToStorage(EASTER_EGGS_KEY, next)
+      return next
+    })
+  }, [])
+
+  // 删除彩蛋：同时从其他忍者记录的镜像关系中移除该忍者（互通）
+  const deleteEasterEgg = useCallback((ninjaId: string) => {
+    setEasterEggs(prev => {
+      const target = prev.find(e => e.ninjaId === ninjaId)
+      if (!target) return prev
+      const map = new Map<string, IEasterEgg>()
+      prev.filter(e => e.ninjaId !== ninjaId).forEach(e => map.set(e.ninjaId, { ...e }))
+
+      target.defeatTargetNinjaIds.forEach(b => {
+        const rec = map.get(b)
+        if (rec) rec.defeatByNinjaIds = rec.defeatByNinjaIds.filter(x => x !== ninjaId)
+      })
+      target.defeatByNinjaIds.forEach(b => {
+        const rec = map.get(b)
+        if (rec) rec.defeatTargetNinjaIds = rec.defeatTargetNinjaIds.filter(x => x !== ninjaId)
+      })
+
+      // 清理完全空白的关系记录
+      for (const [id, rec] of map) {
+        if (rec.defeatByNinjaIds.length === 0 && rec.defeatTargetNinjaIds.length === 0) {
+          map.delete(id)
+        }
+      }
+      const next = Array.from(map.values())
+      saveToStorage(EASTER_EGGS_KEY, next)
+      return next
+    })
+  }, [])
 
   // --- Ninja CRUD ---
   const addNinja = useCallback((ninja: INinja) => {
@@ -402,6 +519,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setAcquisitionOptions(DEFAULT_ACQUISITION_OPTIONS)
     setCounters([])
     setBlindPickOrder(DEFAULT_BLIND_PICK_ORDER)
+    setEasterEggs([])
     saveToStorage(NINJAS_KEY, [])
     saveToStorage(SCROLLS_KEY, [])
     saveToStorage(RECS_KEY, [])
@@ -410,7 +528,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     saveToStorage(ACQUISITION_OPTIONS_KEY, DEFAULT_ACQUISITION_OPTIONS)
     saveToStorage(COUNTERS_KEY, [])
     saveToStorage(BLIND_PICK_ORDER_KEY, DEFAULT_BLIND_PICK_ORDER)
-    loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false }
+    saveToStorage(EASTER_EGGS_KEY, [])
+    loadingRef.current = { ninjas: false, scrolls: false, recs: false, summons: false, counters: false, easterEggs: false }
     setLoadingCount(0)
   }, [])
 
@@ -425,6 +544,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         acquisitionOptions,
         counters,
         blindPickOrder,
+        easterEggs,
         loadingCount,
         setBlindPickOrder,
         ensureNinjas,
@@ -432,6 +552,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ensureRecommendations,
         ensureSummons,
         ensureCounters,
+        ensureEasterEggs,
         addNinja,
         updateNinja,
         updateNinjasBatch,
@@ -453,6 +574,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addCounter,
         updateCounter,
         deleteCounter,
+        upsertEasterEgg,
+        deleteEasterEgg,
         resetAllData,
       }}
     >

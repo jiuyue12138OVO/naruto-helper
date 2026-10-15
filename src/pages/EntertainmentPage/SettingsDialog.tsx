@@ -59,15 +59,31 @@ export default function SettingsDialog({
     return kw ? ninjas.filter(n => n.name.toLowerCase().includes(kw)) : ninjas
   }, [ninjas, settingsSearch])
 
-  // 分组忍者
+  // 分组忍者（每组内按游戏内编号升序，缺失 gameOrder 的排最后）
   const groupedSettingsNinjas = useMemo(() => {
     const groups: { tier: string; ninjas: INinja[] }[] = []
     TIER_ORDER.forEach(tier => {
-      const list = filteredNinjas.filter(n => n.tier === tier)
+      const list = filteredNinjas
+        .filter(n => n.tier === tier)
+        .sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
       if (list.length) groups.push({ tier, ninjas: list })
     })
     return groups
   }, [filteredNinjas])
+
+  // 整梯度操作：把某一梯度的全部忍者整体 禁用/启用 或 选用/取消选用
+  // 基于完整 ninjas 判断（不受当前搜索词影响）
+  const handleToggleTier = (tier: string) => {
+    const tierNinjas = ninjas.filter(n => n.tier === tier)
+    if (tierNinjas.length === 0) return
+    const ids = tierNinjas.map(n => n.id)
+    const allActive = ids.every(id => activeNinjaSet.has(id))
+    ids.forEach(id => {
+      const has = activeNinjaSet.has(id)
+      if (allActive && has) toggleNinja(id)
+      if (!allActive && !has) toggleNinja(id)
+    })
+  }
 
   // 过滤密卷
   const filteredSettingsScrolls = useMemo(() => {
@@ -136,9 +152,22 @@ export default function SettingsDialog({
                 {groupedSettingsNinjas.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-8">无匹配忍者</p>
                 ) : (
-                  groupedSettingsNinjas.map(group => (
+                  groupedSettingsNinjas.map(group => {
+                    const tierIds = ninjas.filter(n => n.tier === group.tier).map(n => n.id)
+                    const tierAllActive = tierIds.length > 0 && tierIds.every(id => activeNinjaSet.has(id))
+                    return (
                     <div key={group.tier}>
-                      <Badge variant="outline" className="mb-2 text-sm font-bold">{group.tier}</Badge>
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className="text-sm font-bold">{group.tier}</Badge>
+                        <button
+                          className="text-xs text-primary hover:underline shrink-0"
+                          onClick={() => handleToggleTier(group.tier)}
+                        >
+                          {tierAllActive
+                            ? (mode === 'disable' ? '启用整梯度' : '取消选用整梯度')
+                            : (mode === 'disable' ? '禁用整梯度' : '选用整梯度')}
+                        </button>
+                      </div>
                       <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
                         {group.ninjas.map(ninja => {
                           const isActive = activeNinjaSet.has(ninja.id)
@@ -162,7 +191,8 @@ export default function SettingsDialog({
                         })}
                       </div>
                     </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>

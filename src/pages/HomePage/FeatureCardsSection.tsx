@@ -37,7 +37,7 @@ const FEATURES = [
   },
   {
     title: '娱乐',
-    description: '随机忍者 · 随机阵容 · 更多玩法',
+    description: '随机忍者 · 随机阵容 · 彩蛋图鉴',
     icon: '🎮',
     path: '/entertainment',
     gradient: 'from-purple-500/20 to-pink-600/20',

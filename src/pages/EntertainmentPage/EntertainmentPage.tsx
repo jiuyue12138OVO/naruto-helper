@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useData } from '@/contexts/DataContext'
+import { EasterEggIcon } from '@/components/EasterEggIcon'
 import RandomTab from './RandomTab'
+import EasterEggTab from './EasterEggTab'
 
 export default function EntertainmentPage() {
-  const { ensureNinjas, ensureScrolls, ensureRecommendations } = useData()
+  const { ensureNinjas, ensureScrolls, ensureRecommendations, ensureEasterEggs } = useData()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -12,8 +14,9 @@ export default function EntertainmentPage() {
       ensureNinjas(),
       ensureScrolls(),
       ensureRecommendations(),
+      ensureEasterEggs(),
     ]).finally(() => setLoading(false))
-  }, [ensureNinjas, ensureScrolls, ensureRecommendations])
+  }, [ensureNinjas, ensureScrolls, ensureRecommendations, ensureEasterEggs])
 
   if (loading) {
     return (
@@ -39,11 +42,18 @@ export default function EntertainmentPage() {
               <span className="text-base leading-none">🎲</span>
               随机
             </TabsTrigger>
-            {/* 后续新增 Tab 在此添加 */}
+            <TabsTrigger value="easter-egg" className="flex items-center gap-1.5">
+              <EasterEggIcon className="size-5" />
+              彩蛋
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="random" className="mt-6">
             <RandomTab />
+          </TabsContent>
+
+          <TabsContent value="easter-egg" className="mt-6">
+            <EasterEggTab />
           </TabsContent>
         </Tabs>
       </div>
