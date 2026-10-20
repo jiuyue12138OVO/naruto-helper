@@ -299,8 +299,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       })
 
       // 清理完全空白的关系记录（保留当前忍者）
+      // 只有"关联列表为空 且 无类型/标题/描述"的记录才清理，避免误删"特定角色彩蛋"等只有其他信息的记录
       for (const [id, rec] of map) {
-        if (id !== egg.ninjaId && rec.defeatByNinjaIds.length === 0 && rec.defeatTargetNinjaIds.length === 0) {
+        if (
+          id !== egg.ninjaId &&
+          rec.defeatByNinjaIds.length === 0 &&
+          rec.defeatTargetNinjaIds.length === 0 &&
+          !rec.title && !rec.description && !rec.type
+        ) {
           map.delete(id)
         }
       }
@@ -328,9 +334,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (rec) rec.defeatTargetNinjaIds = rec.defeatTargetNinjaIds.filter(x => x !== ninjaId)
       })
 
-      // 清理完全空白的关系记录
+      // 清理完全空白的关系记录（仅当无类型/标题/描述时才清理）
       for (const [id, rec] of map) {
-        if (rec.defeatByNinjaIds.length === 0 && rec.defeatTargetNinjaIds.length === 0) {
+        if (
+          rec.defeatByNinjaIds.length === 0 &&
+          rec.defeatTargetNinjaIds.length === 0 &&
+          !rec.title && !rec.description && !rec.type
+        ) {
           map.delete(id)
         }
       }

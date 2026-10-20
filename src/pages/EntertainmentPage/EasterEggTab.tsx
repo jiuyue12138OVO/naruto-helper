@@ -18,6 +18,7 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 const EGG_TYPE_LABEL: Record<string, string> = {
   self: '自带彩蛋',
   scene: '场景互动彩蛋',
+  character: '特定角色彩蛋',
   other: '其他彩蛋',
 }
 
@@ -163,12 +164,12 @@ export default function EasterEggTab() {
               {!selectedEgg ||
                 (selectedEgg.defeatByNinjaIds.length === 0 &&
                  selectedEgg.defeatTargetNinjaIds.length === 0 &&
-                 !selectedEgg.title && !selectedEgg.description) ? (
+                 !selectedEgg.title && !selectedEgg.description && !selectedEgg.type) ? (
                 <p className="text-sm text-muted-foreground text-center py-6">该忍者暂无彩蛋信息</p>
               ) : (
                 <>
                   {/* 上面：其他信息（自带 / 场景互动等） */}
-                  {(selectedEgg.title || selectedEgg.description) && (
+                  {(selectedEgg.type || selectedEgg.title || selectedEgg.description) && (
                     <div className="bg-muted/40 rounded-lg p-3 space-y-2">
                       {selectedEgg.type && (
                         <Badge variant="outline" className="text-xs">{EGG_TYPE_LABEL[selectedEgg.type] ?? selectedEgg.type}</Badge>

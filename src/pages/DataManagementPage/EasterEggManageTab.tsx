@@ -20,6 +20,7 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 const TYPE_OPTIONS: { value: EasterEggType; label: string }[] = [
   { value: 'self', label: '自带彩蛋' },
   { value: 'scene', label: '场景互动彩蛋' },
+  { value: 'character', label: '特定角色彩蛋' },
   { value: 'other', label: '其他' },
 ]
 

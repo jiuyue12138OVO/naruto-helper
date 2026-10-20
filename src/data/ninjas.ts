@@ -1621,7 +1621,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "高输出",
         "低真空期",
         "大招可接",
-        "拉扯"
+        "拉扯",
+        "高机动性"
       ],
       "blindPick": false,
       "acquisition": "点券",

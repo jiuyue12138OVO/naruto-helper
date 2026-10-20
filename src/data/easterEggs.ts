@@ -1,7 +1,7 @@
 // EXPORTS: EasterEggType, IEasterEgg, MOCK_EASTER_EGGS
 
-/** 彩蛋类型：self=自带彩蛋，scene=场景互动彩蛋，other=其他 */
-export type EasterEggType = 'self' | 'scene' | 'other'
+/** 彩蛋类型：self=自带彩蛋，scene=场景互动彩蛋，character=特定角色彩蛋，other=其他 */
+export type EasterEggType = 'self' | 'scene' | 'character' | 'other'
 
 /** 单个忍者的彩蛋记录（每个忍者一条，以 ninjaId 为主键） */
 export interface IEasterEgg {
@@ -52,7 +52,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783308820073",
         "1783309737253",
         "1783315526387"
-      ]
+      ],
+      "type": "character",
+      "title": "威装·须佐能乎",
+      "description": "当对手为宇智波带土【十尾人柱力】时，奥义替换为威装·须佐能乎。"
     },
     {
       "ninjaId": "1783308820073",
@@ -82,7 +85,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309691119",
         "1783315611859",
         "1791104875173"
-      ]
+      ],
+      "type": "character",
+      "title": "神剑·沼之矛",
+      "description": "当对手为漩涡鸣人【九喇嘛连结】、宇智波佐助【永恒万花筒】时，奥义替换为神剑·沼之矛。"
     },
     {
       "ninjaId": "1783309691119",
@@ -106,7 +112,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "9",
         "1783316350750",
         "1791091191760"
-      ]
+      ],
+      "type": "character",
+      "title": "威装·须佐能乎",
+      "description": "当对手为宇智波带土【十尾人柱力】时，奥义替换为威装·须佐能乎。"
     },
     {
       "ninjaId": "15",
@@ -226,8 +235,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783310494403",
       "defeatByNinjaIds": [
-        "1",
-        "1784014504732"
+        "1"
       ],
       "defeatTargetNinjaIds": [
         "1791042141219",
@@ -249,8 +257,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "defeatByNinjaIds": [
         "1",
         "12",
-        "1783308752772",
-        "1784014504732"
+        "1783308752772"
       ],
       "defeatTargetNinjaIds": [
         "1",
@@ -262,11 +269,11 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1791000986913",
         "1791003548591",
         "1785510479412",
-        "1784014504732",
         "1791123002916",
         "15",
         "1790212950413",
-        "1783315425090"
+        "1783315425090",
+        "1784014504732"
       ],
       "type": "self",
       "title": "“不要小看火之意志！！”",
@@ -287,7 +294,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1785510479412",
         "1783316837191",
         "1791089622892"
-      ]
+      ],
+      "type": "scene",
+      "title": "让世界感受痛楚",
+      "description": "如果当前决斗场场景为木叶村（木叶村空地、公园空地、重建街道），佩恩·天道【超】追击释放二段大招“超·神罗天征”后会出现木叶被摧毁的镜头，之后改变场景。"
     },
     {
       "ninjaId": "1783315719485",
@@ -349,7 +359,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       ],
       "type": "other",
       "title": "时空间灭相",
-      "description": "当对手为旗木卡卡西【万花筒写轮眼】、旗木卡卡西【忍界大战】时，触发宇智波反弹后会将对方拽入神威空间（带有抓取效果），并在当前小局内双技能各减少2sCD。"
+      "description": "当对手为旗木卡卡西、旗木卡卡西【万花筒写轮眼】、旗木卡卡西【忍界大战】时，触发宇智波反弹后使用神威瞬移到对手身后抓取对手，将对手拽入神威空间，并在当前小局内双技能各减少2sCD。"
     },
     {
       "ninjaId": "1783309749818",
@@ -364,7 +374,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "11",
         "1783309774545",
         "1789296416670"
-      ]
+      ],
+      "type": "character",
+      "title": "“不能认同自己的人，注定失败”",
+      "description": "当对手为药师兜【仙人模式】时，触发伊邪那美后会有特殊动作。"
     },
     {
       "ninjaId": "1783316581671",
@@ -582,8 +595,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791090898435",
       "defeatByNinjaIds": [
-        "1783310541594",
-        "1784014504732"
+        "1783310541594"
       ],
       "defeatTargetNinjaIds": [
         "1783310541594"
@@ -594,7 +606,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "defeatByNinjaIds": [],
       "defeatTargetNinjaIds": [
         "1783315644309"
-      ]
+      ],
+      "type": "character",
+      "title": "李洛克vs我爱罗",
+      "description": "当对手为我爱罗时，普通攻击最后一下时会出现李洛克中忍考试时的剪影。"
     },
     {
       "ninjaId": "12",
@@ -736,8 +751,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1784014419187",
       "defeatByNinjaIds": [
         "1790309313890",
-        "1783316968545",
-        "1784014504732"
+        "1783316968545"
       ],
       "defeatTargetNinjaIds": [
         "1790309313890",
@@ -872,8 +886,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783316859772",
       "defeatByNinjaIds": [
-        "1790212950413",
-        "1784014504732"
+        "1790212950413"
       ],
       "defeatTargetNinjaIds": [
         "1790212950413"
@@ -927,8 +940,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791212022913",
       "defeatByNinjaIds": [
-        "1789372944362",
-        "1784014504732"
+        "1789372944362"
       ],
       "defeatTargetNinjaIds": [
         "1789372944362"
@@ -955,8 +967,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791090944714",
       "defeatByNinjaIds": [
-        "1789098396723",
-        "1784014504732"
+        "1789098396723"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -1025,15 +1036,14 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791215274235",
       "defeatByNinjaIds": [
-        "1784018555884",
-        "1784014504732"
+        "1784018555884"
       ],
       "defeatTargetNinjaIds": [
         "1784018555884"
       ],
       "type": "self",
       "title": "“什么？！”",
-      "description": "奥义由迈特凯【轮椅】击杀触发。"
+      "description": "奥义最后一段有小概率出现迈特凯【轮椅】踢出一击，该段伤害击杀对手可触发特殊奥义图。"
     },
     {
       "ninjaId": "1791000765013",
@@ -1173,8 +1183,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1791081944792",
       "defeatByNinjaIds": [
         "1791082853082",
-        "1784005699565",
-        "1784014504732"
+        "1784005699565"
       ],
       "defeatTargetNinjaIds": [
         "1791081438297"
@@ -1184,8 +1193,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1791104875173",
       "defeatByNinjaIds": [
         "2",
-        "1783310155158",
-        "1784014504732"
+        "1783310155158"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -1207,8 +1215,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1791001922565",
       "defeatByNinjaIds": [
         "1784018638140",
-        "1785510624612",
-        "1784014504732"
+        "1785510624612"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -1473,8 +1480,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791082452460",
       "defeatByNinjaIds": [
-        "1784005699565",
-        "1784014504732"
+        "1784005699565"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -1495,8 +1501,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1790397769770",
       "defeatByNinjaIds": [
-        "1784005472314",
-        "1784014504732"
+        "1784005472314"
       ],
       "defeatTargetNinjaIds": [
         "1784005472314"
@@ -1606,8 +1611,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1791089984600",
       "defeatByNinjaIds": [
         "1783316531227",
-        "1783309572540",
-        "1784014504732"
+        "1783309572540"
       ],
       "defeatTargetNinjaIds": [
         "1783316531227"
@@ -1625,18 +1629,19 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1789296484148",
       "defeatByNinjaIds": [
-        "1783316531227",
-        "1784014504732"
+        "1783316531227"
       ],
       "defeatTargetNinjaIds": [
         "1783316531227"
-      ]
+      ],
+      "type": "character",
+      "title": "“しゃーんなろー！！！”",
+      "description": "当对手为蝎、蝎【百机操演】、蝎【绯硫琥】时奥义会由春野樱【疾风传】完成最后一击。"
     },
     {
       "ninjaId": "1784018790869",
       "defeatByNinjaIds": [
-        "1783315694697",
-        "1784014504732"
+        "1783315694697"
       ],
       "defeatTargetNinjaIds": [
         "1783315694697"
@@ -1655,8 +1660,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "20",
       "defeatByNinjaIds": [
-        "8",
-        "1784014504732"
+        "8"
       ],
       "defeatTargetNinjaIds": [
         "1783309172598",
@@ -1695,9 +1699,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     },
     {
       "ninjaId": "1783309521385",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
+      "defeatByNinjaIds": [],
       "defeatTargetNinjaIds": [
         "1791081438297"
       ]
@@ -1737,8 +1739,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783316484124",
       "defeatByNinjaIds": [
-        "1783309985981",
-        "1784014504732"
+        "1783309985981"
       ],
       "defeatTargetNinjaIds": [
         "1783309985981"
@@ -1767,8 +1768,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783316959901",
       "defeatByNinjaIds": [
-        "1783309572540",
-        "1784014504732"
+        "1783309572540"
       ],
       "defeatTargetNinjaIds": [
         "1783315611859"
@@ -1836,8 +1836,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "ninjaId": "1791091191760",
       "defeatByNinjaIds": [
         "1783309691119",
-        "1783310155158",
-        "1784014504732"
+        "1783310155158"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -1856,9 +1855,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     },
     {
       "ninjaId": "1791211847155",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
+      "defeatByNinjaIds": [],
       "defeatTargetNinjaIds": [
         "1790398737992"
       ]
@@ -2029,8 +2026,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791213744403",
       "defeatByNinjaIds": [
-        "1791129618324",
-        "1784014504732"
+        "1791129618324"
       ],
       "defeatTargetNinjaIds": [
         "1783310082543"
@@ -2049,151 +2045,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783317094790",
       "defeatByNinjaIds": [
-        "1788917702688",
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": [
-        "1784014504732"
-      ]
-    },
-    {
-      "ninjaId": "1784014504732",
-      "defeatByNinjaIds": [
-        "1783317094790",
-        "1783309572540",
         "1788917702688"
       ],
       "defeatTargetNinjaIds": [
-        "1783310560092",
-        "1783309208477",
-        "1783309130139",
-        "20",
-        "1783310469533",
-        "1783310187740",
-        "1783316753096",
-        "1783309521385",
-        "1783309572540",
-        "1783310494403",
-        "1783310506586",
-        "1783315995490",
-        "1783316139532",
-        "1784014419187",
-        "1784018320448",
-        "1783316484124",
-        "1788788499677",
-        "1783316800764",
-        "1783317094790",
-        "1783316859772",
-        "1783773559637",
-        "1783316959901",
-        "1783316976705",
-        "1784005135985",
-        "1788876338242",
-        "1790396327811",
-        "1784005003107",
-        "1784005572928",
-        "1784018790869",
-        "1791124630751",
-        "1791124933516",
-        "1790397769770",
-        "1791213103960",
-        "1790400124420",
-        "1790400451030",
-        "1790400687728",
-        "1791041418200",
-        "1791002694399",
-        "1783612673505",
-        "1791107437074",
-        "1791104228053",
-        "1791175333711",
-        "1791108245126",
-        "1791176409720",
-        "1791176715602",
-        "1784005768895",
-        "1791122715458",
-        "1791105093119",
-        "1791125157702",
-        "1791212468386",
-        "1791130042863",
-        "1791217065240",
-        "1791106538813",
-        "1791130922568",
-        "1791004788011",
-        "1791041755537",
-        "1791082452460",
-        "1784014794401",
-        "1789296538418",
-        "1789296484148",
-        "1791104875173",
-        "1791122395887",
-        "1791178414780",
-        "1791216196912",
-        "1791208710617",
-        "1791209291942",
-        "1791210855130",
-        "1791211210192",
-        "1791211847155",
-        "1791212022913",
-        "1790398468018",
-        "1791127676562",
-        "1791213744403",
-        "1791214031833",
-        "1791216803144",
-        "1791215274235",
-        "1791081944792",
-        "1791089984600",
-        "1791173456548",
-        "1791103665239",
-        "1791174153023",
-        "1791174399724",
-        "1791175123960",
-        "1791175561089",
-        "1791117486678",
-        "1791176870602",
-        "1791123400949",
-        "1791177212743",
-        "1791123527736",
-        "1791123849140",
-        "1791124064503",
-        "1791124413600",
-        "1791216535278",
-        "1791091191760",
-        "1791126533450",
-        "1791212157960",
-        "1791212637533",
-        "1791129224238",
-        "1791129448878",
-        "1791213584199",
-        "1791214165543",
-        "1791000986913",
-        "1791079551720",
-        "1791079861759",
-        "1791080220742",
-        "1791003901522",
-        "1791081077873",
-        "1791107314831",
-        "1791107635759",
-        "1791173926098",
-        "1791108006937",
-        "1791104518356",
-        "1791176258740",
-        "1791121978724",
-        "1791090898435",
-        "1791090944714",
-        "1791102496048",
-        "1791210706044",
-        "1791040893366",
-        "1791002027507",
-        "1791002153199",
-        "1791002477765",
-        "1791090126679",
-        "1791090538339",
-        "1791003548591",
-        "1791001227443",
-        "1791001643980",
-        "1791001922565",
-        "1791003369475",
-        "1791003035617"
+        "1784014504732"
       ]
     },
     {
@@ -2273,8 +2128,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "defeatByNinjaIds": [
         "12",
         "1783315425090",
-        "1784074755345",
-        "1784014504732"
+        "1784074755345"
       ],
       "defeatTargetNinjaIds": [
         "1783315425090",
@@ -2317,8 +2171,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791214031833",
       "defeatByNinjaIds": [
-        "1791129618324",
-        "1784014504732"
+        "1791129618324"
       ],
       "defeatTargetNinjaIds": [
         "1791129618324"
@@ -2356,9 +2209,9 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1791081213435"
       ],
       "defeatTargetNinjaIds": [
-        "1784014504732",
         "1791041226298",
-        "1783317094790"
+        "1783317094790",
+        "1784014504732"
       ]
     },
     {
@@ -2382,8 +2235,7 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783310560092",
       "defeatByNinjaIds": [
-        "1791089622892",
-        "1784014504732"
+        "1791089622892"
       ],
       "defeatTargetNinjaIds": [
         "1791089622892"
@@ -2484,16 +2336,14 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1791000986913",
       "defeatByNinjaIds": [
-        "1783309572540",
-        "1784014504732"
+        "1783309572540"
       ],
       "defeatTargetNinjaIds": []
     },
     {
       "ninjaId": "1791003548591",
       "defeatByNinjaIds": [
-        "1783309572540",
-        "1784014504732"
+        "1783309572540"
       ],
       "defeatTargetNinjaIds": []
     },
@@ -2528,713 +2378,11 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       ]
     },
     {
-      "ninjaId": "1783309208477",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783309130139",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783310469533",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783310187740",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783316753096",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783310506586",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783315995490",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783316139532",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1784018320448",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1788788499677",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783316800764",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783773559637",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783316976705",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1784005135985",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1788876338242",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1790396327811",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1784005003107",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1784005572928",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791124630751",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791124933516",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791213103960",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1790400124420",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1790400451030",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1790400687728",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791041418200",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791002694399",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1783612673505",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791107437074",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791104228053",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791175333711",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791108245126",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791176409720",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791176715602",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1784005768895",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791122715458",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791105093119",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791125157702",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791212468386",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791130042863",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791217065240",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791106538813",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791130922568",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791004788011",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791041755537",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
       "ninjaId": "1784014794401",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
+      "defeatByNinjaIds": [],
       "defeatTargetNinjaIds": [
         "1791081438297"
       ]
-    },
-    {
-      "ninjaId": "1791122395887",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791178414780",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791216196912",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791208710617",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791209291942",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791210855130",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791211210192",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1790398468018",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791127676562",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791216803144",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791173456548",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791103665239",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791174153023",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791174399724",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791175123960",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791175561089",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791117486678",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791176870602",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791123400949",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791177212743",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791123527736",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791123849140",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791124064503",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791124413600",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791216535278",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791126533450",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791212157960",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791212637533",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791129224238",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791129448878",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791213584199",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791214165543",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791079551720",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791079861759",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791080220742",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791003901522",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791081077873",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791107314831",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791107635759",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791173926098",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791108006937",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791104518356",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791176258740",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791121978724",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791102496048",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791210706044",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791040893366",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791002027507",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791002153199",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791002477765",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791090126679",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791090538339",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791001227443",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791001643980",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791003369475",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
-    },
-    {
-      "ninjaId": "1791003035617",
-      "defeatByNinjaIds": [
-        "1784014504732"
-      ],
-      "defeatTargetNinjaIds": []
     },
     {
       "ninjaId": "1791172900039",
@@ -3249,5 +2397,41 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "20"
       ],
       "defeatTargetNinjaIds": []
+    },
+    {
+      "ninjaId": "1784014504732",
+      "defeatByNinjaIds": [
+        "1783317094790",
+        "1783309572540",
+        "1788917702688"
+      ],
+      "defeatTargetNinjaIds": [],
+      "type": "character",
+      "title": "“所有的漂亮姐姐，我都要一个人独占！”",
+      "description": "自来也【少年】奥义击杀所有女忍触发。"
+    },
+    {
+      "ninjaId": "1791125157702",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "type": "character",
+      "title": "恩爱夫妻❤️",
+      "description": "对手为波风水门【新春限定】时开场触发特殊动作。"
+    },
+    {
+      "ninjaId": "1783310130280",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "type": "character",
+      "title": "恩爱夫妻❤️",
+      "description": "当对手为漩涡玖辛奈【新春限定】时开场触发特殊互动。"
+    },
+    {
+      "ninjaId": "1788876338242",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "type": "self",
+      "title": "Let's party!",
+      "description": "站着不动15s后会用拐杖糖进行一发射击（训练场无法触发）。"
     }
   ]
