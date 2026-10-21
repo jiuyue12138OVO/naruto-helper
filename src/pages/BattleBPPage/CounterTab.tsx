@@ -253,7 +253,7 @@ export default function CounterTab() {
                                     <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                                   </div>
                                   <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
-                                  <span className={`text-[10px] font-bold mt-0.5 ${score > 0 ? 'text-green-500' : score < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                  <span className={`text-[10px] font-bold mt-0.5 ${score > 0 ? 'text-green-500' : 'text-muted-foreground'}`}>
                                     {score > 0 ? `+${score}` : score}
                                   </span>
                                 </div>

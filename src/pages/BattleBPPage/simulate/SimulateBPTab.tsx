@@ -435,6 +435,19 @@ export default function SimulateBPTab() {
     setPhase('done')
   }
 
+  // 跳过密卷阶段：不选择密卷，槽位保持为空，不消耗密卷池
+  const skipScrolls = () => {
+    pushHistory()
+    setPhase('summons')
+    setSummonActiveSlot({ player: '1P', index: 0 })
+  }
+
+  // 跳过通灵阶段：不选择通灵，槽位保持为空，不消耗通灵池
+  const skipSummons = () => {
+    pushHistory()
+    setPhase('done')
+  }
+
   // ===== 渲染 =====
   const renderBanSlot = (player: '1P' | '2P', index: number) => {
     const ninja = (player === '1P' ? ban1P : ban2P)[index]
@@ -604,16 +617,26 @@ export default function SimulateBPTab() {
     }
     if (phase === 'scrolls') {
       return (
-        <Button size="sm" onClick={confirmScrolls} disabled={!isScrollsComplete}>
-          确认密卷配置
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={skipScrolls}>
+            跳过密卷（不消耗池）
+          </Button>
+          <Button size="sm" onClick={confirmScrolls} disabled={!isScrollsComplete}>
+            确认密卷配置
+          </Button>
+        </div>
       )
     }
     if (phase === 'summons') {
       return (
-        <Button size="sm" onClick={confirmSummons} disabled={!isSummonsComplete}>
-          确认通灵配置
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={skipSummons}>
+            跳过通灵（不消耗池）
+          </Button>
+          <Button size="sm" onClick={confirmSummons} disabled={!isSummonsComplete}>
+            确认通灵配置
+          </Button>
+        </div>
       )
     }
     if (phase === 'done') {
@@ -726,6 +749,14 @@ export default function SimulateBPTab() {
         </div>
       </div>
 
+      {/* 左侧工具栏：重置（与右侧操作区分离，避免误点） */}
+      <div className="fixed top-20 left-4 z-50 flex items-center gap-2 bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2">
+        <Button variant="outline" size="sm" onClick={resetAll} className="gap-1">
+          <RotateCcw className="h-4 w-4" /> 重置
+        </Button>
+      </div>
+
+      {/* 右侧工具栏：过往 / 撤回 / 当前阶段操作 */}
       <div className="fixed top-20 right-4 z-50 flex items-center gap-2 bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2">
         {historyRecords.length > 0 && (
           <Button variant="outline" size="sm" onClick={() => setShowHistory(true)} className="gap-1">
@@ -740,9 +771,6 @@ export default function SimulateBPTab() {
           className="gap-1"
         >
           <Undo2 className="h-4 w-4" /> 撤回
-        </Button>
-        <Button variant="outline" size="sm" onClick={resetAll} className="gap-1">
-          <RotateCcw className="h-4 w-4" /> 重置
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
         {renderTopRightActions()}

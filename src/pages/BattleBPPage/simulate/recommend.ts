@@ -2,10 +2,11 @@ import type { INinja } from '@/data/ninjas'
 import type { IBPCounter } from '@/data/battleBp'
 
 /** 梯度权重 */
+// 梯度权重（已降低比重，让克制关系在推荐中占主导）
 export const TIER_WEIGHT: Record<string, number> = {
-  '天王': 30, '伪天王': 25, 't0顶': 20, 't0上': 15,
-  't0中': 10, 't0下': 5, '准t0': 3, 't1': 0, '准t1': -1, 't2': -2,
-  't3': -4, '...': -6,
+  '天王': 15, '伪天王': 12, 't0顶': 10, 't0上': 7,
+  't0中': 5, 't0下': 3, '准t0': 2, 't1': 0, '准t1': 0, 't2': -1,
+  't3': -2, '...': -3,
 }
 
 /** 盲选加成 */
@@ -45,19 +46,20 @@ export function scorePickCandidate(
     total += BLIND_BONUS
   }
 
-  // 对每个参考目标计算克制 / 被克制，主要目标权重 1.5，次要目标权重 0.5
+  // 对每个参考目标计算克制 / 被克制，主要目标权重 2.5，次要目标权重 1（提高克制比重）
   targets.forEach((target, idx) => {
     if (!target) return
-    const weight = idx === primaryIndex ? 1.5 : 0.5
+    const weight = idx === primaryIndex ? 2.5 : 1
 
     const targetCounter = counters.find(c => c.ninjaId === target.id)
     if (targetCounter && targetCounter.counterNinjaIds.includes(candidate.id)) {
       const s = targetCounter.counterNinjaScores?.[candidate.id] ?? 0
-      const v = s * weight
+      // 负数不代表劣势，只是优先级更低：按 0 处理，不参与扣分
+      const v = (s > 0 ? s : 0) * weight
       details.push({
         label: `克制 ${target.name}${idx === primaryIndex ? '（对位）' : '（邻位）'}`,
         value: v,
-        description: `克制分数 ${s} × 权重 ${weight}`,
+        description: `克制分数 ${s} × 权重 ${weight}${s <= 0 ? '（负分为低优先级，不计入）' : ''}`,
       })
       total += v
     }
@@ -65,11 +67,12 @@ export function scorePickCandidate(
     const candidateCounter = counters.find(c => c.ninjaId === candidate.id)
     if (candidateCounter && candidateCounter.counterNinjaIds.includes(target.id)) {
       const s = candidateCounter.counterNinjaScores?.[target.id] ?? 0
-      const v = -s * weight
+      // 负数不代表劣势，只是优先级更低：按 0 处理，不参与扣分
+      const v = -(s > 0 ? s : 0) * weight
       details.push({
         label: `被 ${target.name} 克制${idx === primaryIndex ? '（对位）' : '（邻位）'}`,
         value: v,
-        description: `被克制分数 ${s} × 权重 ${weight}`,
+        description: `被克制分数 ${s} × 权重 ${weight}${s <= 0 ? '（负分为低优先级，不计入）' : ''}`,
       })
       total += v
     }
