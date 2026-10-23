@@ -153,9 +153,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 2
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -533,13 +538,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "春野樱【忍界大战】",
       "scrolls": [
         {
-          "scrollId": "1783349280153",
-          "scrollName": "水遁·水龙卷",
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
           "priority": 1
         },
         {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
           "priority": 2
         },
         {
@@ -730,24 +735,29 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 3
+        },
+        {
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
-          "priority": 3
+          "priority": 4
         },
         {
           "scrollId": "1783349488627",
           "scrollName": "通灵·雷光剑化",
-          "priority": 4
+          "priority": 5
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 5
+          "priority": 6
         },
         {
           "scrollId": "1783349280153",
           "scrollName": "水遁·水龙卷",
-          "priority": 6
+          "priority": 7
         }
       ]
     },
@@ -1120,9 +1130,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 4
         },
         {
+          "scrollId": "1783350925467",
+          "scrollName": "时空间忍术",
+          "priority": 5
+        },
+        {
           "scrollId": "9",
           "scrollName": "火遁·鬼灯笼",
-          "priority": 5
+          "priority": 6
         }
       ]
     },
@@ -1152,6 +1167,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "1783351060243",
+          "scrollName": "冰遁·冰牢",
+          "priority": 2
         }
       ]
     },
@@ -2032,13 +2052,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "照美冥【夏日限定】",
       "scrolls": [
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
           "priority": 1
         },
         {
-          "scrollId": "5",
-          "scrollName": "水遁·水冲波",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 2
         },
         {
@@ -2286,6 +2306,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 4
+        },
+        {
+          "scrollId": "1783350438746",
+          "scrollName": "通灵·操手里剑",
+          "priority": 5
         }
       ]
     },
@@ -3271,19 +3296,24 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "小南【神驹佑将】",
       "scrolls": [
         {
+          "scrollId": "1783350886684",
+          "scrollName": "冰遁·爆雪",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -4191,19 +4221,24 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "漩涡鸣人·自来也【修行之旅】",
       "scrolls": [
         {
-          "scrollId": "2",
-          "scrollName": "冰遁·冻雪",
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
           "priority": 1
         },
         {
-          "scrollId": "1783349328947",
-          "scrollName": "土遁·土流枪",
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 3
         },
         {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 3
+          "priority": 4
         }
       ]
     },

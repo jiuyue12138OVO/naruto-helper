@@ -174,7 +174,7 @@
         "位移",
         "高机动性"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 8
     },
@@ -313,7 +313,8 @@
         "低真空期",
         "位移",
         "高机动性",
-        "瞬发"
+        "瞬发",
+        "拉扯"
       ],
       "blindPick": true,
       "acquisition": "高招",
@@ -528,7 +529,7 @@
         "低真空期",
         "大招可接"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "免费",
       "gameOrder": 2
     },
@@ -666,7 +667,7 @@
         "位移",
         "金刚体"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "祈愿夺宝",
       "gameOrder": 98
     },
@@ -882,7 +883,7 @@
         "大招特殊情况可接",
         "低真空期"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "点券",
       "gameOrder": 125
     },
@@ -1067,7 +1068,7 @@
         "防反",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 40
     },
@@ -1156,7 +1157,7 @@
         "拉扯",
         "低真空期"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "忍法帖",
       "gameOrder": 33
     },
@@ -1219,7 +1220,7 @@
         "高机动性",
         "大招可接"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "忍法帖",
       "gameOrder": 49
     },
@@ -1429,7 +1430,8 @@
         "大招可接",
         "位移",
         "高机动性",
-        "拉扯"
+        "拉扯",
+        "大招特殊情况可接"
       ],
       "blindPick": false,
       "acquisition": "点券",
@@ -1570,7 +1572,7 @@
         "低真空期",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "点券",
       "gameOrder": 122
     },
@@ -1627,7 +1629,7 @@
         "大招可接",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 138
     },
@@ -4086,7 +4088,7 @@
       "imageUrl": "data:image/webp;base64,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",
       "acquisition": "免费",
       "gameOrder": 431,
-      "blindPick": true,
+      "blindPick": false,
       "trend": "up"
     },
     {
@@ -8764,9 +8766,14 @@
           "priority": 1
         },
         {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 2
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -9144,13 +9151,13 @@
       "ninjaName": "春野樱【忍界大战】",
       "scrolls": [
         {
-          "scrollId": "1783349280153",
-          "scrollName": "水遁·水龙卷",
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
           "priority": 1
         },
         {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
           "priority": 2
         },
         {
@@ -9341,24 +9348,29 @@
           "priority": 2
         },
         {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 3
+        },
+        {
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
-          "priority": 3
+          "priority": 4
         },
         {
           "scrollId": "1783349488627",
           "scrollName": "通灵·雷光剑化",
-          "priority": 4
+          "priority": 5
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 5
+          "priority": 6
         },
         {
           "scrollId": "1783349280153",
           "scrollName": "水遁·水龙卷",
-          "priority": 6
+          "priority": 7
         }
       ]
     },
@@ -9731,9 +9743,14 @@
           "priority": 4
         },
         {
+          "scrollId": "1783350925467",
+          "scrollName": "时空间忍术",
+          "priority": 5
+        },
+        {
           "scrollId": "9",
           "scrollName": "火遁·鬼灯笼",
-          "priority": 5
+          "priority": 6
         }
       ]
     },
@@ -9763,6 +9780,11 @@
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "1783351060243",
+          "scrollName": "冰遁·冰牢",
+          "priority": 2
         }
       ]
     },
@@ -10643,13 +10665,13 @@
       "ninjaName": "照美冥【夏日限定】",
       "scrolls": [
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
           "priority": 1
         },
         {
-          "scrollId": "5",
-          "scrollName": "水遁·水冲波",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 2
         },
         {
@@ -10897,6 +10919,11 @@
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
           "priority": 4
+        },
+        {
+          "scrollId": "1783350438746",
+          "scrollName": "通灵·操手里剑",
+          "priority": 5
         }
       ]
     },
@@ -11882,19 +11909,24 @@
       "ninjaName": "小南【神驹佑将】",
       "scrolls": [
         {
+          "scrollId": "1783350886684",
+          "scrollName": "冰遁·爆雪",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -12802,19 +12834,24 @@
       "ninjaName": "漩涡鸣人·自来也【修行之旅】",
       "scrolls": [
         {
-          "scrollId": "2",
-          "scrollName": "冰遁·冻雪",
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
           "priority": 1
         },
         {
-          "scrollId": "1783349328947",
-          "scrollName": "土遁·土流枪",
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
+          "priority": 3
         },
         {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -18090,7 +18127,10 @@
         "8",
         "1783309774545",
         "1783309829510",
+        "1783309186224",
         "1783309096309",
+        "1783309084993",
+        "1783309816393",
         "1783310042732",
         "9",
         "1783315644309"
@@ -18110,17 +18150,21 @@
         "1783589300960",
         "1",
         "1783587288271",
-        "1783588411488"
+        "1783588411488",
+        "1783587352179"
       ],
       "counterNinjaScores": {
-        "8": 30,
+        "8": 45,
         "9": -10,
         "1783315644309": -10,
-        "1783309829510": 25,
-        "1783309774545": 25,
+        "1783309829510": 30,
+        "1783309774545": 45,
         "1783310042732": 10,
-        "1783309783866": 40,
-        "1783309096309": 20
+        "1783309783866": 50,
+        "1783309096309": 25,
+        "1783309816393": 15,
+        "1783309084993": 25,
+        "1783309186224": 30
       }
     },
     {
@@ -18136,6 +18180,7 @@
         "1783309172598",
         "1783309783866",
         "20",
+        "1783310187740",
         "1783316484124",
         "1783309803512",
         "1783315644309"
@@ -18164,7 +18209,8 @@
         "1783308944026": 30,
         "1783309348233": 35,
         "1783309774545": 40,
-        "1783309783866": 30
+        "1783309783866": 30,
+        "1783310187740": 25
       }
     },
     {
@@ -18230,7 +18276,8 @@
         "1783310187740",
         "1783310541594",
         "2",
-        "1783310202753"
+        "1783310202753",
+        "1783309172598"
       ],
       "counterScrollIds": [
         "1783349733336",
@@ -18248,7 +18295,8 @@
         "1783310187740": 40,
         "1783310202753": 30,
         "1783309415054": 50,
-        "1783310541594": 40
+        "1783310541594": 40,
+        "1783309172598": 30
       }
     },
     {
@@ -18262,7 +18310,8 @@
         "1783310042732",
         "1783309257305",
         "1783310187740",
-        "1783309691119"
+        "1783309691119",
+        "1783612618366"
       ],
       "counterScrollIds": [
         "1",
@@ -18284,7 +18333,8 @@
         "1783310187740": 35,
         "1783309783866": 45,
         "1783309691119": 25,
-        "1783309257305": 40
+        "1783309257305": 40,
+        "1783612618366": 10
       }
     },
     {
@@ -18336,12 +18386,15 @@
         "1783350480900",
         "1783611799449",
         "1783349842473",
-        "1783350886684"
+        "1783350886684",
+        "1783349328947",
+        "1783349114634"
       ],
       "counterSummonIds": [
         "1783587571165",
         "1783589889497",
-        "1783587125412"
+        "1783587125412",
+        "1783590294526"
       ],
       "counterNinjaScores": {
         "9": -10,
@@ -18438,9 +18491,10 @@
         "1783308767737",
         "1783309208477",
         "1783309850660",
+        "1783316557259",
         "1783309880298",
-        "1783309311486",
         "1783309627781",
+        "1783309311486",
         "12"
       ],
       "counterScrollIds": [
@@ -18448,7 +18502,9 @@
         "1783350043475",
         "1783349062619",
         "1783350952440",
-        "2"
+        "2",
+        "1783349379011",
+        "1783349488627"
       ],
       "counterSummonIds": [
         "1783588411488",
@@ -18461,8 +18517,9 @@
         "1783309208477": 40,
         "1783309850660": 40,
         "1783309880298": 30,
-        "1783309311486": 30,
-        "1783309627781": 25
+        "1783309311486": 20,
+        "1783309627781": 25,
+        "1783316557259": 35
       }
     },
     {
@@ -18485,7 +18542,8 @@
         "1783349379011",
         "1783349062619",
         "1783350283755",
-        "1783349328947"
+        "1783349328947",
+        "1783350438746"
       ],
       "counterSummonIds": [
         "1783589300960",
@@ -18553,7 +18611,8 @@
       ],
       "counterSummonIds": [
         "1783588233106",
-        "1783589344138"
+        "1783589344138",
+        "1783587820594"
       ],
       "counterNinjaScores": {
         "1783310187740": 45,
@@ -18573,26 +18632,35 @@
         "1783309783866",
         "1783309880298",
         "1783316910582",
-        "1784018320448"
+        "1783309208477",
+        "1783310560092",
+        "1784018320448",
+        "1783315644309"
       ],
       "counterScrollIds": [
         "1783350283755",
         "1783349328947",
         "1783350438746",
         "1783351060243",
-        "1783349453506"
+        "1783349453506",
+        "1783349062619"
       ],
       "counterSummonIds": [
         "1783587402912",
         "1783588906858",
         "1783587288271",
-        "1783587626528"
+        "1783587626528",
+        "1783587125412",
+        "1783590454028"
       ],
       "counterNinjaScores": {
         "1783309783866": 40,
         "1783316910582": 30,
         "1783309880298": 35,
-        "1784018320448": 10
+        "1784018320448": 15,
+        "1783315644309": 10,
+        "1783309208477": 25,
+        "1783310560092": 25
       }
     },
     {
@@ -18610,7 +18678,8 @@
       ],
       "counterSummonIds": [
         "1783589344138",
-        "1783588906858"
+        "1783588906858",
+        "1"
       ],
       "counterNinjaScores": {
         "8": 40,
@@ -18704,7 +18773,9 @@
         "1",
         "1783587626528",
         "1783588169015",
-        "1783589344138"
+        "1783589344138",
+        "1783588233106",
+        "1783589300960"
       ],
       "counterNinjaScores": {
         "8": 40,
@@ -18764,8 +18835,8 @@
         "1783308961488",
         "1783309627781",
         "1783310541594",
-        "1783309960047",
         "14",
+        "1783309960047",
         "9"
       ],
       "counterScrollIds": [
@@ -18781,7 +18852,7 @@
       ],
       "counterNinjaScores": {
         "9": 0,
-        "14": 20,
+        "14": 25,
         "19": 40,
         "1783310586721": 40,
         "1783308767737": 50,
@@ -18791,7 +18862,7 @@
         "1783309850660": 40,
         "1783309627781": 35,
         "1783310541594": 30,
-        "1783309960047": 25
+        "1783309960047": 20
       }
     },
     {
@@ -18820,9 +18891,9 @@
       "id": "1783596972178",
       "ninjaId": "11",
       "counterNinjaIds": [
-        "1783309612984",
-        "1783309172598",
         "1783310202753",
+        "1783309172598",
+        "1783309612984",
         "1783309398928",
         "1783315644309"
       ],
@@ -18843,10 +18914,10 @@
       ],
       "counterNinjaScores": {
         "1783309612984": 30,
-        "1783309172598": 30,
+        "1783309172598": 35,
         "1783309398928": 25,
         "1783315644309": 15,
-        "1783310202753": 30
+        "1783310202753": 35
       }
     },
     {
@@ -18874,6 +18945,7 @@
       "counterNinjaIds": [
         "1783308767737",
         "1783309208477",
+        "1783309348233",
         "1783309850660",
         "1783310586721",
         "1783309627781",
@@ -18903,7 +18975,8 @@
         "1783309208477": 50,
         "1783310586721": 40,
         "1783309850660": 40,
-        "1783309627781": 35
+        "1783309627781": 35,
+        "1783309348233": 45
       }
     },
     {
@@ -18911,9 +18984,9 @@
       "ninjaId": "1783308987411",
       "counterNinjaIds": [
         "1783308767737",
-        "1783309627781",
         "1783309046156",
         "1783309572540",
+        "1783309627781",
         "1783315450040",
         "1783310187740",
         "1783309398928",
@@ -18927,10 +19000,10 @@
         "1783310187740": 20,
         "1783309398928": 15,
         "1783316699625": -10,
-        "1783308767737": 40,
-        "1783309627781": 35,
-        "1783309046156": 35,
-        "1783309572540": 30,
+        "1783308767737": 50,
+        "1783309627781": 30,
+        "1783309046156": 40,
+        "1783309572540": 40,
         "1783315450040": 20
       }
     },
@@ -18953,6 +19026,7 @@
       "ninjaId": "1783309096309",
       "counterNinjaIds": [
         "1783309415054",
+        "1783307504056",
         "1783310541594",
         "1783316708410",
         "1783310202753",
@@ -18962,7 +19036,8 @@
       ],
       "counterScrollIds": [
         "1783350663437",
-        "1783350438746"
+        "1783350438746",
+        "6"
       ],
       "counterSummonIds": [
         "1783588465585",
@@ -18975,13 +19050,15 @@
         "1783316708410": 30,
         "1783310202753": 30,
         "1783309348233": 30,
-        "1783310187740": 25
+        "1783310187740": 25,
+        "1783307504056": 50
       }
     },
     {
       "id": "1783613319626",
       "ninjaId": "1783309084993",
       "counterNinjaIds": [
+        "1783309415054",
         "1783309783866",
         "1783310541594",
         "1783309186224",
@@ -18989,29 +19066,38 @@
         "1783309398928",
         "2",
         "18",
+        "1783317048070",
+        "1783309348233",
         "10"
       ],
       "counterScrollIds": [
         "1783349802096",
         "1783351060243",
-        "1783611799449"
+        "1783611799449",
+        "1783349062619"
       ],
       "counterSummonIds": [
         "1783587352179",
         "1783587288271",
         "1783590454028",
         "1783590294526",
-        "1783588906858"
+        "1783588906858",
+        "1783589300960",
+        "1783587820594",
+        "1783587402912"
       ],
       "counterNinjaScores": {
         "2": 25,
         "10": 10,
         "18": 20,
-        "1783309783866": 40,
-        "1783310541594": 40,
-        "1783309880298": 30,
-        "1783309186224": 35,
-        "1783309398928": 25
+        "1783309783866": 45,
+        "1783310541594": 45,
+        "1783309880298": 35,
+        "1783309186224": 40,
+        "1783309398928": 30,
+        "1783317048070": 20,
+        "1783309348233": 15,
+        "1783309415054": 50
       }
     },
     {
@@ -19050,9 +19136,9 @@
         "1783309783866",
         "1783309257305",
         "1783308752772",
+        "1",
         "1783309774545",
         "1783309749818",
-        "1",
         "1783310187740"
       ],
       "counterScrollIds": [
@@ -19073,7 +19159,7 @@
         "1783587820594"
       ],
       "counterNinjaScores": {
-        "1": 15,
+        "1": 40,
         "1783308767737": 50,
         "1783309749818": 25,
         "1783309084993": 45,
@@ -19093,11 +19179,15 @@
         "1783309186224",
         "1783309415054",
         "1783310586721",
+        "1783309208477",
         "1783309850660",
         "1783310541594",
         "18",
         "1783308752772",
-        "10"
+        "1783309348233",
+        "1784014419187",
+        "10",
+        "1783316976705"
       ],
       "counterScrollIds": [
         "1783350480900",
@@ -19126,7 +19216,11 @@
         "1783310586721": 40,
         "1783309850660": 35,
         "1783310541594": 35,
-        "1783308752772": 30
+        "1783308752772": 30,
+        "1783309208477": 40,
+        "1783316976705": 10,
+        "1784014419187": 25,
+        "1783309348233": 30
       }
     },
     {
@@ -19227,6 +19321,7 @@
         "1783309046156",
         "1783308961488",
         "11",
+        "1783309162593",
         "9"
       ],
       "counterScrollIds": [
@@ -19256,7 +19351,8 @@
         "1783309829510": 30,
         "1783308767737": 50,
         "1783309627781": 30,
-        "1783308961488": 15
+        "1783308961488": 15,
+        "1783309162593": 15
       }
     },
     {
@@ -19267,8 +19363,11 @@
         "1783308767737",
         "1783310586721",
         "1783309783866",
+        "1783310144555",
         "1783309627781",
         "1783315526387",
+        "1",
+        "8",
         "1783309774545"
       ],
       "counterScrollIds": [
@@ -19290,16 +19389,20 @@
         "1783587571165",
         "1783588169015",
         "1783589344138",
-        "1783588411488"
+        "1783588411488",
+        "1783587288271"
       ],
       "counterNinjaScores": {
+        "1": 30,
+        "8": 30,
         "1783309783866": 35,
         "1783309208477": 50,
         "1783308767737": 50,
         "1783310586721": 45,
         "1783309627781": 30,
         "1783315526387": 30,
-        "1783309774545": 25
+        "1783309774545": 25,
+        "1783310144555": 35
       }
     },
     {
@@ -19311,8 +19414,9 @@
         "1783309084993",
         "1783309774545",
         "1",
-        "1783316659432",
         "1783316557259",
+        "5",
+        "1783316659432",
         "1784018320448",
         "1783316910582"
       ],
@@ -19332,17 +19436,19 @@
         "1783587288271",
         "1783587402912",
         "1783590294526",
-        "1783590454028"
+        "1783590454028",
+        "1783588411488"
       ],
       "counterNinjaScores": {
         "1": 35,
+        "5": 30,
         "1783309084993": 40,
         "1783309783866": 50,
         "1783309774545": 35,
         "1783316557259": 30,
         "1783316910582": 20,
         "1783308752772": 40,
-        "1783316659432": 35,
+        "1783316659432": 25,
         "1784018320448": 25
       }
     },
@@ -19352,17 +19458,20 @@
       "counterNinjaIds": [
         "1783309398928",
         "8",
-        "1783317048070",
         "1783309691119",
+        "1783317048070",
+        "1783309783866",
         "2",
-        "1783310541594"
+        "1783310541594",
+        "1783316910582"
       ],
       "counterScrollIds": [
         "1783351060243",
         "1783349328947",
         "1783350283755",
         "1783349453506",
-        "1783350438746"
+        "1783350438746",
+        "1783350043475"
       ],
       "counterSummonIds": [
         "1783589344138",
@@ -19378,7 +19487,9 @@
         "1783317048070": 30,
         "1783309398928": 40,
         "1783310541594": 15,
-        "1783309691119": 25
+        "1783309691119": 35,
+        "1783309783866": 25,
+        "1783316910582": 15
       }
     },
     {
@@ -19389,7 +19500,8 @@
         "1783310187740",
         "1783316557259",
         "1783309415054",
-        "1783310202753"
+        "1783310202753",
+        "1783309084993"
       ],
       "counterScrollIds": [
         "1783351060243",
@@ -19397,7 +19509,8 @@
         "1783349453506",
         "1783350952440",
         "1783349062619",
-        "1783349488627"
+        "1783349488627",
+        "1783350438746"
       ],
       "counterSummonIds": [
         "1783587352179",
@@ -19405,14 +19518,18 @@
         "1783588906858",
         "1783590454028",
         "1783589300960",
-        "1783587820594"
+        "1783587820594",
+        "1783590294526",
+        "1783588233106",
+        "1"
       ],
       "counterNinjaScores": {
         "1783309415054": 30,
         "1783310187740": 40,
         "1783309880298": 40,
         "1783316557259": 35,
-        "1783310202753": 25
+        "1783310202753": 25,
+        "1783309084993": 25
       }
     },
     {
@@ -19433,7 +19550,8 @@
         "1783349488627",
         "1",
         "1783350043475",
-        "1783350438746"
+        "1783350438746",
+        "1783349328947"
       ],
       "counterSummonIds": [
         "1783587234386",
@@ -19441,7 +19559,9 @@
         "1783587626528",
         "1783588411488",
         "1783589300960",
-        "1783587288271"
+        "1783587288271",
+        "1783587352179",
+        "1783590454028"
       ],
       "counterNinjaScores": {
         "2": 25,
@@ -19463,9 +19583,11 @@
         "1783309208477",
         "1783309046156",
         "1783309627781",
+        "1783310144555",
         "12",
         "1783309398928",
         "1783309960047",
+        "1783310541594",
         "1783735988278",
         "9"
       ],
@@ -19480,7 +19602,8 @@
         "1783588411488",
         "1783589344138",
         "1783588169015",
-        "1783588233106"
+        "1783588233106",
+        "1783589300960"
       ],
       "counterNinjaScores": {
         "9": 10,
@@ -19491,7 +19614,9 @@
         "1783309208477": 50,
         "1783309046156": 40,
         "1783309627781": 35,
-        "1783309960047": 30
+        "1783309960047": 30,
+        "1783310541594": 30,
+        "1783310144555": 35
       }
     },
     {
@@ -19506,8 +19631,10 @@
         "1783309398928",
         "1783309774545",
         "1783309084993",
+        "1783309880298",
         "1783310202753",
         "1783310187740",
+        "1783309348233",
         "1783310042732",
         "1783317048070"
       ],
@@ -19532,17 +19659,19 @@
       ],
       "counterNinjaScores": {
         "1783309783866": 50,
-        "1783310541594": 40,
-        "1783309186224": 40,
+        "1783310541594": 45,
+        "1783309186224": 45,
         "1783310042732": 20,
-        "1783310202753": 25,
+        "1783310202753": 30,
         "1783317048070": 20,
-        "1783309850660": 35,
+        "1783309850660": 40,
         "1783309415054": 50,
-        "1783309774545": 30,
-        "1783309084993": 30,
-        "1783309398928": 35,
-        "1783310187740": 25
+        "1783309774545": 35,
+        "1783309084993": 35,
+        "1783309398928": 40,
+        "1783310187740": 25,
+        "1783309880298": 35,
+        "1783309348233": 25
       }
     },
     {
@@ -19556,7 +19685,8 @@
         "1783350480900",
         "12",
         "1783350886684",
-        "10"
+        "10",
+        "1783351060243"
       ],
       "counterSummonIds": [
         "1783587571165",
@@ -19592,6 +19722,7 @@
         "19",
         "1783309850660",
         "1783310042732",
+        "1783315526387",
         "1783309749818"
       ],
       "counterScrollIds": [
@@ -19603,13 +19734,15 @@
       "counterSummonIds": [
         "1783588271625",
         "1783589889497",
-        "1"
+        "1",
+        "1783589300960"
       ],
       "counterNinjaScores": {
         "19": 40,
         "1783309749818": 20,
         "1783310042732": 30,
-        "1783309850660": 35
+        "1783309850660": 35,
+        "1783315526387": 25
       }
     },
     {
@@ -19973,10 +20106,12 @@
         "1783316484124"
       ],
       "counterScrollIds": [
-        "1783349453506"
+        "1783349453506",
+        "1783349379011"
       ],
       "counterSummonIds": [
-        "1783589093236"
+        "1783589093236",
+        "1783589300960"
       ],
       "counterNinjaScores": {
         "1783310187740": 40,
@@ -20021,7 +20156,8 @@
       "counterScrollIds": [
         "1783349062619",
         "1783349328947",
-        "1783349733336"
+        "1783349733336",
+        "1783349488627"
       ],
       "counterSummonIds": [
         "1783588271625"
@@ -20090,12 +20226,14 @@
         "1783309348233",
         "1783309257305",
         "1783309186224",
+        "1783309850660",
         "10"
       ],
       "counterScrollIds": [
         "1783350480900",
         "1783349379011",
-        "2"
+        "2",
+        "1783350438746"
       ],
       "counterSummonIds": [
         "1783587571165",
@@ -20111,7 +20249,8 @@
         "1783309257305": 40,
         "1783309186224": 40,
         "1783309783866": 45,
-        "1783309348233": 45
+        "1783309348233": 45,
+        "1783309850660": 30
       }
     },
     {
@@ -20121,6 +20260,7 @@
         "1783310541594",
         "1783309880298",
         "1783310187740",
+        "15",
         "1783310042732",
         "1783309172598",
         "1783315644309"
@@ -20138,9 +20278,13 @@
         "1783587288271",
         "1783587402912",
         "1783588411488",
-        "1783587940850"
+        "1783587940850",
+        "1783588169015",
+        "1783588906858",
+        "1783587626528"
       ],
       "counterNinjaScores": {
+        "15": 25,
         "1783310541594": 40,
         "1783309172598": 10,
         "1783309880298": 30,
@@ -20172,9 +20316,12 @@
         "1783309415054",
         "1783310541594",
         "1783310202753",
-        "1783308944026"
+        "1783308944026",
+        "1783309348233"
       ],
-      "counterScrollIds": [],
+      "counterScrollIds": [
+        "1783349280153"
+      ],
       "counterSummonIds": [
         "1783589507534",
         "1"
@@ -20183,14 +20330,16 @@
         "1783308944026": 35,
         "1783310541594": 40,
         "1783310202753": 40,
-        "1783309415054": 50
+        "1783309415054": 50,
+        "1783309348233": 25
       }
     },
     {
       "id": "1783786807806",
       "ninjaId": "14",
       "counterNinjaIds": [
-        "1783316557259"
+        "1783316557259",
+        "1783310586721"
       ],
       "counterScrollIds": [
         "1783349280153",
@@ -20205,7 +20354,8 @@
         "1783590162218"
       ],
       "counterNinjaScores": {
-        "1783316557259": 40
+        "1783316557259": 40,
+        "1783310586721": 25
       }
     },
     {
@@ -20258,7 +20408,8 @@
       "ninjaId": "1783310586721",
       "counterNinjaIds": [
         "1783309348233",
-        "19"
+        "19",
+        "1783309311486"
       ],
       "counterScrollIds": [
         "10",
@@ -20269,7 +20420,8 @@
         "1783350438746",
         "1783349488627",
         "1783350952440",
-        "1783349453506"
+        "1783349453506",
+        "1783350480900"
       ],
       "counterSummonIds": [
         "1783588233106",
@@ -20282,7 +20434,8 @@
       ],
       "counterNinjaScores": {
         "19": 35,
-        "1783309348233": 40
+        "1783309348233": 40,
+        "1783309311486": 10
       }
     },
     {
@@ -20327,7 +20480,7 @@
       ],
       "counterNinjaScores": {
         "3": 45,
-        "9": -10,
+        "9": 0,
         "1783315719485": 30,
         "1783310494403": 30,
         "1783310187740": 30
@@ -20370,13 +20523,17 @@
       ],
       "counterScrollIds": [
         "1783349379011",
-        "1783349733336"
+        "1783349733336",
+        "1783349453506",
+        "1783349488627",
+        "1783350438746"
       ],
       "counterSummonIds": [
         "1783590294526",
         "1783587626528",
         "1783588411488",
-        "1783589344138"
+        "1783589344138",
+        "1783588169015"
       ],
       "counterNinjaScores": {
         "1783309612984": 35,
@@ -20396,9 +20553,13 @@
         "8"
       ],
       "counterScrollIds": [
-        "1783349453506"
+        "1783349453506",
+        "1783349379011"
       ],
-      "counterSummonIds": [],
+      "counterSummonIds": [
+        "1783587820594",
+        "1783588233106"
+      ],
       "counterNinjaScores": {
         "8": 25,
         "1783310541594": 45,
@@ -20601,15 +20762,20 @@
       "id": "1790168766069",
       "ninjaId": "1784018320448",
       "counterNinjaIds": [
-        "1783310187740"
+        "1783310187740",
+        "1783309829510"
       ],
       "counterScrollIds": [
         "1783350925467",
-        "1783611799449"
+        "1783611799449",
+        "1783349379011"
       ],
-      "counterSummonIds": [],
+      "counterSummonIds": [
+        "1783588233106"
+      ],
       "counterNinjaScores": {
-        "1783310187740": 30
+        "1783310187740": 30,
+        "1783309829510": 25
       }
     },
     {
@@ -20662,9 +20828,12 @@
       "ninjaId": "1783316976705",
       "counterNinjaIds": [],
       "counterScrollIds": [
-        "1783349453506"
+        "1783349453506",
+        "1783350438746"
       ],
-      "counterSummonIds": [],
+      "counterSummonIds": [
+        "1783588906858"
+      ],
       "counterNinjaScores": {}
     },
     {
@@ -20705,18 +20874,11 @@
     "1783309774545",
     "1783315526387",
     "1783310042732",
-    "1783309880298",
-    "1783310541594",
     "2",
     "1783309172598",
-    "1783309096309",
     "1783316557259",
     "1783310144555",
     "1783309046156",
-    "1783309398928",
-    "1783309816393",
-    "1783310469533",
-    "8",
     "1783316598915",
     "1785316064800",
     "1783308767737",
@@ -20738,10 +20900,7 @@
     "1783310560092",
     "5",
     "1783309130139",
-    "15",
-    "1783308858692",
-    "1789372944362",
-    "1783309749818"
+    "15"
   ],
   "easterEggs": [
     {

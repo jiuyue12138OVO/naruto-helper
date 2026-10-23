@@ -191,7 +191,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "高机动性"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 8
     },
@@ -330,7 +330,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "位移",
         "高机动性",
-        "瞬发"
+        "瞬发",
+        "拉扯"
       ],
       "blindPick": true,
       "acquisition": "高招",
@@ -545,7 +546,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "大招可接"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "免费",
       "gameOrder": 2
     },
@@ -683,7 +684,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "位移",
         "金刚体"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "祈愿夺宝",
       "gameOrder": 98
     },
@@ -899,7 +900,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招特殊情况可接",
         "低真空期"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "点券",
       "gameOrder": 125
     },
@@ -1084,7 +1085,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "防反",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 40
     },
@@ -1173,7 +1174,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "拉扯",
         "低真空期"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "忍法帖",
       "gameOrder": 33
     },
@@ -1236,7 +1237,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "高机动性",
         "大招可接"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "忍法帖",
       "gameOrder": 49
     },
@@ -1446,7 +1447,8 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "位移",
         "高机动性",
-        "拉扯"
+        "拉扯",
+        "大招特殊情况可接"
       ],
       "blindPick": false,
       "acquisition": "点券",
@@ -1587,7 +1589,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "低真空期",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "点券",
       "gameOrder": 122
     },
@@ -1644,7 +1646,7 @@ export const MOCK_NINJAS: INinja[] =  [
         "大招可接",
         "位移"
       ],
-      "blindPick": true,
+      "blindPick": false,
       "acquisition": "高招",
       "gameOrder": 138
     },
@@ -4103,7 +4105,7 @@ export const MOCK_NINJAS: INinja[] =  [
       "imageUrl": "data:image/webp;base64,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",
       "acquisition": "免费",
       "gameOrder": 431,
-      "blindPick": true,
+      "blindPick": false,
       "trend": "up"
     },
     {

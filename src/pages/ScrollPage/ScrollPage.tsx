@@ -32,6 +32,8 @@ export default function ScrollPage() {
 
   // 选忍者看密卷模式下，显示忍者最优密卷
   const [showBestInNinjaView, setShowBestInNinjaView] = useState(false)
+  // 选忍者看密卷模式下，只看拥有专属密卷的忍者
+  const [showExclusiveOnly, setShowExclusiveOnly] = useState(false)
   // 选忍者看密卷模式下，默认按游戏内编号排序；开启后按强度梯度分组
   const [sortByTier, setSortByTier] = useState(false)
   // 密卷详情弹窗内，适配忍者标签页显示忍者最优密卷
@@ -98,6 +100,16 @@ export default function ScrollPage() {
     }) || null
   }
 
+  // 该忍者是否拥有专属密卷：其推荐密卷中至少一个存在该忍者的专属变体
+  const hasExclusiveScroll = (ninjaId: string): boolean => {
+    const rec = recommendations.find(r => r.ninjaId === ninjaId)
+    if (!rec) return false
+    return rec.scrolls.some(s => {
+      const detail = scrolls.find(sc => sc.id === s.scrollId)
+      return detail ? getVariantForNinja(detail, ninjaId) !== null : false
+    })
+  }
+
   // 选忍者看密卷的列表
   // - 默认（sortByTier=false）：平铺，按游戏内编号升序
   // - 开启（sortByTier=true）：按强度梯度分组，组内按游戏内编号升序
@@ -105,6 +117,7 @@ export default function ScrollPage() {
     const ninjaIds = new Set(recommendations.map(r => r.ninjaId))
     let filtered = ninjas.filter(n => ninjaIds.has(n.id))
     if (searchNinja.trim()) filtered = filtered.filter(n => n.name.toLowerCase().includes(searchNinja.toLowerCase()))
+    if (showExclusiveOnly) filtered = filtered.filter(n => hasExclusiveScroll(n.id))
     if (!sortByTier) {
       return [{ tier: null as string | null, ninjas: sortByGameOrder(filtered) }]
     }
@@ -113,7 +126,7 @@ export default function ScrollPage() {
       if (tierNinjas.length > 0) return { tier, ninjas: tierNinjas }
       return null
     }).filter(Boolean) as { tier: string | null; ninjas: INinja[] }[]
-  }, [ninjas, recommendations, searchNinja, sortByTier])
+  }, [ninjas, recommendations, searchNinja, sortByTier, showExclusiveOnly])
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground text-lg">加载密卷数据中...</p></div>
 
@@ -171,6 +184,16 @@ export default function ScrollPage() {
                     id="ninja-best-toggle"
                     checked={showBestInNinjaView}
                     onCheckedChange={setShowBestInNinjaView}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="ninja-exclusive-only-toggle" className="text-sm cursor-pointer select-none">
+                    只看专属
+                  </Label>
+                  <Switch
+                    id="ninja-exclusive-only-toggle"
+                    checked={showExclusiveOnly}
+                    onCheckedChange={setShowExclusiveOnly}
                   />
                 </div>
               </div>

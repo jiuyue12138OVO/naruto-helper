@@ -55,6 +55,10 @@ export default function CounterTab() {
         const ib = blindOrderMap.has(b.id) ? blindOrderMap.get(b.id)! : Infinity
         return ia - ib
       }
+      // 非盲选位：按游戏内编号升序，编号相同按名称
+      const ga = a.gameOrder ?? Infinity
+      const gb = b.gameOrder ?? Infinity
+      if (ga !== gb) return ga - gb
       return a.name.localeCompare(b.name)
     }
 
@@ -95,11 +99,15 @@ export default function CounterTab() {
       .sort((a, b) => b.score - a.score)
   }
 
-  const getCounters = (ninjaId: string): INinja[] => {
+  const getCountersWithScores = (ninjaId: string): { ninja: INinja; score: number }[] => {
     return counters
       .filter(c => c.counterNinjaIds.includes(ninjaId))
-      .map(c => getNinjaById(c.ninjaId))
-      .filter(Boolean) as INinja[]
+      .map(c => {
+        const scores = c.counterNinjaScores || {}
+        return { ninja: getNinjaById(c.ninjaId)!, score: scores[ninjaId] ?? 0 }
+      })
+      .filter(item => item.ninja)
+      .sort((a, b) => b.score - a.score)
   }
 
   return (
@@ -221,9 +229,14 @@ export default function CounterTab() {
           {selectedNinja && (() => {
             const counter = getCounterData(selectedNinja.id)
             const counteredByList = counter ? getCounteredByWithScores(selectedNinja.id) : []
-            const counterList = getCounters(selectedNinja.id)
+            const counterList = getCountersWithScores(selectedNinja.id)
             const scrollList = counter ? counter.counterScrollIds.map(id => getScrollById(id)).filter(Boolean) : []
             const summonList = counter ? counter.counterSummonIds.map(id => getSummonById(id)).filter(Boolean) : []
+
+            // 互克集合：同时存在于"被克制"与"克制"列表的忍者
+            const counteredByIds = new Set(counteredByList.map(item => item.ninja.id))
+            const counterIds = new Set(counterList.map(item => item.ninja.id))
+            const mutualIds = new Set([...counteredByIds].filter(id => counterIds.has(id)))
 
             const hasData = counteredByList.length > 0 || counterList.length > 0 || scrollList.length > 0 || summonList.length > 0
 
@@ -256,6 +269,9 @@ export default function CounterTab() {
                                   <span className={`text-[10px] font-bold mt-0.5 ${score > 0 ? 'text-green-500' : 'text-muted-foreground'}`}>
                                     {score > 0 ? `+${score}` : score}
                                   </span>
+                                  {mutualIds.has(n.id) && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-[9px] font-bold rounded px-1 z-10">互克</span>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -265,12 +281,18 @@ export default function CounterTab() {
                           <div>
                             <span className="text-sm font-medium">克制</span>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {counterList.map(n => (
-                                <div key={n.id} className="flex flex-col items-center w-14">
+                              {counterList.map(({ ninja: n, score }) => (
+                                <div key={n.id} className="flex flex-col items-center w-14 relative">
                                   <div className="w-10 h-10 rounded-md overflow-hidden border border-border/40 bg-card">
                                     <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                                   </div>
                                   <span className="text-xs text-muted-foreground truncate max-w-full mt-0.5 text-center leading-tight">{n.name}</span>
+                                  {mutualIds.has(n.id) && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-[9px] font-bold rounded px-1 z-10">互克</span>
+                                  )}
+                                  <span className={`text-[10px] font-bold mt-0.5 ${score > 0 ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                    {score > 0 ? `+${score}` : score}
+                                  </span>
                                 </div>
                               ))}
                             </div>

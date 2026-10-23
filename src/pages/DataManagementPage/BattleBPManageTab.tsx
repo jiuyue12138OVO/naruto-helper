@@ -86,8 +86,16 @@ export default function BattleBPManageTab() {
     })
   }
 
+  // 该忍者与当前配置忍者是否相互克制：该忍者记录中被当前忍者克制（当前忍者克制该忍者）
+  const isMutualWith = (ninjaId: string) => {
+    return (counters.find(c => c.ninjaId === ninjaId)?.counterNinjaIds.includes(selectedNinjaId) ?? false)
+  }
+
   // 添加/移除忍者
   const toggleNinja = (id: string) => {
+    if (!form.counterNinjaIds.includes(id) && isMutualWith(id)) {
+      toast.warning(`「${ninjas.find(n => n.id === id)?.name}」与「${selectedNinja?.name}」相互克制`)
+    }
     setForm(prev => {
       const exists = prev.counterNinjaIds.includes(id)
       const newIds = exists ? prev.counterNinjaIds.filter(i => i !== id) : [...prev.counterNinjaIds, id]
@@ -127,7 +135,12 @@ export default function BattleBPManageTab() {
         const ib = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
         return ia - ib
       })
-      nonBlind.sort((a, b) => a.name.localeCompare(b.name))
+      nonBlind.sort((a, b) => {
+      const ga = a.gameOrder ?? Number.MAX_SAFE_INTEGER
+      const gb = b.gameOrder ?? Number.MAX_SAFE_INTEGER
+      if (ga !== gb) return ga - gb
+      return a.name.localeCompare(b.name)
+    })
       return { tier, ninjas: [...blind, ...nonBlind] }
     }).filter(Boolean) as { tier: string; ninjas: typeof ninjas }[]
   }, [filteredNinjas, blindPickOrder])
@@ -354,6 +367,15 @@ export default function BattleBPManageTab() {
                           <Image src={n.imageUrl} alt={n.name} className="w-full h-full object-cover" />
                         </div>
                         <span className="text-xs">{n.name}</span>
+                        {isMutualWith(n.id) && (
+                          <span className={`text-[10px] font-bold rounded px-1 shrink-0 ${
+                            form.counterNinjaIds.includes(n.id)
+                              ? 'bg-amber-500/20 text-amber-600'
+                              : 'bg-primary/10 text-primary'
+                          }`}>
+                            {form.counterNinjaIds.includes(n.id) ? '互克' : '克制'}
+                          </span>
+                        )}
                       </Badge>
                     ))}
                   </div>
@@ -385,6 +407,9 @@ export default function BattleBPManageTab() {
                                 <Image src={nin.imageUrl} alt={nin.name} className="w-full h-full object-cover" />
                               </div>
                               <span className="text-sm truncate">{nin.name}</span>
+                              {isMutualWith(id) && (
+                                <span className="text-[10px] font-bold bg-amber-500/20 text-amber-600 rounded px-1 shrink-0">互克</span>
+                              )}
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
