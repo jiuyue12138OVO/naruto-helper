@@ -438,6 +438,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 2
         }
       ]
     },
@@ -1945,6 +1950,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "7",
           "scrollName": "忍体术·御",
           "priority": 3
+        },
+        {
+          "scrollId": "1783349842473",
+          "scrollName": "木遁·扦插之术",
+          "priority": 4
         }
       ]
     },
@@ -2212,14 +2222,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349062619",
+          "scrollName": "通灵·返手里剑",
+          "priority": 2
+        },
+        {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
-          "priority": 3
+          "priority": 4
         }
       ]
     },
@@ -2610,13 +2625,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
           "priority": 2
         },
         {
-          "scrollId": "1783349241266",
-          "scrollName": "雷遁·地走",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 3
         }
       ]
@@ -2993,6 +3008,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 3
         }
       ]
     },

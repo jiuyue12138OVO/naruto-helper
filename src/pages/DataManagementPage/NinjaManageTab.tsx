@@ -274,7 +274,8 @@ export default function NinjaManageTab() {
       list.sort((a, b) => {
         const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
         const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
-        return ta - tb
+        if (ta !== tb) return ta - tb
+        return (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
       })
       snapshot[tier] = list.map(n => n.id)
     })
@@ -291,7 +292,8 @@ export default function NinjaManageTab() {
       list.sort((a, b) => {
         const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
         const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
-        return ta - tb
+        if (ta !== tb) return ta - tb
+        return (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
       })
       snapshot[tier] = list.map(n => n.id)
     })
@@ -316,6 +318,11 @@ export default function NinjaManageTab() {
           const ib = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
           return ia - ib
         })
+      } else {
+        // 默认：每梯度按游戏内编号升序，缺失编号的排最后
+        tierNinjas = [...tierNinjas].sort((a, b) =>
+          (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+        )
       }
       return { tier, ninjas: tierNinjas }
     })
