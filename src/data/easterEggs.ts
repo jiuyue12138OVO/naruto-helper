@@ -3,6 +3,13 @@
 /** 彩蛋类型：self=自带彩蛋，scene=场景互动彩蛋，character=特定角色彩蛋，other=其他 */
 export type EasterEggType = 'self' | 'scene' | 'character' | 'other'
 
+/** 单条其他信息（一个忍者可有多条：多个特定角色彩蛋、自带彩蛋等） */
+export interface IEasterEggExtra {
+  type?: EasterEggType
+  title?: string
+  description?: string
+}
+
 /** 单个忍者的彩蛋记录（每个忍者一条，以 ninjaId 为主键） */
 export interface IEasterEgg {
   ninjaId: string
@@ -10,12 +17,21 @@ export interface IEasterEgg {
   defeatByNinjaIds: string[]
   /** 该忍者击败后会出现彩蛋的忍者 id 列表（当前忍者击败这些忍者时触发奥义彩蛋） */
   defeatTargetNinjaIds: string[]
-  /** 其他信息：彩蛋类型（可选） */
+  /** 其他信息：彩蛋类型（可选，兼容旧版单条，新数据用 extras） */
   type?: EasterEggType
-  /** 其他信息：彩蛋标题（可选） */
+  /** 其他信息：彩蛋标题（可选，兼容旧版单条，新数据用 extras） */
   title?: string
-  /** 其他信息：彩蛋描述（可选） */
+  /** 其他信息：彩蛋描述（可选，兼容旧版单条，新数据用 extras） */
   description?: string
+  /** 其他信息列表：可多条（特定角色彩蛋、自带彩蛋、场景互动彩蛋等） */
+  extras?: IEasterEggExtra[]
+}
+
+/** 读取忍者的其他信息列表：优先 extras 数组；旧版单条 type/title/description 自动包装为一条 */
+export const getEggExtras = (egg: IEasterEgg): IEasterEggExtra[] => {
+  if (egg.extras && egg.extras.length > 0) return egg.extras
+  if (egg.title || egg.description || egg.type) return [{ type: egg.type, title: egg.title, description: egg.description }]
+  return []
 }
 
 /** 默认彩蛋数据（示例，可按需增删改） */
@@ -113,9 +129,18 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783316350750",
         "1791091191760"
       ],
-      "type": "character",
-      "title": "威装·须佐能乎",
-      "description": "当对手为宇智波带土【十尾人柱力】时，奥义替换为威装·须佐能乎。"
+      "extras": [
+        {
+          "type": "character",
+          "title": "威装·须佐能乎",
+          "description": "当对手为宇智波带土【十尾人柱力】时，奥义替换为威装·须佐能乎。"
+        },
+        {
+          "type": "character",
+          "title": "“老爸！”",
+          "description": "当对手为波风水门【秽土转生】、波风水门【九喇嘛连结】时开场触发特殊互动。"
+        }
+      ]
     },
     {
       "ninjaId": "15",
@@ -165,7 +190,10 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309691119",
         "2",
         "1783309829510"
-      ]
+      ],
+      "type": "character",
+      "title": "“上吧。鸣人！”",
+      "description": "当对手为漩涡鸣人【九喇嘛连结】时开场触发特殊互动。"
     },
     {
       "ninjaId": "1",
@@ -412,6 +440,13 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309829510",
         "1783316337877",
         "1791089622892"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "“上吧，鸣人！”",
+          "description": "当对手为漩涡鸣人【九喇嘛连结】时开场触发特殊互动。"
+        }
       ]
     },
     {
@@ -889,7 +924,8 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1790212950413"
       ],
       "defeatTargetNinjaIds": [
-        "1790212950413"
+        "1790212950413",
+        "1783316959901"
       ],
       "type": "self",
       "title": "“不要小看火之意志！”",
@@ -1768,7 +1804,8 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
     {
       "ninjaId": "1783316959901",
       "defeatByNinjaIds": [
-        "1783309572540"
+        "1783309572540",
+        "1783316859772"
       ],
       "defeatTargetNinjaIds": [
         "1783315611859"
@@ -1830,6 +1867,13 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "defeatTargetNinjaIds": [
         "1791089622892",
         "1790308386823"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "唯一克星",
+          "description": "卑留呼【火之意志继承者】二技能可吸收绝大多数忍术，唯独无法吸收风遁·螺旋手里剑。"
+        }
       ]
     },
     {
@@ -1971,6 +2015,13 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       ],
       "defeatTargetNinjaIds": [
         "1783316910582"
+      ],
+      "extras": [
+        {
+          "type": "self",
+          "title": "老了干什么都心酸......",
+          "description": "大野木【三代目土影】奥义后摇有概率闪腰，触发后无法衔接技能。"
+        }
       ]
     },
     {
@@ -2049,6 +2100,13 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       ],
       "defeatTargetNinjaIds": [
         "1784014504732"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "男女有别",
+          "description": "纲手【少女】一技能抓取命中时，会根据敌方性别触发不同投掷动作。"
+        }
       ]
     },
     {
@@ -2175,6 +2233,13 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       ],
       "defeatTargetNinjaIds": [
         "1791129618324"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "鹰小队的羁绊",
+          "description": "队伍携带香燐【忍界大战】时，宇智波佐助【须佐能乎】胜利后触发回血（接近10万）。"
+        }
       ]
     },
     {
@@ -2433,5 +2498,113 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "type": "self",
       "title": "Let's party!",
       "description": "站着不动15s后会用拐杖糖进行一发射击（训练场无法触发）。"
+    },
+    {
+      "ninjaId": "1791041418200",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "“我的红头发又变长了呦”",
+          "description": "漩涡玖辛奈【少女】奥义收尾有小概率触发彩蛋：玖辛奈晕倒，水门将其扶起（该状态下奥义可接）。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1791121978724",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "隐藏口味",
+          "description": "天天【中华面点师】奥义常态为蛋黄馅月饼，极低概率触发五仁馅演出彩蛋。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1783316544775",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "艺术就是......滑稽~",
+          "description": "迪达拉【新春限定】奥义烟花常态为兔子，低概率触发滑稽笑脸。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1791176870602",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "优雅翻车",
+          "description": "日向花火【和服】奥义有概率触发油纸伞砸头。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1783612673505",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "吃！爽！",
+          "description": "天天【忍界大战】连点方向键可吃包子，能量条满后奥义可衔接技能。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1786091108484",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "青春的传承",
+          "description": "迈特凯【青春爆炸】血量低于30% 释放特殊奥义时，概率触发三代青春虚影，奥义伤害大幅提升。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1791209291942",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "self",
+          "title": "冬日百宝袋；血红辣椒",
+          "description": "漩涡玖辛奈【冬日限定】二技能随机抽道具，极概率空手、极小概率抽出 10 秒无敌 + 二技能无冷却的幸运星；普攻常态 3A，概率触发断杖并追加平底锅攻击。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1783309186224",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "character",
+          "title": "唯一的挚友",
+          "description": "当对手为宇智波止水【新春限定】时开场触发特殊互动。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1783316611067",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "character",
+          "title": "唯一的挚友",
+          "description": "当对手为宇智波鼬【新春限定】时开场触发特殊互动。"
+        }
+      ]
     }
   ]

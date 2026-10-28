@@ -202,13 +202,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 2
         },
         {
-          "scrollId": "11",
-          "scrollName": "封印术·除魔",
+          "scrollId": "1783349062619",
+          "scrollName": "通灵·返手里剑",
           "priority": 3
         },
         {
-          "scrollId": "1783349062619",
-          "scrollName": "通灵·返手里剑",
+          "scrollId": "11",
+          "scrollName": "封印术·除魔",
           "priority": 4
         }
       ]
@@ -1996,13 +1996,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
           "priority": 2
         },
         {
-          "scrollId": "2",
-          "scrollName": "冰遁·冻雪",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 3
         }
       ]
@@ -3005,13 +3005,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
           "priority": 2
         },
         {
-          "scrollId": "1783349241266",
-          "scrollName": "雷遁·地走",
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
           "priority": 3
         }
       ]
@@ -3480,6 +3480,21 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "1783350925467",
+          "scrollName": "时空间忍术",
+          "priority": 2
+        },
+        {
+          "scrollId": "5",
+          "scrollName": "水遁·水冲波",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 4
         }
       ]
     },
@@ -3687,18 +3702,18 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "纲手【传说中的三忍】",
       "scrolls": [
         {
-          "scrollId": "1783349683914",
-          "scrollName": "禁术·阴愈伤灭",
-          "priority": 1
-        },
-        {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 2
+          "priority": 1
         },
         {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
           "priority": 3
         }
       ]
@@ -3714,9 +3729,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -8247,9 +8267,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "香燐【冬日限定】",
       "scrolls": [
         {
+          "scrollId": "1783349241266",
+          "scrollName": "雷遁·地走",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         }
       ]
     },
@@ -8796,6 +8821,23 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349241266",
           "scrollName": "雷遁·地走",
           "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1792983907971",
+      "ninjaId": "1792983753092",
+      "ninjaName": "风祭萌黄【古堡奇遇】",
+      "scrolls": [
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 1
+        },
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 2
         }
       ]
     }

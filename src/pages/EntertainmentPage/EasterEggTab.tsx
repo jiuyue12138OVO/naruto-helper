@@ -12,6 +12,7 @@ import { Image } from '@/components/ui/image'
 import { useData } from '@/contexts/DataContext'
 import { EasterEggIcon } from '@/components/EasterEggIcon'
 import type { INinja } from '@/data/ninjas'
+import { getEggExtras } from '@/data/easterEggs'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
 
@@ -38,7 +39,7 @@ export default function EasterEggTab() {
   const hasEgg = (ninjaId: string) => {
     const egg = eggOf(ninjaId)
     if (!egg) return false
-    return egg.defeatByNinjaIds.length > 0 || egg.defeatTargetNinjaIds.length > 0 || !!egg.title || !!egg.description
+    return egg.defeatByNinjaIds.length > 0 || egg.defeatTargetNinjaIds.length > 0 || getEggExtras(egg).length > 0
   }
 
   // 按游戏内编号排序的 id 列表（用于弹窗内"击败/被击败"组）
@@ -164,20 +165,28 @@ export default function EasterEggTab() {
               {!selectedEgg ||
                 (selectedEgg.defeatByNinjaIds.length === 0 &&
                  selectedEgg.defeatTargetNinjaIds.length === 0 &&
-                 !selectedEgg.title && !selectedEgg.description && !selectedEgg.type) ? (
+                 getEggExtras(selectedEgg).length === 0) ? (
                 <p className="text-sm text-muted-foreground text-center py-6">该忍者暂无彩蛋信息</p>
               ) : (
                 <>
-                  {/* 上面：其他信息（自带 / 场景互动等） */}
-                  {(selectedEgg.type || selectedEgg.title || selectedEgg.description) && (
-                    <div className="bg-muted/40 rounded-lg p-3 space-y-2">
-                      {selectedEgg.type && (
-                        <Badge variant="outline" className="text-xs">{EGG_TYPE_LABEL[selectedEgg.type] ?? selectedEgg.type}</Badge>
-                      )}
-                      {selectedEgg.title && <p className="text-sm font-semibold">{selectedEgg.title}</p>}
-                      {selectedEgg.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedEgg.description}</p>}
-                    </div>
-                  )}
+                  {/* 上面：其他信息（自带 / 场景互动等，可多条） */}
+                  {(() => {
+                    const extras = getEggExtras(selectedEgg)
+                    if (extras.length === 0) return null
+                    return (
+                      <div className="space-y-2">
+                        {extras.map((x, idx) => (
+                          <div key={idx} className="bg-muted/40 rounded-lg p-3 space-y-2">
+                            {x.type && (
+                              <Badge variant="outline" className="text-xs">{EGG_TYPE_LABEL[x.type] ?? x.type}</Badge>
+                            )}
+                            {x.title && <p className="text-sm font-semibold">{x.title}</p>}
+                            {x.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{x.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()}
 
                   {/* 下面：奥义彩蛋关联忍者（分"被击败"/"击败"，按游戏内编号排序） */}
                   <div className="space-y-4">

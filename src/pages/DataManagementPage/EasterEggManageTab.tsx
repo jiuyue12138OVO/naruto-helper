@@ -1,5 +1,5 @@
 import { useState, useMemo, useId } from 'react'
-import { Trash2, Search, X, Save, ChevronDown } from 'lucide-react'
+import { Trash2, Search, X, Save, ChevronDown, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { useData } from '@/contexts/DataContext'
 import type { INinja } from '@/data/ninjas'
 import type { EasterEggType } from '@/data/easterEggs'
+import { getEggExtras } from '@/data/easterEggs'
 import { cn } from '@/lib/utils'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
@@ -115,16 +116,21 @@ function NinjaSelectGrid({
   )
 }
 
-interface EggForm {
-  defeatBy: string[]
-  defeatTarget: string[]
-  showExtra: boolean
+/** 单条其他信息的编辑表单 */
+interface EggExtraForm {
   type: EasterEggType
   title: string
   description: string
 }
 
-const EMPTY_FORM: EggForm = { defeatBy: [], defeatTarget: [], showExtra: false, type: 'self', title: '', description: '' }
+interface EggForm {
+  defeatBy: string[]
+  defeatTarget: string[]
+  showExtra: boolean
+  extras: EggExtraForm[]
+}
+
+const EMPTY_FORM: EggForm = { defeatBy: [], defeatTarget: [], showExtra: false, extras: [] }
 
 export default function EasterEggManageTab() {
   const { ninjas, easterEggs, upsertEasterEgg, deleteEasterEgg } = useData()
@@ -172,29 +178,52 @@ export default function EasterEggManageTab() {
       if (e.defeatTargetNinjaIds.includes(ninjaId)) defeatBy.add(e.ninjaId)
       if (e.defeatByNinjaIds.includes(ninjaId)) defeatTarget.add(e.ninjaId)
     })
-    setForm(stored || defeatBy.size > 0 || defeatTarget.size > 0
+    const storedExtras = stored ? getEggExtras(stored) : []
+    setForm(stored || defeatBy.size > 0 || defeatTarget.size > 0 || storedExtras.length > 0
       ? {
           defeatBy: [...defeatBy],
           defeatTarget: [...defeatTarget],
-          showExtra: !!(stored?.title || stored?.description || stored?.type),
-          type: stored?.type || 'self',
-          title: stored?.title || '',
-          description: stored?.description || '',
+          showExtra: storedExtras.length > 0,
+          extras: storedExtras.map(x => ({ type: x.type || 'self', title: x.title || '', description: x.description || '' })),
         }
       : EMPTY_FORM)
     setDefeatByOpen(false)
     setDefeatTargetOpen(false)
   }
 
+  // 更新某条其他信息
+  const updateExtra = (idx: number, patch: Partial<EggExtraForm>) => {
+    setForm(prev => ({
+      ...prev,
+      extras: prev.extras.map((x, i) => (i === idx ? { ...x, ...patch } : x)),
+    }))
+  }
+
+  // 删除某条其他信息
+  const removeExtra = (idx: number) => {
+    setForm(prev => ({ ...prev, extras: prev.extras.filter((_, i) => i !== idx) }))
+  }
+
+  // 新增一条其他信息
+  const addExtra = () => {
+    setForm(prev => ({ ...prev, extras: [...prev.extras, { type: 'self', title: '', description: '' }] }))
+  }
+
   const handleSave = () => {
     if (!editingNinjaId) return
+    // 过滤完全空白（无标题且无描述）的条目；有内容的条目写入 extras
+    const extras = form.extras
+      .filter(x => x.title.trim() || x.description.trim())
+      .map(x => ({
+        type: x.type,
+        title: x.title.trim() || undefined,
+        description: x.description.trim() || undefined,
+      }))
     upsertEasterEgg({
       ninjaId: editingNinjaId,
       defeatByNinjaIds: form.defeatBy,
       defeatTargetNinjaIds: form.defeatTarget,
-      type: form.showExtra ? form.type : undefined,
-      title: form.showExtra ? form.title.trim() || undefined : undefined,
-      description: form.showExtra ? form.description.trim() || undefined : undefined,
+      extras,
     })
     toast.success('彩蛋信息已保存')
   }
@@ -364,30 +393,47 @@ export default function EasterEggManageTab() {
             <div className="flex items-center justify-between bg-muted/40 rounded-lg px-3 py-2.5">
               <div>
                 <p className="text-sm font-medium">录入其他信息</p>
-                <p className="text-xs text-muted-foreground">自带彩蛋、场景互动彩蛋等</p>
+                <p className="text-xs text-muted-foreground">自带彩蛋、场景互动彩蛋、特定角色彩蛋等，可录入多条</p>
               </div>
               <Switch checked={form.showExtra} onCheckedChange={(v) => setForm(prev => ({ ...prev, showExtra: v }))} />
             </div>
 
             {form.showExtra && (
               <div className="space-y-3">
-                <div>
-                  <Label className="mb-1.5 block">彩蛋类型</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm(prev => ({ ...prev, type: v as EasterEggType }))}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {TYPE_OPTIONS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="mb-1.5 block">彩蛋标题</Label>
-                  <Input value={form.title} onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))} placeholder="例如：千年之争" />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block">彩蛋描述</Label>
-                  <Textarea value={form.description} onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))} placeholder="彩蛋内容描述..." rows={3} />
-                </div>
+                {form.extras.map((item, idx) => (
+                  <div key={idx} className="border border-border/40 rounded-lg p-3 space-y-3 relative">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeExtra(idx)}
+                      title="删除该条彩蛋"
+                    >
+                      <X className="size-3.5" />
+                    </Button>
+                    <div>
+                      <Label className="mb-1.5 block">彩蛋类型</Label>
+                      <Select value={item.type} onValueChange={(v) => updateExtra(idx, { type: v as EasterEggType })}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {TYPE_OPTIONS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="mb-1.5 block">彩蛋标题</Label>
+                      <Input value={item.title} onChange={e => updateExtra(idx, { title: e.target.value })} placeholder="例如：千年之争" />
+                    </div>
+                    <div>
+                      <Label className="mb-1.5 block">彩蛋描述</Label>
+                      <Textarea value={item.description} onChange={e => updateExtra(idx, { description: e.target.value })} placeholder="彩蛋内容描述..." rows={3} />
+                    </div>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={addExtra} className="gap-1">
+                  <Plus className="size-3.5" /> 添加一条彩蛋
+                </Button>
               </div>
             )}
 
