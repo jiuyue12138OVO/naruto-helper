@@ -189,11 +189,16 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
       "defeatTargetNinjaIds": [
         "1783309691119",
         "2",
-        "1783309829510"
+        "1783309829510",
+        "1783316337877"
       ],
-      "type": "character",
-      "title": "“上吧。鸣人！”",
-      "description": "当对手为漩涡鸣人【九喇嘛连结】时开场触发特殊互动。"
+      "extras": [
+        {
+          "type": "character",
+          "title": "“上吧。鸣人！”",
+          "description": "当对手为漩涡鸣人【九喇嘛连结】时开场触发特殊互动。"
+        }
+      ]
     },
     {
       "ninjaId": "1",
@@ -2036,7 +2041,8 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "17",
         "1783316837191",
         "1785510479412",
-        "20"
+        "20",
+        "5"
       ],
       "defeatTargetNinjaIds": [
         "1783308987411",
