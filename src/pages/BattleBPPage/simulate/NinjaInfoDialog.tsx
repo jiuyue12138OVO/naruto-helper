@@ -61,7 +61,7 @@ export default function NinjaInfoDialog({
               </div>
               <div className="flex justify-center mt-2">
                 <Badge variant={ninja.blindPick ? 'default' : 'secondary'}>
-                  {ninja.blindPick ? '盲选位' : '非盲选'}
+                  {ninja.blindPick === 'sub' ? '次盲选位' : ninja.blindPick ? '盲选位' : '非盲选'}
                 </Badge>
               </div>
             </div>

@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch' // ✨ 新增：开关组件
 import { toast } from 'sonner'
 import { useData } from '@/contexts/DataContext'
 import { IBPCounter } from '@/data/battleBp'
+import type { INinja } from '@/data/ninjas'
 import { Image } from '@/components/ui/image'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
@@ -125,43 +126,51 @@ export default function BattleBPManageTab() {
 
   const sortedGroupedNinjas = useMemo(() => {
     const orderMap = new Map(blindPickOrder.map((id, idx) => [id, idx]))
-    return TIER_ORDER.map(tier => {
-      const tierNinjas = filteredNinjas.filter(n => n.tier === tier)
-      if (tierNinjas.length === 0) return null
-      const blind = tierNinjas.filter(n => n.blindPick)
-      const nonBlind = tierNinjas.filter(n => !n.blindPick)
-      blind.sort((a, b) => {
-        const ia = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity
-        const ib = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
-        return ia - ib
-      })
-      nonBlind.sort((a, b) => {
+    const sortByBlindOrder = (a: INinja, b: INinja) => {
+      const ia = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity
+      const ib = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity
+      if (ia !== ib) return ia - ib
+      return sortByGameOrder(a, b)
+    }
+    const sortByGameOrder = (a: INinja, b: INinja) => {
       const ga = a.gameOrder ?? Number.MAX_SAFE_INTEGER
       const gb = b.gameOrder ?? Number.MAX_SAFE_INTEGER
       if (ga !== gb) return ga - gb
       return a.name.localeCompare(b.name)
-    })
-      return { tier, ninjas: [...blind, ...nonBlind] }
-    }).filter(Boolean) as { tier: string; ninjas: typeof ninjas }[]
+    }
+    return TIER_ORDER.map(tier => {
+      const tierNinjas = filteredNinjas.filter(n => n.tier === tier)
+      if (tierNinjas.length === 0) return null
+      const blind = tierNinjas.filter(n => n.blindPick === true)
+      const sub = tierNinjas.filter(n => n.blindPick === 'sub')
+      const nonBlind = tierNinjas.filter(n => !n.blindPick)
+      blind.sort(sortByBlindOrder)
+      sub.sort(sortByBlindOrder)
+      nonBlind.sort(sortByGameOrder)
+      return { tier, ninjas: [...blind, ...sub, ...nonBlind] }
+    }).filter(Boolean) as { tier: string; ninjas: INinja[] }[]
   }, [filteredNinjas, blindPickOrder])
 
-  const handleToggleBlind = useCallback((ninjaId: string, checked: boolean) => {
-    updateNinjaBlindPick(ninjaId, checked)
-    if (checked) {
-      const ninja = ninjas.find(n => n.id === ninjaId)
-      if (!ninja) return
-      const tier = ninja.tier
+  const handleCycleBlind = useCallback((ninjaId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const target = ninjas.find(n => n.id === ninjaId)
+    if (!target) return
+    const current = target.blindPick === 'sub' ? 'sub' : target.blindPick ? 'blind' : 'none'
+    const next: boolean | 'sub' = current === 'none' ? true : current === 'blind' ? 'sub' : false
+    updateNinjaBlindPick(ninjaId, next)
+    if (next) {
+      const tier = target.tier
       setBlindPickOrder(prev => {
+        if (prev.includes(ninjaId)) return prev
         const filtered = prev.filter(id => id !== ninjaId)
         const firstIdx = filtered.findIndex(id => {
-          const n = ninjas.find(n => n.id === id)
+          const n = ninjas.find(x => x.id === id)
           return n && n.blindPick && n.tier === tier
         })
         if (firstIdx !== -1) {
           return [...filtered.slice(0, firstIdx), ninjaId, ...filtered.slice(firstIdx)]
-        } else {
-          return [...filtered, ninjaId]
         }
+        return [...filtered, ninjaId]
       })
     }
   }, [updateNinjaBlindPick, ninjas, setBlindPickOrder])
@@ -533,10 +542,13 @@ export default function BattleBPManageTab() {
                         <span className="text-sm text-muted-foreground">{group.ninjas.length} 位忍者</span>
                       </div>
                       <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
-                        {group.ninjas.map(ninja => (
+                        {group.ninjas.map(ninja => {
+                          const blindState = ninja.blindPick === 'sub' ? 'sub' : ninja.blindPick ? 'blind' : 'none'
+                          const stateLabel = blindState === 'blind' ? '盲选位' : blindState === 'sub' ? '次盲选位' : '非盲选'
+                          return (
                           <div
                             key={ninja.id}
-                            draggable={ninja.blindPick}
+                            draggable={!!ninja.blindPick}
                             onDragStart={ninja.blindPick ? (e) => handleDragStartBlind(e, ninja.id) : undefined}
                             onDragOver={ninja.blindPick ? handleDragOverBlind : undefined}
                             onDrop={ninja.blindPick ? (e) => handleDropBlind(e, ninja.id, group.tier) : undefined}
@@ -544,24 +556,27 @@ export default function BattleBPManageTab() {
                           >
                             <Card className="overflow-hidden border-border/40 bg-card/50 hover:bg-card/80 transition-colors aspect-square flex items-center justify-center p-1 relative">
                               <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain" />
-                              <div className="absolute bottom-0.5 right-0.5 z-10 flex items-center gap-0.5 bg-background/60 rounded p-0.5 backdrop-blur-sm">
-                                <input
-                                  type="checkbox"
-                                  checked={ninja.blindPick || false}
-                                  onChange={(e) => {
-                                    e.stopPropagation()
-                                    handleToggleBlind(ninja.id, e.target.checked)
-                                  }}
-                                  className="size-3.5 rounded border-border accent-primary"
-                                />
-                                {ninja.blindPick && (
-                                  <span className="text-[10px] text-primary font-bold leading-none">盲</span>
-                                )}
+                              <div className="absolute top-0.5 right-0.5 z-10">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleCycleBlind(ninja.id, e)}
+                                  title={`点击切换：非盲选 → 盲选位 → 次盲选位 → 非盲选。当前：${stateLabel}`}
+                                  className={`h-4 min-w-4 rounded px-1 flex items-center justify-center text-[9px] font-bold leading-none border transition-colors ${
+                                    blindState === 'blind'
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : blindState === 'sub'
+                                        ? 'bg-amber-500 text-white border-amber-500'
+                                        : 'bg-background/70 text-muted-foreground/70 border-border hover:border-primary/60'
+                                  }`}
+                                >
+                                  {blindState === 'blind' ? '盲' : blindState === 'sub' ? '次盲' : '非'}
+                                </button>
                               </div>
                             </Card>
                             <p className="text-xs text-muted-foreground truncate text-center mt-1">{ninja.name}</p>
                           </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   ))}

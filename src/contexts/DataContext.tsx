@@ -101,7 +101,7 @@ interface DataContextType {
   removeNinjaTag: (tag: string) => void
   addAcquisitionOption: (option: string) => void
   removeAcquisitionOption: (option: string) => void
-  updateNinjaBlindPick: (id: string, blindPick: boolean) => void
+  updateNinjaBlindPick: (id: string, blindPick: boolean | 'sub') => void
   addCounter: (counter: IBPCounter) => void
   updateCounter: (id: string, data: Partial<IBPCounter>) => void
   deleteCounter: (id: string) => void
@@ -485,7 +485,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // --- Blind Pick ---
-  const updateNinjaBlindPick = useCallback((id: string, blindPick: boolean) => {
+  const updateNinjaBlindPick = useCallback((id: string, blindPick: boolean | 'sub') => {
     setNinjas((prev) => {
       const next = prev.map((n) => (n.id === id ? { ...n, blindPick } : n))
       saveToStorage(NINJAS_KEY, next)

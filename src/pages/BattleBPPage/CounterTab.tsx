@@ -48,12 +48,14 @@ export default function CounterTab() {
       return a.name.localeCompare(b.name)
     }
     const sortByBlindOrderAndName = (a: INinja, b: INinja) => {
-      if (a.blindPick && !b.blindPick) return -1
-      if (!a.blindPick && b.blindPick) return 1
-      if (a.blindPick && b.blindPick) {
+      const rankOf = (n: INinja) => (n.blindPick === 'sub' ? 1 : n.blindPick ? 0 : 2)
+      const ra = rankOf(a)
+      const rb = rankOf(b)
+      if (ra !== rb) return ra - rb
+      if (ra === 0 || ra === 1) {
         const ia = blindOrderMap.has(a.id) ? blindOrderMap.get(a.id)! : Infinity
         const ib = blindOrderMap.has(b.id) ? blindOrderMap.get(b.id)! : Infinity
-        return ia - ib
+        if (ia !== ib) return ia - ib
       }
       // 非盲选位：按游戏内编号升序，编号相同按名称
       const ga = a.gameOrder ?? Infinity
@@ -205,7 +207,9 @@ export default function CounterTab() {
                       <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" />
                     </Card>
                     {ninja.blindPick && (
-                      <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs rounded px-1.5 py-0.5">盲</span>
+                      <span className={`absolute top-1 left-1 text-xs rounded px-1.5 py-0.5 ${ninja.blindPick === 'sub' ? 'bg-amber-500 text-white' : 'bg-primary text-primary-foreground'}`}>
+                        {ninja.blindPick === 'sub' ? '次盲' : '盲'}
+                      </span>
                     )}
                     {ninja.gameOrder !== undefined && (
                       <span className="absolute top-1 right-1 bg-background/70 backdrop-blur-sm text-[10px] font-mono rounded px-1 py-0.5 text-muted-foreground">
@@ -249,7 +253,7 @@ export default function CounterTab() {
                     </div>
                     <div className="flex justify-center mt-2">
                       <Badge variant={selectedNinja.blindPick ? 'default' : 'secondary'}>
-                        {selectedNinja.blindPick ? '盲选位' : '非盲选'}
+                        {selectedNinja.blindPick === 'sub' ? '次盲选位' : selectedNinja.blindPick ? '盲选位' : '非盲选'}
                       </Badge>
                     </div>
                   </div>

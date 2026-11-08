@@ -585,9 +585,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 3
         },
         {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 4
+        },
+        {
           "scrollId": "1783349733336",
           "scrollName": "冰遁·燕吹雪",
-          "priority": 4
+          "priority": 5
         }
       ]
     },
@@ -1739,9 +1744,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 4
         },
         {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 5
+        },
+        {
           "scrollId": "1783349772182",
           "scrollName": "木遁·一字连柱",
-          "priority": 5
+          "priority": 6
         }
       ]
     },
@@ -2493,24 +2503,29 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "大筒木舍人【最终章】",
       "scrolls": [
         {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 3
+          "priority": 4
         },
         {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 4
+          "priority": 5
         }
       ]
     },
