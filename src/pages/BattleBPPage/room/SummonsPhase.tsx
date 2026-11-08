@@ -114,7 +114,8 @@ export default function SummonsPhase({
     }
   }
 
-  const allFilled = order.every(i => mySummons[i] || pendingSummons[i])
+  const hasPending = Object.keys(pendingSummons).length > 0
+  const allFilled = order.every(i => mySummons[i]) && !hasPending
 
   return (
     <div className="space-y-4">

@@ -443,6 +443,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349241266",
           "scrollName": "雷遁·地走",
           "priority": 2
+        },
+        {
+          "scrollId": "1783350886684",
+          "scrollName": "冰遁·爆雪",
+          "priority": 3
         }
       ]
     },
@@ -497,6 +502,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783350925467",
           "scrollName": "时空间忍术",
           "priority": 4
+        },
+        {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 5
         }
       ]
     },

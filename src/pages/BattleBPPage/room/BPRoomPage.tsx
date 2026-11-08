@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
 import { Input } from '@/components/ui/input'
-import { Clock, Search, X, History, Eye } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronUp, Clock, Search, X, History, Eye, RefreshCw } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -70,6 +70,7 @@ interface RoomState {
   startConfirmed1P: boolean
   startConfirmed2P: boolean
   reuseScrollSummon?: boolean
+  lastTimeout?: { key: string; message: string; at: number }
 }
 
 const BAN_STEPS = [
@@ -135,6 +136,9 @@ export default function BPRoomPage() {
   const [publicBanSearch, setPublicBanSearch] = useState('')
   const [transitioning, setTransitioning] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [timeoutNotice, setTimeoutNotice] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [showRules, setShowRules] = useState(false)
 
   // 创建房间时的复用开关
   const [reuseSwitch, setReuseSwitch] = useState(false)
@@ -145,6 +149,7 @@ export default function BPRoomPage() {
   const [publicBanTierGrouping, setPublicBanTierGrouping] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const timeoutAttemptRef = useRef<{ key: string; at: number } | null>(null)
 
   const myRole = useMemo(() => {
     if (!roomState || !myPlayerId) return null
@@ -252,11 +257,39 @@ export default function BPRoomPage() {
     setRoomState(newState)
   }, [roomId])
 
-  const fetchLatestState = useCallback(async () => {
+  const updateRoomWith = useCallback(async (updater: (latest: RoomState) => Partial<RoomState> | null) => {
     if (!roomId) return
     const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
-    if (data) setRoomState(data.state as RoomState)
+    if (!data) return
+    const latest = data.state as RoomState
+    const updates = updater(latest)
+    if (!updates) return
+    const newState: RoomState = { ...latest, ...updates }
+    await supabase.from('rooms').upsert({ id: roomId, state: newState })
+    setRoomState(newState)
   }, [roomId])
+
+  const fetchLatestState = useCallback(async () => {
+    if (!roomId) return null
+    const { data } = await supabase.from('rooms').select('state').eq('id', roomId).single()
+    if (!data) return null
+    const state = data.state as RoomState
+    setRoomState(state)
+    return state
+  }, [roomId])
+
+  const handleRefresh = useCallback(async () => {
+    if (!roomId || refreshing) return
+    setRefreshing(true)
+    try {
+      const state = await fetchLatestState()
+      if (state?.deadline) {
+        setRemainingSeconds(Math.max(0, Math.floor((state.deadline - Date.now()) / 1000)))
+      }
+    } finally {
+      window.setTimeout(() => setRefreshing(false), 300)
+    }
+  }, [roomId, refreshing, fetchLatestState])
 
   const generatePlayerId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 6)
 
@@ -434,8 +467,179 @@ export default function BPRoomPage() {
   }, [roomState, myRole, isPlayer])
 
   const handleTimeout = useCallback(() => {
-    // ... 保持原样，省略以节省篇幅，实际未改动
-  }, [roomState, myRole, isMyTurn, availableNinjas, scrolls, summons, updateRoom])
+    if (!roomId || !roomState?.deadline) return
+    if (myRole === 'spectator') return
+    if (Date.now() < roomState.deadline) return
+
+    const attemptKey = `${roomState.phase}-${roomState.banStep}-${roomState.pickStep}-${roomState.deadline}`
+    const last = timeoutAttemptRef.current
+    if (last?.key === attemptKey && Date.now() - last.at < 3000) return
+    timeoutAttemptRef.current = { key: attemptKey, at: Date.now() }
+
+    updateRoomWith((latest) => {
+      if (!latest.deadline || Date.now() < latest.deadline) return null
+
+      if (latest.phase === 'ban') {
+        const step = BAN_STEPS[latest.banStep]
+        if (!step) return null
+        const key = `ban-${latest.banStep}-${latest.deadline}`
+        if (latest.lastTimeout?.key === key) return null
+        const targetBan = step.player === '1P' ? [...latest.ban1P] : [...latest.ban2P]
+        if (targetBan[step.index]) return null
+
+        const banned = new Set<string>([
+          ...(latest.publicBan || []),
+          ...(latest.ban1P.filter(Boolean) as string[]),
+          ...(latest.ban2P.filter(Boolean) as string[]),
+        ])
+        const used = new Set<string>(latest.usedNinjas)
+        const pool = ninjas.filter(n => !banned.has(n.id) && !used.has(n.id))
+        const chosen = pool[Math.floor(Math.random() * pool.length)]
+        if (!chosen) return null
+
+        targetBan[step.index] = chosen.id
+        const nextStep = latest.banStep + 1
+        const banUpdate: Partial<RoomState> = step.player === '1P' ? { ban1P: targetBan } : { ban2P: targetBan }
+        return {
+          ...banUpdate,
+          banStep: nextStep,
+          deadline: nextStep < BAN_STEPS.length ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+          currentPlayer: nextStep < BAN_STEPS.length ? BAN_STEPS[nextStep].player : null,
+          lastTimeout: {
+            key,
+            message: `禁用阶段超时未选择，已随机禁用「${chosen.name}」`,
+            at: Date.now(),
+          },
+        }
+      }
+
+      if (latest.phase === 'pick') {
+        const step = PICK_STEPS[latest.pickStep]
+        if (!step) return null
+        const key = `pick-${latest.pickStep}-${latest.deadline}`
+        if (latest.lastTimeout?.key === key) return null
+        const targetTeam = step.player === '1P' ? [...latest.team1P] : [...latest.team2P]
+        if (targetTeam[step.index]) return null
+
+        const banned = new Set<string>([
+          ...(latest.publicBan || []),
+          ...(latest.ban1P.filter(Boolean) as string[]),
+          ...(latest.ban2P.filter(Boolean) as string[]),
+        ])
+        const used = new Set<string>(latest.usedNinjas)
+        const taken = new Set<string>([
+          ...(latest.team1P.filter(Boolean) as string[]),
+          ...(latest.team2P.filter(Boolean) as string[]),
+        ])
+        const pool = ninjas.filter(n => !banned.has(n.id) && !used.has(n.id) && !taken.has(n.id))
+        const chosen = pool[Math.floor(Math.random() * pool.length)]
+        if (!chosen) return null
+
+        targetTeam[step.index] = chosen.id
+        const nextStep = latest.pickStep + 1
+        const teamUpdate: Partial<RoomState> = step.player === '1P' ? { team1P: targetTeam } : { team2P: targetTeam }
+        return {
+          ...teamUpdate,
+          usedNinjas: [...latest.usedNinjas, chosen.id],
+          pickStep: nextStep,
+          deadline: nextStep < PICK_STEPS.length ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+          currentPlayer: nextStep < PICK_STEPS.length ? PICK_STEPS[nextStep].player : null,
+          lastTimeout: {
+            key,
+            message: `选用阶段超时未选择，已随机选用「${chosen.name}」`,
+            at: Date.now(),
+          },
+        }
+      }
+
+      if (latest.phase === 'scrolls') {
+        const key = `scrolls-${latest.deadline}`
+        if (latest.lastTimeout?.key === key) return null
+        const pending1P = !latest.scrollsConfirmed1P
+        const pending2P = !latest.scrollsConfirmed2P
+        if (!pending1P && !pending2P) return null
+
+        const fillScrolls = (role: '1P' | '2P') => {
+          const current = role === '1P' ? [...latest.scrolls1P] : [...latest.scrolls2P]
+          const history = new Set<string>(role === '1P' ? (latest.myScrollHistory || []) : (latest.opponentScrollHistory || []))
+          const picked = new Set<string>(current.filter(Boolean) as string[])
+          const pool = scrolls.filter(s => !history.has(s.id) && !picked.has(s.id))
+          for (let i = 0; i < current.length; i++) {
+            if (current[i] || pool.length === 0) continue
+            const idx = Math.floor(Math.random() * pool.length)
+            const scroll = pool[idx]
+            if (!scroll) break
+            current[i] = scroll.id
+            picked.add(scroll.id)
+            pool.splice(idx, 1)
+          }
+          return current
+        }
+
+        const updates: Partial<RoomState> = {
+          lastTimeout: { key, message: '密卷阶段超时未确认，已随机选择密卷', at: Date.now() },
+        }
+        if (pending1P) {
+          const next1P = fillScrolls('1P')
+          if (next1P.some(s => !s)) return null
+          updates.scrolls1P = next1P
+          updates.scrollsConfirmed1P = true
+        }
+        if (pending2P) {
+          const next2P = fillScrolls('2P')
+          if (next2P.some(s => !s)) return null
+          updates.scrolls2P = next2P
+          updates.scrollsConfirmed2P = true
+        }
+        return updates
+      }
+
+      if (latest.phase === 'summons') {
+        const key = `summons-${latest.deadline}`
+        if (latest.lastTimeout?.key === key) return null
+        const pending1P = !latest.summonsConfirmed1P
+        const pending2P = !latest.summonsConfirmed2P
+        if (!pending1P && !pending2P) return null
+
+        const fillSummons = (role: '1P' | '2P') => {
+          const current = role === '1P' ? [...latest.summons1P] : [...latest.summons2P]
+          const history = new Set<string>(role === '1P' ? (latest.mySummonHistory || []) : (latest.opponentSummonHistory || []))
+          const picked = new Set<string>(current.filter(Boolean) as string[])
+          const pool = summons.filter(s => !history.has(s.id) && !picked.has(s.id))
+          for (let i = 0; i < current.length; i++) {
+            if (current[i] || pool.length === 0) continue
+            const idx = Math.floor(Math.random() * pool.length)
+            const summon = pool[idx]
+            if (!summon) break
+            current[i] = summon.id
+            picked.add(summon.id)
+            pool.splice(idx, 1)
+          }
+          return current
+        }
+
+        const updates: Partial<RoomState> = {
+          lastTimeout: { key, message: '通灵阶段超时未确认，已随机选择通灵', at: Date.now() },
+        }
+        if (pending1P) {
+          const next1P = fillSummons('1P')
+          if (next1P.some(s => !s)) return null
+          updates.summons1P = next1P
+          updates.summonsConfirmed1P = true
+        }
+        if (pending2P) {
+          const next2P = fillSummons('2P')
+          if (next2P.some(s => !s)) return null
+          updates.summons2P = next2P
+          updates.summonsConfirmed2P = true
+        }
+        return updates
+      }
+
+      return null
+    }).catch(() => {})
+  }, [roomId, roomState?.deadline, myRole, ninjas, scrolls, summons, updateRoomWith])
+
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -452,13 +656,21 @@ export default function BPRoomPage() {
     const tick = () => {
       const diff = Math.max(0, Math.floor((roomState.deadline! - Date.now()) / 1000))
       setRemainingSeconds(diff)
-      if (diff <= 0) { clearInterval(timerRef.current!); handleTimeout() }
+      if (diff <= 0) handleTimeout()
     }
     tick()
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(tick, 1000)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [roomState?.deadline, handleTimeout])
+
+  useEffect(() => {
+    const notice = roomState?.lastTimeout
+    if (!notice) return
+    setTimeoutNotice(notice.message)
+    const timer = setTimeout(() => setTimeoutNotice(null), 5000)
+    return () => clearTimeout(timer)
+  }, [roomState?.lastTimeout?.at])
 
   const confirmSelection = (ninjaId: string) => {
     if (!roomState || !isPlayer || !isMyTurn) return
@@ -794,6 +1006,106 @@ export default function BPRoomPage() {
   if (!roomId) {
     return (
       <div className="max-w-md mx-auto space-y-6">
+        <Card className="overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowRules(v => !v)}
+            className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors"
+          >
+            <span className="flex items-center gap-2 font-semibold">
+              <BookOpen className="h-4 w-4" />
+              武斗赛 BP 规则说明
+            </span>
+            {showRules
+              ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </button>
+
+          {showRules && (
+            <div className="px-6 pb-6 space-y-5 text-sm leading-relaxed">
+              <div className="space-y-2">
+                <p className="font-semibold">房间与席位</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>创建房间的一方为 1P，房间号由系统生成，6 位字符。</li>
+                  <li>输入房间号加入的一方占用空出的玩家席位，优先 1P，其次 2P。两个席位都已占用时无法以玩家身份加入。</li>
+                  <li>观众以观众身份加入，每个房间最多 5 名观众，只能查看，不能操作。</li>
+                  <li>双方在等待页各自点击“开始 BP”后才进入禁用阶段。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">公 ban</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>等待页双方共同从忍者池添加禁用忍者，合计最多 10 名。</li>
+                  <li>公 ban 的忍者本局全程不可被禁用和选用。任一方都可以添加和移除。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">禁用阶段</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>共 4 步，顺序为 1P、2P、2P、1P，每人禁用 2 名忍者。</li>
+                  <li>已被公 ban、双方已禁用、双方已选用的忍者不会出现在可选列表中。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">选用阶段</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>共 6 步，顺序为 1P、2P、2P、1P、1P、2P，每人选用 3 名忍者。</li>
+                  <li>已禁用的忍者不可选用，同一忍者不能重复选用。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">倒计时与超时</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>每个禁用、选用步骤有 60 秒倒计时。</li>
+                  <li>倒计时归零仍未确认时，系统从当前可选池随机选一名并自动进入下一步，界面显示随机结果提示。</li>
+                  <li>对手掉线或退出时，其步骤由在线一方在超时后随机推进，对局不会停在原地。</li>
+                  <li>同一步骤只会由超时逻辑处理一次，不会重复随机。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">密卷配置</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>每人为自己的 3 名忍者各配 1 个密卷。</li>
+                  <li>点击忍者下方的密卷槽位，再从下方网格点击密卷，最后点击“确认当前密卷”提交该槽位。</li>
+                  <li>三个槽位全部提交后，“确认密卷配置”才可点击。双方都确认后进入通灵配置。</li>
+                  <li>本阶段倒计时超时未确认时，系统随机补齐未提交的槽位并自动确认，已提交的槽位保持不变。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">通灵配置</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>每人为自己的 3 名忍者各配 1 个通灵，操作方式与密卷一致。</li>
+                  <li>三个槽位全部提交后，“确认通灵配置”才可点击。双方都确认后进入结算。</li>
+                  <li>本阶段倒计时超时未确认时，系统随机补齐并自动确认。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">结算与下一局</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>结算页显示双方本局阵容与密卷、通灵配置，双方各自点击确认下一局。</li>
+                  <li>双方都确认后开启下一局，双方席位互换，先手方随之交换。</li>
+                  <li>已使用过的密卷和通灵不会在同一方后续对局中重复出现。建房时开启“密卷通灵复用”后，每局重新可用，不受历史限制。</li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-semibold">显示与刷新</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>观众可以查看实时阵容、禁用、密卷、通灵和倒计时。</li>
+                  <li>界面显示与房间状态不一致时，点击房间右上角“刷新”按钮重新拉取房间状态。</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </Card>
+
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">创建房间</h2>
           <p className="text-sm text-muted-foreground mb-4">你将作为 1P 开始对局</p>
@@ -841,7 +1153,12 @@ export default function BPRoomPage() {
               <Badge variant="outline" className="gap-1"><Eye className="h-3 w-3" /> 观众 {roomState.spectators.length}/{MAX_SPECTATORS}</Badge>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-1">
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} /> 刷新
+            </Button>
+            <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
+          </div>
         </div>
         <Card className="p-6 space-y-4">
           <div>
@@ -978,6 +1295,9 @@ export default function BPRoomPage() {
               <History className="h-4 w-4" /> 过往小局
             </Button>
           )}
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-1">
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} /> 刷新
+          </Button>
           <Button variant="outline" size="sm" onClick={leaveRoom}>退出房间</Button>
         </div>
       </div>
@@ -1003,6 +1323,9 @@ export default function BPRoomPage() {
               <Clock className="h-5 w-5" /> {remainingSeconds}s
             </Badge>
           </div>
+        )}
+        {timeoutNotice && (
+          <p className="text-center text-xs text-amber-600 mb-3">{timeoutNotice}</p>
         )}
 
         {renderBanDisplay()}

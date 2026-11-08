@@ -890,7 +890,7 @@ export const MOCK_NINJAS: INinja[] = [
         "大招特殊情况可接",
         "低真空期"
       ],
-      "blindPick": false,
+      "blindPick": "sub",
       "acquisition": "点券",
       "gameOrder": 125
     },

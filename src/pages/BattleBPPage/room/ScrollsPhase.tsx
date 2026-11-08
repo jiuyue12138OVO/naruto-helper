@@ -107,7 +107,8 @@ export default function ScrollsPhase({
     }
   }
 
-  const allFilled = order.every(i => myScrolls[i] || pendingScrolls[i])
+  const hasPending = Object.keys(pendingScrolls).length > 0
+  const allFilled = order.every(i => myScrolls[i]) && !hasPending
 
   return (
     <div className="space-y-4">
