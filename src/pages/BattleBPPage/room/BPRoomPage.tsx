@@ -16,6 +16,9 @@ import PickPhase from './PickPhase'
 import ScrollsPhase from './ScrollsPhase'
 import SummonsPhase from './SummonsPhase'
 import DonePhase from './DonePhase'
+import PoolSettingsDialog from './PoolSettingsDialog'
+import { EMPTY_POOL, poolAllows, poolSummary } from './battlePool'
+import type { PlayerPool } from './battlePool'
 import type { INinja } from '@/data/ninjas'
 
 const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '准t0', 't1', '准t1', 't2', 't3', '...']
@@ -110,6 +113,8 @@ interface RoomState {
   startConfirmed1P: boolean
   startConfirmed2P: boolean
   reuseScrollSummon?: boolean
+  player1PPool?: PlayerPool
+  player2PPool?: PlayerPool
   lastTimeout?: { key: string; message: string; at: number }
 }
 
@@ -133,6 +138,7 @@ const emptyRoomState = (
   player1PId: string,
   reuseScrollSummon = false,
   profile?: { name?: string; avatar?: string | null },
+  pool: PlayerPool = EMPTY_POOL,
 ): RoomState => ({
   phase: 'waiting',
   gameNumber: 1,
@@ -158,6 +164,8 @@ const emptyRoomState = (
   player1PAvatar: profile?.avatar ?? null,
   player2PName: '',
   player2PAvatar: null,
+  player1PPool: pool,
+  player2PPool: undefined,
   spectators: [],
   gameHistory: [],
   deadline: null,
@@ -201,6 +209,22 @@ export default function BPRoomPage() {
   const [avatarError, setAvatarError] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
+  // 本机保存的忍者/密卷/通灵池，建房和加入房间共用
+  const [myPool, setMyPool] = useState<PlayerPool>(() => {
+    try {
+      const raw = localStorage.getItem('bp_room_pool')
+      if (!raw) return EMPTY_POOL
+      const parsed = JSON.parse(raw) as Partial<PlayerPool>
+      return {
+        mode: parsed.mode === 'select' || parsed.mode === 'disable' ? parsed.mode : 'all',
+        ninjas: Array.isArray(parsed.ninjas) ? parsed.ninjas : [],
+        scrolls: Array.isArray(parsed.scrolls) ? parsed.scrolls : [],
+        summons: Array.isArray(parsed.summons) ? parsed.summons : [],
+      }
+    } catch { return EMPTY_POOL }
+  })
+  const [showPoolDialog, setShowPoolDialog] = useState(false)
+
   // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
   const [showTierGrouping, setShowTierGrouping] = useState(false)
   // 公 ban 阶段：是否按梯度分组（默认关闭）
@@ -212,8 +236,9 @@ export default function BPRoomPage() {
       else localStorage.removeItem('bp_room_name')
       if (myAvatar) localStorage.setItem('bp_room_avatar', myAvatar)
       else localStorage.removeItem('bp_room_avatar')
+      localStorage.setItem('bp_room_pool', JSON.stringify(myPool))
     } catch {}
-  }, [myName, myAvatar])
+  }, [myName, myAvatar, myPool])
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutAttemptRef = useRef<{ key: string; at: number } | null>(null)
@@ -228,6 +253,11 @@ export default function BPRoomPage() {
 
   const isSpectator = myRole === 'spectator'
   const isPlayer = myRole === '1P' || myRole === '2P'
+
+  const mySeatPool = useMemo(() => {
+    if (!roomState || (myRole !== '1P' && myRole !== '2P')) return myPool
+    return (myRole === '1P' ? roomState.player1PPool : roomState.player2PPool) || myPool
+  }, [roomState, myRole, myPool])
 
   const isSpectatorRef = useRef(isSpectator)
   useEffect(() => {
@@ -384,7 +414,7 @@ export default function BPRoomPage() {
   const createRoom = async () => {
     const id = Math.random().toString(36).substring(2, 8).toUpperCase()
     const playerId = generatePlayerId()
-    const init = emptyRoomState(playerId, reuseSwitch, { name: myName.trim(), avatar: myAvatar })
+    const init = emptyRoomState(playerId, reuseSwitch, { name: myName.trim(), avatar: myAvatar }, myPool)
     setRoomId(id); setMyPlayerId(playerId); setRoomState(init)
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
@@ -414,11 +444,17 @@ export default function BPRoomPage() {
       setError('玩家数已满'); return
     }
     const newPlayerId = generatePlayerId()
-    const newState = {
+    const newState: RoomState = {
       ...state,
       [`player${roleToTake}Id`]: newPlayerId,
       [`player${roleToTake}Name`]: myName.trim(),
       [`player${roleToTake}Avatar`]: myAvatar,
+    }
+    // 席位池在开局时确定，玩家离开后保留，新玩家继承原席位池
+    if (roleToTake === '1P') {
+      if (!newState.player1PPool) newState.player1PPool = myPool
+    } else {
+      if (!newState.player2PPool) newState.player2PPool = myPool
     }
     await supabase.from('rooms').upsert({ id, state: newState })
     setRoomId(id); setMyPlayerId(newPlayerId); setRoomState(newState)
@@ -484,12 +520,28 @@ export default function BPRoomPage() {
     }
   }
 
+  // 禁用阶段：所有忍者都可被禁，不受个人池限制
   const availableNinjas = useMemo(() => {
     if (!roomState) return []
     const publicBanSet = new Set(roomState.publicBan || [])
     const banned = new Set([...roomState.ban1P.filter(Boolean), ...roomState.ban2P.filter(Boolean)])
-    return ninjas.filter(n => !roomState.usedNinjas.includes(n.id) && !banned.has(n.id) && !publicBanSet.has(n.id))
+    return ninjas.filter(n =>
+      !roomState.usedNinjas.includes(n.id)
+      && !banned.has(n.id)
+      && !publicBanSet.has(n.id)
+    )
   }, [roomState, ninjas])
+
+  // 选用阶段：只允许自己席位池内的忍者
+  const pickableNinjas = useMemo(() => {
+    if (!roomState) return []
+    const seatPool = myRole === '1P'
+      ? roomState.player1PPool
+      : myRole === '2P'
+        ? roomState.player2PPool
+        : undefined
+    return availableNinjas.filter(n => poolAllows(seatPool, 'ninjas', n.id))
+  }, [availableNinjas, roomState, myRole])
 
   // 通用排序：优先 gameOrder，缺失时退化到 评级 → 名字
   const sortNinjasBase = useCallback((a: INinja, b: INinja) => {
@@ -534,9 +586,10 @@ export default function BPRoomPage() {
 
   // ban/pick 阶段的忍者分组
   const groupedNinjas = useMemo(() => {
+    const source = roomState?.phase === 'pick' ? pickableNinjas : availableNinjas
     const filtered = search
-      ? availableNinjas.filter(n => n.name.toLowerCase().includes(search.toLowerCase()))
-      : availableNinjas
+      ? source.filter(n => n.name.toLowerCase().includes(search.toLowerCase()))
+      : source
 
     if (showTierGrouping) {
       const groups: { tier: string; ninjas: INinja[] }[] = []
@@ -550,7 +603,7 @@ export default function BPRoomPage() {
       const sorted = [...filtered].sort(sortByGameOrder)
       return [{ tier: '全部', ninjas: sorted }]
     }
-  }, [availableNinjas, search, showTierGrouping, sortByGameOrder])
+  }, [availableNinjas, pickableNinjas, roomState?.phase, search, showTierGrouping, sortByGameOrder])
 
   const isMyTurn = useMemo(() => {
     if (!roomState || !isPlayer) return false
@@ -626,7 +679,10 @@ export default function BPRoomPage() {
           ...(latest.team1P.filter(Boolean) as string[]),
           ...(latest.team2P.filter(Boolean) as string[]),
         ])
-        const pool = ninjas.filter(n => !banned.has(n.id) && !used.has(n.id) && !taken.has(n.id))
+        const seatPool = step.player === '1P' ? latest.player1PPool : latest.player2PPool
+        const basePool = ninjas.filter(n => !banned.has(n.id) && !used.has(n.id) && !taken.has(n.id))
+        const restricted = basePool.filter(n => poolAllows(seatPool, 'ninjas', n.id))
+        const pool = restricted.length > 0 ? restricted : basePool
         const chosen = pool[Math.floor(Math.random() * pool.length)]
         if (!chosen) return null
 
@@ -658,7 +714,13 @@ export default function BPRoomPage() {
           const current = role === '1P' ? [...latest.scrolls1P] : [...latest.scrolls2P]
           const history = new Set<string>(role === '1P' ? (latest.myScrollHistory || []) : (latest.opponentScrollHistory || []))
           const picked = new Set<string>(current.filter(Boolean) as string[])
-          const pool = scrolls.filter(s => !history.has(s.id) && !picked.has(s.id))
+          const seatPool = role === '1P' ? latest.player1PPool : latest.player2PPool
+          const basePool = scrolls.filter(s => !history.has(s.id) && !picked.has(s.id))
+          const restricted = basePool.filter(s => poolAllows(seatPool, 'scrolls', s.id))
+          const pool = [...restricted]
+          if (pool.length < current.filter(s => !s).length) {
+            basePool.filter(s => !restricted.includes(s)).forEach(s => pool.push(s))
+          }
           for (let i = 0; i < current.length; i++) {
             if (current[i] || pool.length === 0) continue
             const idx = Math.floor(Math.random() * pool.length)
@@ -700,7 +762,13 @@ export default function BPRoomPage() {
           const current = role === '1P' ? [...latest.summons1P] : [...latest.summons2P]
           const history = new Set<string>(role === '1P' ? (latest.mySummonHistory || []) : (latest.opponentSummonHistory || []))
           const picked = new Set<string>(current.filter(Boolean) as string[])
-          const pool = summons.filter(s => !history.has(s.id) && !picked.has(s.id))
+          const seatPool = role === '1P' ? latest.player1PPool : latest.player2PPool
+          const basePool = summons.filter(s => !history.has(s.id) && !picked.has(s.id))
+          const restricted = basePool.filter(s => poolAllows(seatPool, 'summons', s.id))
+          const pool = [...restricted]
+          if (pool.length < current.filter(s => !s).length) {
+            basePool.filter(s => !restricted.includes(s)).forEach(s => pool.push(s))
+          }
           for (let i = 0; i < current.length; i++) {
             if (current[i] || pool.length === 0) continue
             const idx = Math.floor(Math.random() * pool.length)
@@ -1132,6 +1200,7 @@ export default function BPRoomPage() {
             scrolls1P={roomState!.scrolls1P} scrolls2P={roomState!.scrolls2P}
             scrollHistory1P={scrollHistory1P} scrollHistory2P={scrollHistory2P}
             ninjas={ninjas} scrolls={scrolls}
+            poolScrolls={scrolls.filter(s => poolAllows(mySeatPool, 'scrolls', s.id))}
             order={order}
             search={search} setSearch={setSearch}
             onSelectScrollSlot={selectScrollSlot}
@@ -1148,6 +1217,7 @@ export default function BPRoomPage() {
             scrolls1P={roomState!.scrolls1P} scrolls2P={roomState!.scrolls2P}
             summonHistory1P={summonHistory1P} summonHistory2P={summonHistory2P}
             ninjas={ninjas} summons={summons} scrolls={scrolls}
+            poolSummons={summons.filter(s => poolAllows(mySeatPool, 'summons', s.id))}
             order={order}
             search={search} setSearch={setSearch}
             onSelectSummonSlot={selectSummonSlot}
@@ -1298,6 +1368,13 @@ export default function BPRoomPage() {
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
           </div>
           {avatarError && <p className="text-xs text-destructive">{avatarError}</p>}
+          <div className="flex items-center justify-between gap-3 border-t pt-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">我的忍者池</p>
+              <p className="truncate text-xs text-muted-foreground">{poolSummary(myPool)}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setShowPoolDialog(true)}>设置</Button>
+          </div>
         </Card>
 
         <Card className="p-6">
@@ -1324,6 +1401,16 @@ export default function BPRoomPage() {
             <Button onClick={() => joinRoom(true)} variant="secondary" className="flex-1">以观众加入</Button>
           </div>
         </Card>
+
+        <PoolSettingsDialog
+          open={showPoolDialog}
+          onOpenChange={setShowPoolDialog}
+          ninjas={ninjas}
+          scrolls={scrolls}
+          summons={summons}
+          pool={myPool}
+          onChange={setMyPool}
+        />
       </div>
     )
   }

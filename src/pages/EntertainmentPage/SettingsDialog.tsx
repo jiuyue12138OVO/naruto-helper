@@ -3,6 +3,8 @@ import { Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Image } from '@/components/ui/image'
@@ -43,6 +45,7 @@ export default function SettingsDialog({
 }: SettingsDialogProps) {
   const [settingsTab, setSettingsTab] = useState('ninjas')
   const [settingsSearch, setSettingsSearch] = useState('')
+  const [settingsTierGrouping, setSettingsTierGrouping] = useState(false)
 
   // 决定当前模式下显示哪一个集合以及操作函数
   const isDisabledMode = mode === 'disable'
@@ -59,22 +62,27 @@ export default function SettingsDialog({
     return kw ? ninjas.filter(n => n.name.toLowerCase().includes(kw)) : ninjas
   }, [ninjas, settingsSearch])
 
-  // 分组忍者（每组内按游戏内编号升序，缺失 gameOrder 的排最后）
-  const groupedSettingsNinjas = useMemo(() => {
-    const groups: { tier: string; ninjas: INinja[] }[] = []
-    TIER_ORDER.forEach(tier => {
-      const list = filteredNinjas
-        .filter(n => n.tier === tier)
-        .sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
-      if (list.length) groups.push({ tier, ninjas: list })
-    })
-    return groups
+  // 默认整体按游戏内编号；打开梯度开关后按梯度分组，组内仍按编号
+  const sortedSettingsNinjas = useMemo(() => {
+    const list = [...filteredNinjas]
+    list.sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
+    return list
   }, [filteredNinjas])
 
-  // 整梯度操作：把某一梯度的全部忍者整体 禁用/启用 或 选用/取消选用
-  // 基于完整 ninjas 判断（不受当前搜索词影响）
-  const handleToggleTier = (tier: string) => {
-    const tierNinjas = ninjas.filter(n => n.tier === tier)
+  const groupedSettingsNinjas = useMemo(() => {
+    if (!settingsTierGrouping) return [{ tier: '全部', ninjas: sortedSettingsNinjas }]
+    const groups: { tier: string; ninjas: INinja[] }[] = []
+    TIER_ORDER.forEach(tier => {
+      const list = sortedSettingsNinjas.filter(n => n.tier === tier)
+      if (list.length) groups.push({ tier, ninjas: list })
+    })
+    const rest = sortedSettingsNinjas.filter(n => !TIER_ORDER.includes(n.tier))
+    if (rest.length) groups.push({ tier: '其他', ninjas: rest })
+    return groups
+  }, [sortedSettingsNinjas, settingsTierGrouping])
+
+  // 整组操作：把当前分组的全部忍者整体 禁用/启用 或 选用/取消选用
+  const handleToggleTier = (tierNinjas: INinja[]) => {
     if (tierNinjas.length === 0) return
     const ids = tierNinjas.map(n => n.id)
     const allActive = ids.every(id => activeNinjaSet.has(id))
@@ -147,13 +155,23 @@ export default function SettingsDialog({
                 <Button variant="ghost" size="sm" onClick={clearNinjas} disabled={activeNinjaSet.size === 0}>
                   清空列表
                 </Button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Label htmlFor="settings-tier-toggle" className="cursor-pointer select-none text-xs">
+                    按忍者梯度排行
+                  </Label>
+                  <Switch
+                    id="settings-tier-toggle"
+                    checked={settingsTierGrouping}
+                    onCheckedChange={setSettingsTierGrouping}
+                  />
+                </div>
               </div>
               <div className="space-y-4 max-h-80 overflow-y-auto">
                 {groupedSettingsNinjas.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-8">无匹配忍者</p>
                 ) : (
                   groupedSettingsNinjas.map(group => {
-                    const tierIds = ninjas.filter(n => n.tier === group.tier).map(n => n.id)
+                    const tierIds = group.ninjas.map(n => n.id)
                     const tierAllActive = tierIds.length > 0 && tierIds.every(id => activeNinjaSet.has(id))
                     return (
                     <div key={group.tier}>
@@ -161,11 +179,13 @@ export default function SettingsDialog({
                         <Badge variant="outline" className="text-sm font-bold">{group.tier}</Badge>
                         <button
                           className="text-xs text-primary hover:underline shrink-0"
-                          onClick={() => handleToggleTier(group.tier)}
+                          onClick={() => handleToggleTier(group.ninjas)}
                         >
-                          {tierAllActive
-                            ? (mode === 'disable' ? '启用整梯度' : '取消选用整梯度')
-                            : (mode === 'disable' ? '禁用整梯度' : '选用整梯度')}
+                          {group.tier === '全部'
+                            ? (tierAllActive ? '取消全选' : '全选')
+                            : tierAllActive
+                              ? (mode === 'disable' ? '启用整梯度' : '取消选用整梯度')
+                              : (mode === 'disable' ? '禁用整梯度' : '选用整梯度')}
                         </button>
                       </div>
                       <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
@@ -230,8 +250,8 @@ export default function SettingsDialog({
                       className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg transition-all ${isGray ? 'opacity-40 grayscale' : 'hover:bg-muted/50'}`}
                       onClick={() => toggleScroll(scroll.id)}
                     >
-                      <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
-                        <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full object-cover" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden border border-border/40 bg-card">
+                        <Image src={scroll.imageUrl} alt={scroll.name} className="w-full h-full rounded-full object-cover" />
                       </div>
                       <span className={`text-xs text-center leading-tight ${isGray ? 'text-destructive line-through' : 'text-foreground'}`}>
                         {scroll.name}

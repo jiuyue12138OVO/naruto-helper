@@ -20,6 +20,7 @@ interface SummonsPhaseProps {
   ninjas: INinja[]
   summons: ISummon[]
   scrolls: IScroll[]
+  poolSummons?: ISummon[]
   order: number[]
   search: string
   setSearch: (v: string) => void
@@ -33,7 +34,7 @@ export default function SummonsPhase({
   myRole, team1P, team2P, summons1P, summons2P,
   scrolls1P, scrolls2P,
   summonHistory1P, summonHistory2P,
-  ninjas, summons, scrolls, order, search, setSearch, onSelectSummonSlot, onConfirm, isConfirmed,
+  ninjas, summons, scrolls, poolSummons = summons, order, search, setSearch, onSelectSummonSlot, onConfirm, isConfirmed,
   disabled = false,
 }: SummonsPhaseProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)

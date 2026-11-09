@@ -16,6 +16,7 @@ interface ScrollsPhaseProps {
   scrollHistory2P: Set<string>
   ninjas: INinja[]
   scrolls: IScroll[]
+  poolScrolls?: IScroll[]
   order: number[]
   search: string
   setSearch: (v: string) => void
@@ -28,7 +29,7 @@ interface ScrollsPhaseProps {
 export default function ScrollsPhase({
   myRole, team1P, team2P, scrolls1P, scrolls2P,
   scrollHistory1P, scrollHistory2P,
-  ninjas, scrolls, order, search, setSearch, onSelectScrollSlot, onConfirm, isConfirmed,
+  ninjas, scrolls, poolScrolls = scrolls, order, search, setSearch, onSelectScrollSlot, onConfirm, isConfirmed,
   disabled = false,
 }: ScrollsPhaseProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -74,7 +75,7 @@ export default function ScrollsPhase({
   const myScrolls = myRole === '1P' ? scrolls1P : scrolls2P
   const myHistory = myRole === '1P' ? scrollHistory1P : scrollHistory2P
   const used = new Set(myScrolls.filter(Boolean) as string[])
-  const available = scrolls.filter(s => !myHistory.has(s.id) && !used.has(s.id))
+  const available = poolScrolls.filter(s => !myHistory.has(s.id) && !used.has(s.id))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
   const toggleActive = (index: number) => {
