@@ -953,8 +953,9 @@ export default function BPRoomPage() {
     return null
   }
 
-  const renderHistorySide = (record: GameRecord, role: '1P' | '2P') => {
-    const order = role === '1P' ? displayOrder1P : displayOrder2P
+  const renderHistorySide = (record: GameRecord, role: '1P' | '2P', mirrored = false) => {
+    const baseOrder = role === '1P' ? displayOrder1P : displayOrder2P
+    const order = mirrored ? baseOrder.slice().reverse() : baseOrder
     const team = role === '1P' ? record.team1P : record.team2P
     const scrollRow = role === '1P' ? record.scrolls1P : record.scrolls2P
     const summonRow = role === '1P' ? record.summons1P : record.summons2P
@@ -1588,8 +1589,8 @@ export default function BPRoomPage() {
                       <h3 className="font-semibold">第 {record.gameNumber} 小局</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-8">
-                      {renderHistorySide(record, leftRole)}
-                      {renderHistorySide(record, rightRole)}
+                      {renderHistorySide(record, leftRole, swap)}
+                      {renderHistorySide(record, rightRole, swap)}
                     </div>
                   </div>
                 )
