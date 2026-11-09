@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import type { ChangeEvent } from 'react'
 import { supabase } from '@/supabase'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Image } from '@/components/ui/image'
 import { Input } from '@/components/ui/input'
-import { BookOpen, ChevronDown, ChevronUp, Clock, Search, X, History, Eye, RefreshCw } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronUp, Clock, Search, X, History, Eye, RefreshCw, UserRound } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,35 @@ const RATING_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 }
 const COUNTDOWN_SECONDS = 60
 const MAX_PUBLIC_BAN = 10
 const MAX_SPECTATORS = 5
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024
+const AVATAR_SIZE = 128
+
+const fileToAvatarDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('读取失败'))
+    reader.onload = () => {
+      const img = new window.Image()
+      img.onerror = () => reject(new Error('图片解析失败'))
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = AVATAR_SIZE
+        canvas.height = AVATAR_SIZE
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('画布不可用'))
+          return
+        }
+        const scale = Math.max(AVATAR_SIZE / img.naturalWidth, AVATAR_SIZE / img.naturalHeight)
+        const drawW = img.naturalWidth * scale
+        const drawH = img.naturalHeight * scale
+        ctx.drawImage(img, (AVATAR_SIZE - drawW) / 2, (AVATAR_SIZE - drawH) / 2, drawW, drawH)
+        resolve(canvas.toDataURL('image/jpeg', 0.8))
+      }
+      img.src = typeof reader.result === 'string' ? reader.result : ''
+    }
+    reader.readAsDataURL(file)
+  })
 
 type Phase = 'waiting' | 'ban' | 'pick' | 'scrolls' | 'summons' | 'done'
 
@@ -33,6 +63,12 @@ interface GameRecord {
   scrolls2P: (string | null)[]
   summons1P: (string | null)[]
   summons2P: (string | null)[]
+  player1PId?: string | null
+  player1PName?: string
+  player1PAvatar?: string | null
+  player2PId?: string | null
+  player2PName?: string
+  player2PAvatar?: string | null
 }
 
 interface RoomState {
@@ -60,6 +96,10 @@ interface RoomState {
   opponentSummonHistory?: string[]
   player1PId: string | null
   player2PId: string | null
+  player1PName?: string
+  player1PAvatar?: string | null
+  player2PName?: string
+  player2PAvatar?: string | null
   spectators: string[]
   gameHistory: GameRecord[]
   deadline: number | null
@@ -89,7 +129,11 @@ const PICK_STEPS = [
   { player: '2P', index: 2 },
 ] as const
 
-const emptyRoomState = (player1PId: string, reuseScrollSummon = false): RoomState => ({
+const emptyRoomState = (
+  player1PId: string,
+  reuseScrollSummon = false,
+  profile?: { name?: string; avatar?: string | null },
+): RoomState => ({
   phase: 'waiting',
   gameNumber: 1,
   firstPlayer: '1P',
@@ -110,6 +154,10 @@ const emptyRoomState = (player1PId: string, reuseScrollSummon = false): RoomStat
   summonsConfirmed2P: false,
   player1PId,
   player2PId: null,
+  player1PName: profile?.name || '',
+  player1PAvatar: profile?.avatar ?? null,
+  player2PName: '',
+  player2PAvatar: null,
   spectators: [],
   gameHistory: [],
   deadline: null,
@@ -143,10 +191,29 @@ export default function BPRoomPage() {
   // 创建房间时的复用开关
   const [reuseSwitch, setReuseSwitch] = useState(false)
 
+  // 玩家资料，保存在本机，建房和加入房间共用
+  const [myName, setMyName] = useState(() => {
+    try { return localStorage.getItem('bp_room_name') || '' } catch { return '' }
+  })
+  const [myAvatar, setMyAvatar] = useState<string | null>(() => {
+    try { return localStorage.getItem('bp_room_avatar') } catch { return null }
+  })
+  const [avatarError, setAvatarError] = useState('')
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+
   // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
   const [showTierGrouping, setShowTierGrouping] = useState(false)
   // 公 ban 阶段：是否按梯度分组（默认关闭）
   const [publicBanTierGrouping, setPublicBanTierGrouping] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (myName) localStorage.setItem('bp_room_name', myName)
+      else localStorage.removeItem('bp_room_name')
+      if (myAvatar) localStorage.setItem('bp_room_avatar', myAvatar)
+      else localStorage.removeItem('bp_room_avatar')
+    } catch {}
+  }, [myName, myAvatar])
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutAttemptRef = useRef<{ key: string; at: number } | null>(null)
@@ -291,12 +358,33 @@ export default function BPRoomPage() {
     }
   }, [roomId, refreshing, fetchLatestState])
 
+  const handleAvatarSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('请选择图片文件')
+      return
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      setAvatarError('图片不能超过 5MB')
+      return
+    }
+    try {
+      const dataUrl = await fileToAvatarDataUrl(file)
+      setMyAvatar(dataUrl)
+      setAvatarError('')
+    } catch {
+      setAvatarError('图片处理失败，请换一张')
+    }
+  }
+
   const generatePlayerId = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 6)
 
   const createRoom = async () => {
     const id = Math.random().toString(36).substring(2, 8).toUpperCase()
     const playerId = generatePlayerId()
-    const init = emptyRoomState(playerId, reuseSwitch)
+    const init = emptyRoomState(playerId, reuseSwitch, { name: myName.trim(), avatar: myAvatar })
     setRoomId(id); setMyPlayerId(playerId); setRoomState(init)
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
@@ -326,7 +414,12 @@ export default function BPRoomPage() {
       setError('玩家数已满'); return
     }
     const newPlayerId = generatePlayerId()
-    const newState = { ...state, [`player${roleToTake}Id`]: newPlayerId }
+    const newState = {
+      ...state,
+      [`player${roleToTake}Id`]: newPlayerId,
+      [`player${roleToTake}Name`]: myName.trim(),
+      [`player${roleToTake}Avatar`]: myAvatar,
+    }
     await supabase.from('rooms').upsert({ id, state: newState })
     setRoomId(id); setMyPlayerId(newPlayerId); setRoomState(newState)
     setError('')
@@ -339,7 +432,9 @@ export default function BPRoomPage() {
     const latestState = data.state as RoomState
 
     if (myRole === '1P' || myRole === '2P') {
-      const updates: Partial<RoomState> = myRole === '1P' ? { player1PId: null } : { player2PId: null }
+      const updates: Partial<RoomState> = myRole === '1P'
+        ? { player1PId: null, player1PName: '', player1PAvatar: null }
+        : { player2PId: null, player2PName: '', player2PAvatar: null }
       const newState = { ...latestState, ...updates }
       await supabase.from('rooms').upsert({ id: roomId, state: newState })
       if (!newState.player1PId && !newState.player2PId) {
@@ -749,6 +844,12 @@ export default function BPRoomPage() {
         scrolls2P: [...state.scrolls2P],
         summons1P: [...state.summons1P],
         summons2P: [...state.summons2P],
+        player1PId: state.player1PId,
+        player1PName: state.player1PName,
+        player1PAvatar: state.player1PAvatar,
+        player2PId: state.player2PId,
+        player2PName: state.player2PName,
+        player2PAvatar: state.player2PAvatar,
       }
 
       const reuse = state.reuseScrollSummon
@@ -763,6 +864,10 @@ export default function BPRoomPage() {
         firstPlayer: state.firstPlayer === '1P' ? '2P' : '1P',
         player1PId: state.player2PId,
         player2PId: state.player1PId,
+        player1PName: state.player2PName,
+        player1PAvatar: state.player2PAvatar,
+        player2PName: state.player1PName,
+        player2PAvatar: state.player1PAvatar,
         phase: 'ban', banStep: 0, pickStep: 0,
         ban1P: [null, null], ban2P: [null, null],
         team1P: [null, null, null], team2P: [null, null, null],
@@ -831,6 +936,64 @@ export default function BPRoomPage() {
   const order = myRole === '1P' ? displayOrder1P : myRole === '2P' ? displayOrder2P : displayOrder1P
 
   const historyRecords = useMemo(() => roomState?.gameHistory || [], [roomState])
+
+  const [alignHistory, setAlignHistory] = useState(false)
+
+  const isHistoryPlayer = useMemo(
+    () => !!myPlayerId && (roomState?.gameHistory || []).some(
+      r => r.player1PId === myPlayerId || r.player2PId === myPlayerId
+    ),
+    [roomState?.gameHistory, myPlayerId]
+  )
+
+  const avatarById = (id?: string | null) => {
+    if (!id) return null
+    if (id === roomState?.player1PId) return roomState?.player1PAvatar ?? null
+    if (id === roomState?.player2PId) return roomState?.player2PAvatar ?? null
+    return null
+  }
+
+  const renderHistorySide = (record: GameRecord, role: '1P' | '2P') => {
+    const order = role === '1P' ? displayOrder1P : displayOrder2P
+    const team = role === '1P' ? record.team1P : record.team2P
+    const scrollRow = role === '1P' ? record.scrolls1P : record.scrolls2P
+    const summonRow = role === '1P' ? record.summons1P : record.summons2P
+    const name = (role === '1P' ? record.player1PName : record.player2PName) || ''
+    const sideAvatar = role === '1P' ? record.player1PAvatar : record.player2PAvatar
+    const avatar = sideAvatar || avatarById(role === '1P' ? record.player1PId : record.player2PId)
+
+    return (
+      <div>
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <div className="h-7 w-7 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 shrink-0">
+            {avatar
+              ? <Image src={avatar} alt="" className="h-full w-full object-cover" />
+              : <UserRound className="h-3.5 w-3.5 text-muted-foreground" />}
+          </div>
+          <p className="text-sm text-muted-foreground">{role} 阵容{name ? `（${name}）` : ''}</p>
+        </div>
+        <div className="flex justify-center gap-2">
+          {order.map(i => (
+            <div key={i} className="flex flex-col items-center gap-1">
+              <div className="w-16 h-16 border rounded flex items-center justify-center">
+                {team[i] ? (
+                  <Image src={ninjas.find(n => n.id === team[i])?.imageUrl} alt="" className="w-full h-full object-cover" />
+                ) : <span className="text-xs text-muted-foreground">-</span>}
+              </div>
+              <div className="flex gap-1">
+                <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
+                  {scrollRow[i] ? <Image src={scrolls.find(s => s.id === scrollRow[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
+                </div>
+                <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
+                  {summonRow[i] ? <Image src={summons.find(s => s.id === summonRow[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   const renderBanDisplay = () => (
     <div className="grid grid-cols-2 gap-8 mb-6">
@@ -1106,6 +1269,36 @@ export default function BPRoomPage() {
           )}
         </Card>
 
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-bold">我的资料</h2>
+          <p className="text-sm text-muted-foreground">昵称和头像会显示在 BP 界面左右两侧，左侧为 1P、右侧为 2P，供双方辨认身份。两项都可以不填。</p>
+          <div className="space-y-2">
+            <Label htmlFor="player-name" className="text-sm">昵称</Label>
+            <Input
+              id="player-name"
+              value={myName}
+              onChange={e => setMyName(e.target.value)}
+              placeholder="留空则显示为 1P 或 2P"
+              maxLength={12}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full border overflow-hidden flex items-center justify-center bg-muted/30 shrink-0">
+              {myAvatar
+                ? <Image src={myAvatar} alt="" className="w-full h-full object-cover" />
+                : <UserRound className="h-5 w-5 text-muted-foreground" />}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+              上传头像
+            </Button>
+            {myAvatar && (
+              <Button variant="ghost" size="sm" onClick={() => setMyAvatar(null)}>移除</Button>
+            )}
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+          </div>
+          {avatarError && <p className="text-xs text-destructive">{avatarError}</p>}
+        </Card>
+
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">创建房间</h2>
           <p className="text-sm text-muted-foreground mb-4">你将作为 1P 开始对局</p>
@@ -1317,84 +1510,90 @@ export default function BPRoomPage() {
       )}
 
       <Card className="p-6">
-        {roomState.deadline && (
-          <div className="flex justify-center mb-4">
-            <Badge variant="destructive" className="text-lg px-4 py-2 gap-2">
-              <Clock className="h-5 w-5" /> {remainingSeconds}s
-            </Badge>
+        <div className="flex items-start gap-4">
+          <div className="flex w-16 shrink-0 flex-col items-center gap-1.5 self-start">
+            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${myRole === '1P' ? 'ring-2 ring-primary' : ''}`}>
+              {roomState.player1PAvatar
+                ? <Image src={roomState.player1PAvatar} alt="" className="h-full w-full object-cover" />
+                : <UserRound className="h-5 w-5 text-muted-foreground" />}
+            </div>
+            <span
+              className={`max-w-[64px] truncate text-center text-xs leading-tight ${myRole === '1P' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
+              title={roomState.player1PName || '1P'}
+            >
+              {roomState.player1PName || '1P'}
+            </span>
           </div>
-        )}
-        {timeoutNotice && (
-          <p className="text-center text-xs text-amber-600 mb-3">{timeoutNotice}</p>
-        )}
 
-        {renderBanDisplay()}
-        {roomState.phase !== 'ban' && renderTeamDisplay()}
-        {renderPhase()}
+          <div className="min-w-0 flex-1">
+            {roomState.deadline && (
+              <div className="flex justify-center mb-4">
+                <Badge variant="destructive" className="text-lg px-4 py-2 gap-2">
+                  <Clock className="h-5 w-5" /> {remainingSeconds}s
+                </Badge>
+              </div>
+            )}
+            {timeoutNotice && (
+              <p className="text-center text-xs text-amber-600 mb-3">{timeoutNotice}</p>
+            )}
+
+            {renderBanDisplay()}
+            {roomState.phase !== 'ban' && renderTeamDisplay()}
+            {renderPhase()}
+          </div>
+
+          <div className="flex w-16 shrink-0 flex-col items-center gap-1.5 self-start">
+            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${myRole === '2P' ? 'ring-2 ring-primary' : ''}`}>
+              {roomState.player2PAvatar
+                ? <Image src={roomState.player2PAvatar} alt="" className="h-full w-full object-cover" />
+                : <UserRound className="h-5 w-5 text-muted-foreground" />}
+            </div>
+            <span
+              className={`max-w-[64px] truncate text-center text-xs leading-tight ${myRole === '2P' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
+              title={roomState.player2PName || '2P'}
+            >
+              {roomState.player2PName || '2P'}
+            </span>
+          </div>
+        </div>
       </Card>
 
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
         <DialogContent className="sm:max-w-3xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>过往小局阵容</DialogTitle>
+            <div className="flex items-center justify-between gap-3 pr-10">
+              <DialogTitle>过往小局阵容</DialogTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAlignHistory(v => !v)}
+              >
+                {alignHistory ? '按 1P/2P 排列' : '固定在一侧'}
+              </Button>
+            </div>
           </DialogHeader>
           <div className="overflow-y-auto space-y-8">
             {historyRecords.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">暂无过往对局</p>
             ) : (
-              historyRecords.map((record, idx) => (
-                <div key={idx} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">第 {record.gameNumber} 小局</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1 text-center">1P 阵容</p>
-                      <div className="flex justify-center gap-2">
-                        {displayOrder1P.map(i => (
-                          <div key={i} className="flex flex-col items-center gap-1">
-                            <div className="w-16 h-16 border rounded flex items-center justify-center">
-                              {record.team1P[i] ? (
-                                <Image src={ninjas.find(n => n.id === record.team1P[i])?.imageUrl} alt="" className="w-full h-full object-cover" />
-                              ) : <span className="text-xs text-muted-foreground">-</span>}
-                            </div>
-                            <div className="flex gap-1">
-                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
-                                {record.scrolls1P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
-                              </div>
-                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
-                                {record.summons1P[i] ? <Image src={summons.find(s => s.id === record.summons1P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+              historyRecords.map((record, idx) => {
+                const swap = alignHistory && (isHistoryPlayer
+                  ? record.player2PId === myPlayerId
+                  : idx % 2 === 1)
+                const leftRole: '1P' | '2P' = swap ? '2P' : '1P'
+                const rightRole: '1P' | '2P' = swap ? '1P' : '2P'
+                return (
+                  <div key={idx} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">第 {record.gameNumber} 小局</h3>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1 text-center">2P 阵容</p>
-                      <div className="flex justify-center gap-2">
-                        {displayOrder2P.map(i => (
-                          <div key={i} className="flex flex-col items-center gap-1">
-                            <div className="w-16 h-16 border rounded flex items-center justify-center">
-                              {record.team2P[i] ? (
-                                <Image src={ninjas.find(n => n.id === record.team2P[i])?.imageUrl} alt="" className="w-full h-full object-cover" />
-                              ) : <span className="text-xs text-muted-foreground">-</span>}
-                            </div>
-                            <div className="flex gap-1">
-                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
-                                {record.scrolls2P[i] ? <Image src={scrolls.find(s => s.id === record.scrolls2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
-                              </div>
-                              <div className="w-6 h-6 border rounded-full overflow-hidden flex items-center justify-center">
-                                {record.summons2P[i] ? <Image src={summons.find(s => s.id === record.summons2P[i])?.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs">-</span>}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="grid grid-cols-2 gap-8">
+                      {renderHistorySide(record, leftRole)}
+                      {renderHistorySide(record, rightRole)}
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </DialogContent>
