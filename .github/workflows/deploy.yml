@@ -25,9 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      - name: Use official registry in CI
+        run: |
+          sed -i 's#https://registry.npmmirror.com#https://registry.npmjs.org#g' package-lock.json
+          npm config set registry https://registry.npmjs.org/
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci --no-audit --no-fund --fetch-retries=3 --fetch-timeout=120000
 
       - name: Build
         run: npm run build
