@@ -18,9 +18,10 @@ export default function ScrollListPage() {
   const [showExclusive, setShowExclusive] = useState(false)
 
   const filtered = useMemo(() => {
-    if (!keyword) return scrolls
-    return scrolls.filter((s) =>
-      s.name.toLowerCase().includes(keyword.toLowerCase())
+    const kw = keyword.trim().toLowerCase()
+    const list = kw ? scrolls.filter((s) => s.name.toLowerCase().includes(kw)) : scrolls
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
     )
   }, [scrolls, keyword])
 

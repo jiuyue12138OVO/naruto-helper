@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,6 +33,14 @@ export default function SlotFilterCard({
   eligibleCount,
 }: SlotFilterCardProps) {
   const { scrolls, ninjaTags } = useData()
+
+  // 密卷按游戏内编号排序
+  const sortedScrolls = useMemo(
+    () => [...scrolls].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    ),
+    [scrolls]
+  )
 
   // 整体折叠
   const [collapsed, setCollapsed] = useState(false)
@@ -169,7 +177,7 @@ export default function SlotFilterCard({
             </button>
             {scrollOpen && (
               <div className="flex flex-wrap gap-1 mt-1">
-                {scrolls.map(scroll => {
+                {sortedScrolls.map(scroll => {
                   const status = slotState.scroll[scroll.id]
                   let variant: 'default' | 'outline' | 'destructive' = 'outline'
                   if (status === 'include') variant = 'default'

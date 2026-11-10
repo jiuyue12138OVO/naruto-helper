@@ -82,7 +82,9 @@ export default function SummonsPhase({
   const mySummons = myRole === '1P' ? summons1P : summons2P
   const mySummonHistory = myRole === '1P' ? summonHistory1P : summonHistory2P
   const used = new Set(mySummons.filter(Boolean) as string[])
-  const available = summons.filter(s => !mySummonHistory.has(s.id) && !used.has(s.id))
+  const available = [...poolSummons]
+    .filter(s => !mySummonHistory.has(s.id) && !used.has(s.id))
+    .sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
   const toggleActive = (index: number) => {

@@ -307,7 +307,6 @@ export const MOCK_NINJAS: INinja[] = [
         "突进",
         "隐身",
         "纯抓",
-        "低真空期",
         "拉扯"
       ],
       "blindPick": "sub",
@@ -1925,7 +1924,6 @@ export const MOCK_NINJAS: INinja[] = [
         "无敌",
         "高输出",
         "纯抓",
-        "低真空期",
         "大招可接",
         "防反",
         "瞬发"
@@ -2090,8 +2088,7 @@ export const MOCK_NINJAS: INinja[] = [
         "高空优势",
         "拉扯",
         "高机动性",
-        "瞬发",
-        "低真空期"
+        "瞬发"
       ],
       "blindPick": "sub",
       "acquisition": "高招",
@@ -2652,7 +2649,6 @@ export const MOCK_NINJAS: INinja[] = [
         "高机动性",
         "瞬发",
         "大招可接",
-        "低真空期",
         "位移",
         "纯抓"
       ],
@@ -2948,7 +2944,7 @@ export const MOCK_NINJAS: INinja[] = [
     {
       "id": "1783736020022",
       "name": "金角【尾兽状态】",
-      "tier": "...",
+      "tier": "准t0",
       "rating": "S",
       "tags": [],
       "imageUrl": "data:image/webp;base64,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",
@@ -3040,7 +3036,6 @@ export const MOCK_NINJAS: INinja[] = [
         "格挡",
         "破霸体",
         "纯抓",
-        "低真空期",
         "大招可接",
         "拉扯",
         "瞬发",

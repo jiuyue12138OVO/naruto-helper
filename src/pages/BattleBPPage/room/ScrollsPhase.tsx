@@ -75,7 +75,9 @@ export default function ScrollsPhase({
   const myScrolls = myRole === '1P' ? scrolls1P : scrolls2P
   const myHistory = myRole === '1P' ? scrollHistory1P : scrollHistory2P
   const used = new Set(myScrolls.filter(Boolean) as string[])
-  const available = poolScrolls.filter(s => !myHistory.has(s.id) && !used.has(s.id))
+  const available = [...poolScrolls]
+    .filter(s => !myHistory.has(s.id) && !used.has(s.id))
+    .sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
   const toggleActive = (index: number) => {

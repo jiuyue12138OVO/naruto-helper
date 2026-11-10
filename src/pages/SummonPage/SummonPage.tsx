@@ -26,12 +26,16 @@ export default function SummonPage() {
   }, [ensureSummons])
 
   const filtered = useMemo(() => {
-    if (!searchKeyword.trim()) return summons
-    const kw = searchKeyword.toLowerCase()
-    return summons.filter(s =>
-      s.name.toLowerCase().includes(kw) ||
-      s.skill.toLowerCase().includes(kw) ||
-      s.description.toLowerCase().includes(kw)
+    const kw = searchKeyword.trim().toLowerCase()
+    const list = kw
+      ? summons.filter(s =>
+          s.name.toLowerCase().includes(kw) ||
+          (s.skill || '').toLowerCase().includes(kw) ||
+          (s.description || '').toLowerCase().includes(kw)
+        )
+      : summons
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
     )
   }, [summons, searchKeyword])
 

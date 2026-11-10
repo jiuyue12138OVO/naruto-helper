@@ -1690,14 +1690,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 4
         },
         {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 5
+        },
+        {
           "scrollId": "1783349062619",
           "scrollName": "通灵·返手里剑",
-          "priority": 5
+          "priority": 6
         },
         {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 6
+          "priority": 7
         }
       ]
     },
@@ -1906,19 +1911,24 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "机械鸣人【初始形态】",
       "scrolls": [
         {
+          "scrollId": "1783349453506",
+          "scrollName": "火遁·豪炎矢",
+          "priority": 1
+        },
+        {
           "scrollId": "1",
           "scrollName": "风遁·风沙阵",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 2
+          "priority": 3
         },
         {
           "scrollId": "1783350438746",
           "scrollName": "通灵·操手里剑",
-          "priority": 3
+          "priority": 4
         }
       ]
     },

@@ -89,12 +89,14 @@ interface DataContextType {
   updateNinjasBatch: (updates: Record<string, Partial<INinja>>) => void
   deleteNinja: (id: string) => void
   addScroll: (scroll: IScroll) => void
+  updateScrollsBatch: (updates: Record<string, Partial<IScroll>>) => void
   updateScroll: (id: string, data: Partial<IScroll>) => void
   deleteScroll: (id: string) => void
   addRecommendation: (rec: IRecommendation) => void
   updateRecommendation: (id: string, data: Partial<IRecommendation>) => void
   deleteRecommendation: (id: string) => void
   addSummon: (summon: ISummon) => void
+  updateSummonsBatch: (updates: Record<string, Partial<ISummon>>) => void
   updateSummon: (id: string, data: Partial<ISummon>) => void
   deleteSummon: (id: string) => void
   addNinjaTag: (tag: string) => void
@@ -410,6 +412,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const updateScrollsBatch = useCallback((updates: Record<string, Partial<IScroll>>) => {
+    setScrolls((prev) => {
+      const next = prev.map((s) => (updates[s.id] ? { ...s, ...updates[s.id] } : s))
+      saveToStorage(SCROLLS_KEY, next)
+      return next
+    })
+  }, [])
+
   // --- Recommendation CRUD ---
   const addRecommendation = useCallback((rec: IRecommendation) => {
     setRecommendations((prev) => {
@@ -455,6 +465,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const deleteSummon = useCallback((id: string) => {
     setSummons((prev) => {
       const next = prev.filter((s) => s.id !== id)
+      saveToStorage(SUMMONS_KEY, next)
+      return next
+    })
+  }, [])
+
+  const updateSummonsBatch = useCallback((updates: Record<string, Partial<ISummon>>) => {
+    setSummons((prev) => {
+      const next = prev.map((s) => (updates[s.id] ? { ...s, ...updates[s.id] } : s))
       saveToStorage(SUMMONS_KEY, next)
       return next
     })
@@ -571,12 +589,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deleteNinja,
         addScroll,
         updateScroll,
+        updateScrollsBatch,
         deleteScroll,
         addRecommendation,
         updateRecommendation,
         deleteRecommendation,
         addSummon,
         updateSummon,
+        updateSummonsBatch,
         deleteSummon,
         addNinjaTag,
         removeNinjaTag,

@@ -120,14 +120,18 @@ export default function PoolSettingsDialog({
 
   const filteredScrolls = useMemo(() => {
     const kw = search.trim().toLowerCase()
-    const list = kw ? scrolls.filter(s => s.name.toLowerCase().includes(kw)) : scrolls
-    return [...list].sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+    const list = kw ? scrolls.filter(s => (s.name || '').toLowerCase().includes(kw)) : scrolls
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    )
   }, [scrolls, search])
 
   const filteredSummons = useMemo(() => {
     const kw = search.trim().toLowerCase()
-    const list = kw ? summons.filter(s => s.name.toLowerCase().includes(kw)) : summons
-    return [...list].sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+    const list = kw ? summons.filter(s => (s.name || '').toLowerCase().includes(kw)) : summons
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    )
   }, [summons, search])
 
   const modeHint = draft.mode === 'all'

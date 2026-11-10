@@ -58,8 +58,11 @@ export default function ScrollPage() {
   }, [selectedScroll])
 
   const filteredScrolls = useMemo(() => {
-    if (!searchScroll.trim()) return scrolls
-    return scrolls.filter(s => s.name.toLowerCase().includes(searchScroll.toLowerCase()))
+    const kw = searchScroll.trim().toLowerCase()
+    const list = kw ? scrolls.filter(s => s.name.toLowerCase().includes(kw)) : scrolls
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    )
   }, [scrolls, searchScroll])
 
   const getNinjasForScroll = (scrollId: string): INinja[] => {

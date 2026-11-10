@@ -96,7 +96,10 @@ export default function SettingsDialog({
   // 过滤密卷
   const filteredSettingsScrolls = useMemo(() => {
     const kw = settingsSearch.trim().toLowerCase()
-    return kw ? scrolls.filter(s => s.name.toLowerCase().includes(kw)) : scrolls
+    const list = kw ? scrolls.filter(s => s.name.toLowerCase().includes(kw)) : scrolls
+    return [...list].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    )
   }, [scrolls, settingsSearch])
 
   return (

@@ -148,6 +148,14 @@ export default function RandomTab() {
   const includedScrolls = useMemo(() => filterItems(scrollStatus, 'include'), [scrollStatus])
   const excludedScrolls = useMemo(() => filterItems(scrollStatus, 'exclude'), [scrollStatus])
 
+  // 密卷按游戏内编号排序
+  const sortedScrolls = useMemo(
+    () => [...scrolls].sort((a, b) =>
+      (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+    ),
+    [scrolls]
+  )
+
   const handleRandom = useCallback(() => {
     if (eligibleNinjas.length === 0) return
     setIsRolling(true)
@@ -285,7 +293,7 @@ export default function RandomTab() {
                 </button>
                 {scrollOpen && (
                   <div className="flex flex-wrap gap-2">
-                    {scrolls.map(scroll => {
+                    {sortedScrolls.map(scroll => {
                       const status = scrollStatus[scroll.id]
                       return (
                         <div key={scroll.id} className="cursor-pointer flex flex-col items-center w-14" onClick={() => cycleStatus(scroll.id, setScrollStatus)}>
