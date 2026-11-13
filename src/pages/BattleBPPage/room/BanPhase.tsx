@@ -28,13 +28,15 @@ export default function BanPhase({
         禁用忍者 {canAct ? '' : disabled ? '（观众模式）' : '（等待对手操作）'}
       </h3>
 
-      {canAct && pendingSelection && (
-        <div className="flex justify-center mt-2">
-          <Button onClick={() => onConfirm(pendingSelection)} className="gap-2">
-            <Check className="h-4 w-4" /> 确认禁选
-          </Button>
-        </div>
-      )}
+      <div className="flex justify-center mt-2">
+        <Button
+          onClick={() => { if (pendingSelection) onConfirm(pendingSelection) }}
+          disabled={!canAct || !pendingSelection}
+          className="gap-2"
+        >
+          <Check className="h-4 w-4" /> 确认禁选
+        </Button>
+      </div>
 
       <div className="relative max-w-md mx-auto">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

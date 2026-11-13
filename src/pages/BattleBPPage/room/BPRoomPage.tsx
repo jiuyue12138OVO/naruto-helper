@@ -958,35 +958,40 @@ export default function BPRoomPage() {
     setPendingSelection(null)
   }
 
-  const selectScrollSlot = (index: number, scrollId: string | null) => {
+  // 密卷/通灵的写入串行执行，保证每次都基于上一次写入后的 state，避免连点互相覆盖
+  const slotSyncChain = useRef<Promise<void>>(Promise.resolve())
+
+  const syncSlotField = useCallback((apply: (latest: RoomState) => Partial<RoomState>) => {
+    slotSyncChain.current = slotSyncChain.current
+      .then(() => updateRoomWith(apply))
+      .catch(() => {})
+  }, [updateRoomWith])
+
+  // 预选同步：写入三个槽位但不置 confirmed，供超时随机保留已预选项目
+  const syncMyScrollSlots = useCallback((slots: (string | null)[]) => {
     if (!myRole || !isPlayer || isSpectator) return
-    const newScrolls = [...(myRole === '1P' ? roomState!.scrolls1P : roomState!.scrolls2P)]
-    newScrolls[index] = scrollId
-    updateRoom(myRole === '1P' ? { scrolls1P: newScrolls } : { scrolls2P: newScrolls })
-  }
+    syncSlotField(() => (myRole === '1P' ? { scrolls1P: slots } : { scrolls2P: slots }))
+  }, [myRole, isPlayer, isSpectator, syncSlotField])
 
-  const selectSummonSlot = (index: number, summonId: string | null) => {
+  const syncMySummonSlots = useCallback((slots: (string | null)[]) => {
     if (!myRole || !isPlayer || isSpectator) return
-    const newSummons = [...(myRole === '1P' ? roomState!.summons1P : roomState!.summons2P)]
-    newSummons[index] = summonId
-    updateRoom(myRole === '1P' ? { summons1P: newSummons } : { summons2P: newSummons })
-  }
+    syncSlotField(() => (myRole === '1P' ? { summons1P: slots } : { summons2P: slots }))
+  }, [myRole, isPlayer, isSpectator, syncSlotField])
 
-  const confirmMyScrolls = async () => {
-    if (!myRole || !isPlayer || isSpectator || !roomState) return
-    const ms = myRole === '1P' ? roomState.scrolls1P : roomState.scrolls2P
-    if (ms.some(s => !s)) return
-    await updateRoom(myRole === '1P' ? { scrollsConfirmed1P: true } : { scrollsConfirmed2P: true })
-    fetchLatestState()
-  }
+  // 确认配置：一次写入三个槽位并置 confirmed，减少两次请求造成的状态不同步
+  const commitMyScrolls = useCallback((slots: (string | null)[]) => {
+    if (!myRole || !isPlayer || isSpectator) return
+    syncSlotField(() => (myRole === '1P'
+      ? { scrolls1P: slots, scrollsConfirmed1P: true }
+      : { scrolls2P: slots, scrollsConfirmed2P: true }))
+  }, [myRole, isPlayer, isSpectator, syncSlotField])
 
-  const confirmMySummons = async () => {
-    if (!myRole || !isPlayer || isSpectator || !roomState) return
-    const ms = myRole === '1P' ? roomState.summons1P : roomState.summons2P
-    if (ms.some(s => !s)) return
-    await updateRoom(myRole === '1P' ? { summonsConfirmed1P: true } : { summonsConfirmed2P: true })
-    fetchLatestState()
-  }
+  const commitMySummons = useCallback((slots: (string | null)[]) => {
+    if (!myRole || !isPlayer || isSpectator) return
+    syncSlotField(() => (myRole === '1P'
+      ? { summons1P: slots, summonsConfirmed1P: true }
+      : { summons2P: slots, summonsConfirmed2P: true }))
+  }, [myRole, isPlayer, isSpectator, syncSlotField])
 
   const doNextGame = useCallback(async () => {
     if (!roomId || transitioning) return
@@ -1298,8 +1303,8 @@ export default function BPRoomPage() {
             poolScrolls={scrolls.filter(s => poolAllows(mySeatPool, 'scrolls', s.id))}
             order={order}
             search={search} setSearch={setSearch}
-            onSelectScrollSlot={selectScrollSlot}
-            onConfirm={confirmMyScrolls}
+            onSyncSlots={syncMyScrollSlots}
+            onCommit={commitMyScrolls}
             isConfirmed={myRole === '1P' ? roomState!.scrollsConfirmed1P : roomState!.scrollsConfirmed2P}
           />
         )
@@ -1315,8 +1320,8 @@ export default function BPRoomPage() {
             poolSummons={summons.filter(s => poolAllows(mySeatPool, 'summons', s.id))}
             order={order}
             search={search} setSearch={setSearch}
-            onSelectSummonSlot={selectSummonSlot}
-            onConfirm={confirmMySummons}
+            onSyncSlots={syncMySummonSlots}
+            onCommit={commitMySummons}
             isConfirmed={myRole === '1P' ? roomState!.summonsConfirmed1P : roomState!.summonsConfirmed2P}
           />
         )
