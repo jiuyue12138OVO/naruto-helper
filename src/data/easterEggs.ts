@@ -1177,7 +1177,9 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309521385",
         "1791004034341",
         "1791081944792",
-        "1784014794401"
+        "1784014794401",
+        "1794536615978",
+        "1794537923821"
       ],
       "defeatTargetNinjaIds": [
         "1784018555884",
@@ -2610,6 +2612,52 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
           "type": "character",
           "title": "唯一的挚友",
           "description": "当对手为宇智波鼬【新春限定】时开场触发特殊互动。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1794536615978",
+      "defeatByNinjaIds": [],
+      "defeatTargetNinjaIds": [
+        "1783309311486",
+        "1791081438297",
+        "1794537923821"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "守护的意志",
+          "description": "当对手为漩涡博人【桃式显现】时开场触发特殊互动。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1783309311486",
+      "defeatByNinjaIds": [
+        "1794536615978"
+      ],
+      "defeatTargetNinjaIds": [],
+      "extras": [
+        {
+          "type": "character",
+          "title": "守护的意志",
+          "description": "当对手为川木【楔二】时开场触发特殊互动。"
+        }
+      ]
+    },
+    {
+      "ninjaId": "1794537923821",
+      "defeatByNinjaIds": [
+        "1794536615978"
+      ],
+      "defeatTargetNinjaIds": [
+        "1791081438297"
+      ],
+      "extras": [
+        {
+          "type": "character",
+          "title": "“给我老实点！”",
+          "description": "若一技能成功防反漩涡博人、漩涡博人【桃式显现】的螺旋丸，一技能二段将改为发射一枚小螺旋丸。"
         }
       ]
     }

@@ -4032,9 +4032,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
+        },
+        {
           "scrollId": "1783349683914",
           "scrollName": "禁术·阴愈伤灭",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -5238,14 +5243,19 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "角度【晓·北】",
       "scrolls": [
         {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
+          "priority": 1
+        },
+        {
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
-          "priority": 1
+          "priority": 2
         },
         {
           "scrollId": "1783349842473",
           "scrollName": "木遁·扦插之术",
-          "priority": 2
+          "priority": 3
         }
       ]
     },
@@ -5998,6 +6008,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349647927",
           "scrollName": "解术·散",
           "priority": 1
+        },
+        {
+          "scrollId": "1783350583210",
+          "scrollName": "幻术·一叶障",
+          "priority": 2
         }
       ]
     },
@@ -6271,19 +6286,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "春野樱【忍者新秀】",
       "scrolls": [
         {
-          "scrollId": "10",
-          "scrollName": "土遁·地动",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 1
         },
         {
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
           "priority": 2
-        },
-        {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
-          "priority": 3
         }
       ]
     },
@@ -6980,8 +6990,8 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "日向宁次",
       "scrolls": [
         {
-          "scrollId": "10",
-          "scrollName": "土遁·地动",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 1
         },
         {
@@ -8826,19 +8836,14 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
       "ninjaName": "天天",
       "scrolls": [
         {
-          "scrollId": "9",
-          "scrollName": "火遁·鬼灯笼",
+          "scrollId": "1783349280153",
+          "scrollName": "水遁·水龙卷",
           "priority": 1
         },
         {
-          "scrollId": "1783349802096",
-          "scrollName": "水遁·水盾",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 2
-        },
-        {
-          "scrollId": "1783349280153",
-          "scrollName": "水遁·水龙卷",
-          "priority": 3
         }
       ]
     },
@@ -8964,6 +8969,35 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
         {
           "scrollId": "1783350480900",
           "scrollName": "忍法·蛙变之术",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "id": "1794536824630",
+      "ninjaId": "1794536615978",
+      "ninjaName": "川木【楔二】",
+      "scrolls": [
+        {
+          "scrollId": "7",
+          "scrollName": "忍体术·御",
+          "priority": 1
+        },
+        {
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
+          "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1794538245536",
+      "ninjaId": "1794537923821",
+      "ninjaName": "迪鲁达",
+      "scrolls": [
+        {
+          "scrollId": "1783349328947",
+          "scrollName": "土遁·土流枪",
           "priority": 1
         }
       ]

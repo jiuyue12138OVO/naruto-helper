@@ -18,18 +18,32 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 
 type PoolKind = 'ninjas' | 'scrolls' | 'summons'
 
+interface PoolProfileOption {
+  id: string
+  name: string
+  pool: PlayerPool
+}
+
 interface PoolSettingsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   ninjas: INinja[]
   scrolls: IScroll[]
   summons: ISummon[]
+  profiles: PoolProfileOption[]
+  activeProfileId: string
   pool: PlayerPool
   onChange: (pool: PlayerPool) => void
+  onSwitchProfile: (id: string) => void
+  onRenameProfile: (id: string, name: string) => void
+  onAddProfile: () => void
+  onDeleteProfile: (id: string) => void
 }
 
 export default function PoolSettingsDialog({
-  open, onOpenChange, ninjas, scrolls, summons, pool, onChange,
+  open, onOpenChange, ninjas, scrolls, summons,
+  profiles, activeProfileId, pool, onChange,
+  onSwitchProfile, onRenameProfile, onAddProfile, onDeleteProfile,
 }: PoolSettingsDialogProps) {
   const [draft, setDraft] = useState<PlayerPool>(pool)
   const [tab, setTab] = useState('ninjas')
@@ -46,6 +60,8 @@ export default function PoolSettingsDialog({
     })
     setSearch('')
   }, [open, pool])
+
+  const activeProfile = profiles.find(p => p.id === activeProfileId) ?? profiles[0]
 
   const toggleItem = (kind: PoolKind, id: string) => {
     if (draft.mode === 'all') return
@@ -80,6 +96,13 @@ export default function PoolSettingsDialog({
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) onChange(draft)
     onOpenChange(nextOpen)
+  }
+
+  // 切换配置前先保存当前草稿，避免切走时丢失修改
+  const handleSwitchProfile = (id: string) => {
+    if (id === activeProfileId) return
+    onChange(draft)
+    onSwitchProfile(id)
   }
 
   const usableNinjas = useMemo(
@@ -164,147 +187,198 @@ export default function PoolSettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>我的忍者池</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-muted-foreground">模式：</span>
-          <div className="flex bg-muted rounded-lg p-1 gap-1">
-            {(['all', 'select', 'disable'] as PoolMode[]).map(m => (
-              <button
-                key={m}
-                onClick={() => setDraft(prev => ({ ...prev, mode: m }))}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${draft.mode === m ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {m === 'all' ? '全部' : m === 'select' ? '选用' : '排除'}
-              </button>
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground">{modeHint}</span>
-        </div>
-
-        <Tabs value={tab} onValueChange={setTab} className="flex-1 min-h-0 flex flex-col">
-          <TabsList className="shrink-0">
-            <TabsTrigger value="ninjas">忍者</TabsTrigger>
-            <TabsTrigger value="scrolls">密卷</TabsTrigger>
-            <TabsTrigger value="summons">通灵</TabsTrigger>
-          </TabsList>
-
-          <div className="flex shrink-0 items-center gap-2 mt-3">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder={tab === 'ninjas' ? '搜索忍者...' : tab === 'scrolls' ? '搜索密卷...' : '搜索通灵...'}
-                className="pl-9 pr-9"
-              />
-              {search && (
-                <Button variant="ghost" size="icon" className="!absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSearch('')}>
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+        <div className="flex-1 min-h-0 flex gap-4">
+          {/* 左侧配置标签 */}
+          <aside className="w-28 shrink-0 flex flex-col gap-2 border-r pr-3">
+            <p className="text-xs text-muted-foreground">配置（最多 5 个）</p>
+            <div className="flex flex-col gap-1 overflow-y-auto">
+              {profiles.map(profile => (
+                <button
+                  key={profile.id}
+                  onClick={() => handleSwitchProfile(profile.id)}
+                  className={`w-full text-left px-2 py-1.5 text-sm rounded-md transition-colors truncate ${
+                    profile.id === activeProfileId
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted'
+                  }`}
+                  title={profile.name || '未命名'}
+                >
+                  {profile.name || '未命名'}
+                </button>
+              ))}
             </div>
-            {tab === 'ninjas' && (
-              <div className="flex shrink-0 items-center gap-2">
-                <Label htmlFor="pool-tier-toggle" className="cursor-pointer select-none text-xs">
-                  按忍者梯度排行
-                </Label>
-                <Switch
-                  id="pool-tier-toggle"
-                  checked={tierGrouping}
-                  onCheckedChange={setTierGrouping}
-                />
-              </div>
-            )}
+            <Input
+              value={activeProfile?.name ?? ''}
+              onChange={e => onRenameProfile(activeProfileId, e.target.value)}
+              maxLength={10}
+              placeholder="配置名"
+              className="h-8 text-sm"
+            />
             <Button
-              variant="ghost"
               size="sm"
-              onClick={() => clearKind(tab as PoolKind)}
-              disabled={draft.mode === 'all'}
+              variant="outline"
+              className="w-full h-8 text-xs"
+              onClick={onAddProfile}
+              disabled={profiles.length >= 5}
             >
-              清空列表
+              新增配置
             </Button>
-          </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full h-8 text-xs text-destructive"
+              onClick={() => onDeleteProfile(activeProfileId)}
+              disabled={profiles.length <= 1}
+            >
+              删除配置
+            </Button>
+          </aside>
 
-          <TabsContent value="ninjas" className="flex-1 min-h-0 overflow-auto">
-            <div className="space-y-4 mt-3">
-              {groupedNinjas.length === 0 ? (
-                <p className="text-center text-sm text-muted-foreground py-8">无匹配忍者</p>
-              ) : groupedNinjas.map(group => {
-                const ids = group.ninjas.map(n => n.id)
-                const allIn = ids.length > 0 && ids.every(id => draft.ninjas.includes(id))
-                return (
-                  <div key={group.tier}>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-sm font-bold">{group.tier}</Badge>
-                      <button
-                        className="text-xs text-primary hover:underline shrink-0 disabled:opacity-40"
-                        disabled={draft.mode === 'all'}
-                        onClick={() => setMany('ninjas', ids, !allIn)}
-                      >
-                        {group.tier === '全部'
-                          ? (allIn ? '取消全选' : '全选')
-                          : draft.mode === 'select'
-                            ? (allIn ? '取消选用整梯度' : '选用整梯度')
-                            : (allIn ? '取消排除整梯度' : '排除整梯度')}
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                      {group.ninjas.map(ninja => {
-                        const usable = poolAllows(draft, 'ninjas', ninja.id)
-                        return (
-                          <div
-                            key={ninja.id}
-                            className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg transition-all ${usable ? 'hover:bg-muted/50' : 'opacity-40 grayscale'}`}
-                            onClick={() => toggleItem('ninjas', ninja.id)}
-                          >
-                            <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
-                              <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
-                            </div>
-                            <span className={`text-xs text-center leading-tight ${usable ? 'text-foreground' : 'text-destructive line-through'}`}>
-                              {ninja.name}
-                            </span>
-                          </div>
-                        )
-                      })}
-                    </div>
+          {/* 右侧池设置 */}
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+            <div className="flex items-center gap-3 flex-wrap shrink-0">
+              <span className="text-sm text-muted-foreground">模式：</span>
+              <div className="flex bg-muted rounded-lg p-1 gap-1">
+                {(['all', 'select', 'disable'] as PoolMode[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setDraft(prev => ({ ...prev, mode: m }))}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${draft.mode === m ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {m === 'all' ? '全部' : m === 'select' ? '选用' : '排除'}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">{modeHint}</span>
+            </div>
+
+            <Tabs value={tab} onValueChange={setTab} className="flex-1 min-h-0 flex flex-col">
+              <TabsList className="shrink-0">
+                <TabsTrigger value="ninjas">忍者</TabsTrigger>
+                <TabsTrigger value="scrolls">密卷</TabsTrigger>
+                <TabsTrigger value="summons">通灵</TabsTrigger>
+              </TabsList>
+
+              <div className="flex shrink-0 items-center gap-2 mt-3">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder={tab === 'ninjas' ? '搜索忍者...' : tab === 'scrolls' ? '搜索密卷...' : '搜索通灵...'}
+                    className="pl-9 pr-9"
+                  />
+                  {search && (
+                    <Button variant="ghost" size="icon" className="!absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2" onClick={() => setSearch('')}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {tab === 'ninjas' && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Label htmlFor="pool-tier-toggle" className="cursor-pointer select-none text-xs">
+                      按忍者梯度排行
+                    </Label>
+                    <Switch
+                      id="pool-tier-toggle"
+                      checked={tierGrouping}
+                      onCheckedChange={setTierGrouping}
+                    />
                   </div>
-                )
-              })}
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => clearKind(tab as PoolKind)}
+                  disabled={draft.mode === 'all'}
+                >
+                  清空列表
+                </Button>
+              </div>
+
+              <TabsContent value="ninjas" className="flex-1 min-h-0 overflow-auto">
+                <div className="space-y-4 mt-3">
+                  {groupedNinjas.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">无匹配忍者</p>
+                  ) : groupedNinjas.map(group => {
+                    const ids = group.ninjas.map(n => n.id)
+                    const allIn = ids.length > 0 && ids.every(id => draft.ninjas.includes(id))
+                    return (
+                      <div key={group.tier}>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="text-sm font-bold">{group.tier}</Badge>
+                          <button
+                            className="text-xs text-primary hover:underline shrink-0 disabled:opacity-40"
+                            disabled={draft.mode === 'all'}
+                            onClick={() => setMany('ninjas', ids, !allIn)}
+                          >
+                            {group.tier === '全部'
+                              ? (allIn ? '取消全选' : '全选')
+                              : draft.mode === 'select'
+                                ? (allIn ? '取消选用整梯度' : '选用整梯度')
+                                : (allIn ? '取消排除整梯度' : '排除整梯度')}
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                          {group.ninjas.map(ninja => {
+                            const usable = poolAllows(draft, 'ninjas', ninja.id)
+                            return (
+                              <div
+                                key={ninja.id}
+                                className={`cursor-pointer flex flex-col items-center gap-1 p-1 rounded-lg transition-all ${usable ? 'hover:bg-muted/50' : 'opacity-40 grayscale'}`}
+                                onClick={() => toggleItem('ninjas', ninja.id)}
+                              >
+                                <div className="w-12 h-12 rounded-md overflow-hidden border border-border/40 bg-card">
+                                  <Image src={ninja.imageUrl} alt={ninja.name} className="w-full h-full object-cover" />
+                                </div>
+                                <span className={`text-xs text-center leading-tight ${usable ? 'text-foreground' : 'text-destructive line-through'}`}>
+                                  {ninja.name}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="scrolls" className="flex-1 min-h-0 overflow-auto">
+                <div className="mt-3">
+                  {filteredScrolls.length === 0
+                    ? <p className="text-center text-sm text-muted-foreground py-8">无匹配密卷</p>
+                    : renderFlatGrid('scrolls', filteredScrolls)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="summons" className="flex-1 min-h-0 overflow-auto">
+                <div className="mt-3">
+                  {filteredSummons.length === 0
+                    ? <p className="text-center text-sm text-muted-foreground py-8">无匹配通灵</p>
+                    : renderFlatGrid('summons', filteredSummons)}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {(usableNinjas < 6 || usableScrolls < 3 || usableSummons < 3) && (
+              <p className="shrink-0 text-xs text-destructive">
+                可用数量偏少时，手动 BP 可能选不满；超时随机会自动从全部项目补齐。
+              </p>
+            )}
+
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t pt-3">
+              <p className="text-xs text-muted-foreground">
+                可用：忍者 {usableNinjas}/{ninjas.length}，密卷 {usableScrolls}/{scrolls.length}，通灵 {usableSummons}/{summons.length}
+              </p>
+              <Button size="sm" onClick={() => handleOpenChange(false)}>完成</Button>
             </div>
-          </TabsContent>
-
-          <TabsContent value="scrolls" className="flex-1 min-h-0 overflow-auto">
-            <div className="mt-3">
-              {filteredScrolls.length === 0
-                ? <p className="text-center text-sm text-muted-foreground py-8">无匹配密卷</p>
-                : renderFlatGrid('scrolls', filteredScrolls)}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="summons" className="flex-1 min-h-0 overflow-auto">
-            <div className="mt-3">
-              {filteredSummons.length === 0
-                ? <p className="text-center text-sm text-muted-foreground py-8">无匹配通灵</p>
-                : renderFlatGrid('summons', filteredSummons)}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {(usableNinjas < 6 || usableScrolls < 3 || usableSummons < 3) && (
-          <p className="shrink-0 text-xs text-destructive">
-            可用数量偏少时，手动 BP 可能选不满；超时随机会自动从全部项目补齐。
-          </p>
-        )}
-
-        <div className="flex shrink-0 items-center justify-between gap-3 border-t pt-3">
-          <p className="text-xs text-muted-foreground">
-            可用：忍者 {usableNinjas}/{ninjas.length}，密卷 {usableScrolls}/{scrolls.length}，通灵 {usableSummons}/{summons.length}
-          </p>
-          <Button size="sm" onClick={() => handleOpenChange(false)}>完成</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

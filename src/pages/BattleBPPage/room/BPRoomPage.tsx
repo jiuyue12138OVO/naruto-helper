@@ -29,6 +29,54 @@ const MAX_SPECTATORS = 5
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024
 const AVATAR_SIZE = 128
 
+const POOL_PROFILE_LIMIT = 5
+const POOL_PROFILE_DEFAULT_NAMES = ['配置一', '配置二', '配置三', '配置四', '配置五']
+
+interface PoolProfile {
+  id: string
+  name: string
+  pool: PlayerPool
+}
+
+const normalizePool = (input: unknown): PlayerPool => {
+  const parsed = (input ?? {}) as Partial<PlayerPool>
+  return {
+    mode: parsed.mode === 'select' || parsed.mode === 'disable' ? parsed.mode : 'all',
+    ninjas: Array.isArray(parsed.ninjas) ? parsed.ninjas : [],
+    scrolls: Array.isArray(parsed.scrolls) ? parsed.scrolls : [],
+    summons: Array.isArray(parsed.summons) ? parsed.summons : [],
+  }
+}
+
+const loadPoolProfiles = (): { profiles: PoolProfile[]; activeId: string } => {
+  try {
+    const raw = localStorage.getItem('bp_room_pool_profiles')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const profiles: PoolProfile[] = parsed.slice(0, POOL_PROFILE_LIMIT).map((item: any, index: number) => ({
+          id: typeof item?.id === 'string' && item.id ? item.id : `p${index + 1}`,
+          name: typeof item?.name === 'string' && item.name.trim()
+            ? item.name.trim().slice(0, 10)
+            : POOL_PROFILE_DEFAULT_NAMES[index],
+          pool: normalizePool(item?.pool),
+        }))
+        const savedActive = localStorage.getItem('bp_room_active_pool_profile')
+        const activeId = savedActive && profiles.some(p => p.id === savedActive)
+          ? savedActive
+          : profiles[0].id
+        return { profiles, activeId }
+      }
+    }
+    // 兼容只有单池键的旧数据
+    const legacyRaw = localStorage.getItem('bp_room_pool')
+    const pool = legacyRaw ? normalizePool(JSON.parse(legacyRaw)) : EMPTY_POOL
+    return { profiles: [{ id: 'p1', name: POOL_PROFILE_DEFAULT_NAMES[0], pool }], activeId: 'p1' }
+  } catch {
+    return { profiles: [{ id: 'p1', name: POOL_PROFILE_DEFAULT_NAMES[0], pool: EMPTY_POOL }], activeId: 'p1' }
+  }
+}
+
 const fileToAvatarDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -209,20 +257,63 @@ export default function BPRoomPage() {
   const [avatarError, setAvatarError] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
-  // 本机保存的忍者/密卷/通灵池，建房和加入房间共用
-  const [myPool, setMyPool] = useState<PlayerPool>(() => {
-    try {
-      const raw = localStorage.getItem('bp_room_pool')
-      if (!raw) return EMPTY_POOL
-      const parsed = JSON.parse(raw) as Partial<PlayerPool>
-      return {
-        mode: parsed.mode === 'select' || parsed.mode === 'disable' ? parsed.mode : 'all',
-        ninjas: Array.isArray(parsed.ninjas) ? parsed.ninjas : [],
-        scrolls: Array.isArray(parsed.scrolls) ? parsed.scrolls : [],
-        summons: Array.isArray(parsed.summons) ? parsed.summons : [],
+  // 本机保存最多 5 套忍者/密卷/通灵池配置，建房和加入房间使用当前选中的一套
+  const [{ profiles: poolProfiles, activeId: activePoolId }, setPoolProfileState] = useState(loadPoolProfiles)
+
+  const activePoolProfile = useMemo(
+    () => poolProfiles.find(p => p.id === activePoolId) ?? poolProfiles[0],
+    [poolProfiles, activePoolId]
+  )
+
+  const myPool = useMemo(() => activePoolProfile?.pool ?? EMPTY_POOL, [activePoolProfile])
+
+  const setMyPool = useCallback((pool: PlayerPool) => {
+    setPoolProfileState(prev => ({
+      ...prev,
+      profiles: prev.profiles.map(p => p.id === prev.activeId ? { ...p, pool } : p),
+    }))
+  }, [])
+
+  const switchPoolProfile = useCallback((id: string) => {
+    setPoolProfileState(prev =>
+      prev.profiles.some(p => p.id === id) ? { ...prev, activeId: id } : prev
+    )
+  }, [])
+
+  const renamePoolProfile = useCallback((id: string, name: string) => {
+    setPoolProfileState(prev => ({
+      ...prev,
+      profiles: prev.profiles.map(p => p.id === id ? { ...p, name: name.slice(0, 10) } : p),
+    }))
+  }, [])
+
+  const addPoolProfile = useCallback(() => {
+    setPoolProfileState(prev => {
+      if (prev.profiles.length >= POOL_PROFILE_LIMIT) return prev
+      const usedNames = new Set(prev.profiles.map(p => p.name))
+      const defaultName = POOL_PROFILE_DEFAULT_NAMES.find(n => !usedNames.has(n))
+        ?? `配置${prev.profiles.length + 1}`
+      const current = prev.profiles.find(p => p.id === prev.activeId)
+      const created: PoolProfile = {
+        id: `p${Date.now()}`,
+        name: defaultName,
+        pool: normalizePool(current?.pool ?? EMPTY_POOL),
       }
-    } catch { return EMPTY_POOL }
-  })
+      return { profiles: [...prev.profiles, created], activeId: created.id }
+    })
+  }, [])
+
+  const deletePoolProfile = useCallback((id: string) => {
+    setPoolProfileState(prev => {
+      if (prev.profiles.length <= 1) return prev
+      const nextProfiles = prev.profiles.filter(p => p.id !== id)
+      return {
+        profiles: nextProfiles,
+        activeId: prev.activeId === id ? nextProfiles[0].id : prev.activeId,
+      }
+    })
+  }, [])
+
   const [showPoolDialog, setShowPoolDialog] = useState(false)
 
   // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
@@ -236,9 +327,11 @@ export default function BPRoomPage() {
       else localStorage.removeItem('bp_room_name')
       if (myAvatar) localStorage.setItem('bp_room_avatar', myAvatar)
       else localStorage.removeItem('bp_room_avatar')
+      localStorage.setItem('bp_room_pool_profiles', JSON.stringify(poolProfiles))
+      localStorage.setItem('bp_room_active_pool_profile', activePoolId)
       localStorage.setItem('bp_room_pool', JSON.stringify(myPool))
     } catch {}
-  }, [myName, myAvatar, myPool])
+  }, [myName, myAvatar, poolProfiles, activePoolId, myPool])
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutAttemptRef = useRef<{ key: string; at: number } | null>(null)
@@ -1372,7 +1465,12 @@ export default function BPRoomPage() {
           {avatarError && <p className="text-xs text-destructive">{avatarError}</p>}
           <div className="flex items-center justify-between gap-3 border-t pt-3">
             <div className="min-w-0">
-              <p className="text-sm font-medium">我的忍者池</p>
+              <p className="text-sm font-medium">
+                我的忍者池
+                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                  {activePoolProfile?.name || '未命名'}
+                </span>
+              </p>
               <p className="truncate text-xs text-muted-foreground">{poolSummary(myPool)}</p>
             </div>
             <Button variant="outline" size="sm" onClick={() => setShowPoolDialog(true)}>设置</Button>
@@ -1410,8 +1508,14 @@ export default function BPRoomPage() {
           ninjas={ninjas}
           scrolls={scrolls}
           summons={summons}
+          profiles={poolProfiles}
+          activeProfileId={activePoolId}
           pool={myPool}
           onChange={setMyPool}
+          onSwitchProfile={switchPoolProfile}
+          onRenameProfile={renamePoolProfile}
+          onAddProfile={addPoolProfile}
+          onDeleteProfile={deletePoolProfile}
         />
       </div>
     )
