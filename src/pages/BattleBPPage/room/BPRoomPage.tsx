@@ -25,7 +25,7 @@ const TIER_ORDER = ['天王', '伪天王', 't0顶', 't0上', 't0中', 't0下', '
 const RATING_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 }
 const COUNTDOWN_SECONDS = 60
 const MAX_PUBLIC_BAN = 10
-const MAX_SPECTATORS = 5
+const MAX_SPECTATORS = 15
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024
 const AVATAR_SIZE = 128
 
@@ -237,6 +237,8 @@ export default function BPRoomPage() {
   const [search, setSearch] = useState('')
   const [remainingSeconds, setRemainingSeconds] = useState(COUNTDOWN_SECONDS)
   const [pendingSelection, setPendingSelection] = useState<string | null>(null)
+  // 观众正在查看的席位
+  const [watchRole, setWatchRole] = useState<'1P' | '2P'>('1P')
   const [publicBanSearch, setPublicBanSearch] = useState('')
   const [transitioning, setTransitioning] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -348,9 +350,11 @@ export default function BPRoomPage() {
   const isPlayer = myRole === '1P' || myRole === '2P'
 
   const mySeatPool = useMemo(() => {
-    if (!roomState || (myRole !== '1P' && myRole !== '2P')) return myPool
-    return (myRole === '1P' ? roomState.player1PPool : roomState.player2PPool) || myPool
-  }, [roomState, myRole, myPool])
+    if (!roomState) return myPool
+    const role = isSpectator ? watchRole : myRole
+    if (role !== '1P' && role !== '2P') return myPool
+    return (role === '1P' ? roomState.player1PPool : roomState.player2PPool) || myPool
+  }, [roomState, myRole, myPool, isSpectator, watchRole])
 
   const isSpectatorRef = useRef(isSpectator)
   useEffect(() => {
@@ -1101,7 +1105,8 @@ export default function BPRoomPage() {
 
   const displayOrder1P = [2, 1, 0]
   const displayOrder2P = [0, 1, 2]
-  const order = myRole === '1P' ? displayOrder1P : myRole === '2P' ? displayOrder2P : displayOrder1P
+  const viewRole: '1P' | '2P' = isSpectator ? watchRole : myRole === '2P' ? '2P' : '1P'
+  const order = viewRole === '2P' ? displayOrder2P : displayOrder1P
 
   const historyRecords = useMemo(() => roomState?.gameHistory || [], [roomState])
 
@@ -1269,7 +1274,7 @@ export default function BPRoomPage() {
   }
 
   const renderPhase = () => {
-    if (isSpectator) return null
+    const readonly = isSpectator
 
     switch (roomState!.phase) {
       case 'ban':
@@ -1280,6 +1285,7 @@ export default function BPRoomPage() {
             isMyTurn={isMyTurn}
             pendingSelection={pendingSelection} setPendingSelection={setPendingSelection}
             onConfirm={confirmSelection}
+            disabled={readonly}
           />
         )
       case 'pick':
@@ -1290,12 +1296,13 @@ export default function BPRoomPage() {
             isMyTurn={isMyTurn}
             pendingSelection={pendingSelection} setPendingSelection={setPendingSelection}
             onConfirm={confirmSelection}
+            disabled={readonly}
           />
         )
       case 'scrolls':
         return (
           <ScrollsPhase
-            myRole={myRole as '1P' | '2P'}
+            myRole={viewRole}
             team1P={roomState!.team1P} team2P={roomState!.team2P}
             scrolls1P={roomState!.scrolls1P} scrolls2P={roomState!.scrolls2P}
             scrollHistory1P={scrollHistory1P} scrollHistory2P={scrollHistory2P}
@@ -1305,13 +1312,14 @@ export default function BPRoomPage() {
             search={search} setSearch={setSearch}
             onSyncSlots={syncMyScrollSlots}
             onCommit={commitMyScrolls}
-            isConfirmed={myRole === '1P' ? roomState!.scrollsConfirmed1P : roomState!.scrollsConfirmed2P}
+            isConfirmed={viewRole === '1P' ? roomState!.scrollsConfirmed1P : roomState!.scrollsConfirmed2P}
+            disabled={readonly}
           />
         )
       case 'summons':
         return (
           <SummonsPhase
-            myRole={myRole as '1P' | '2P'}
+            myRole={viewRole}
             team1P={roomState!.team1P} team2P={roomState!.team2P}
             summons1P={roomState!.summons1P} summons2P={roomState!.summons2P}
             scrolls1P={roomState!.scrolls1P} scrolls2P={roomState!.scrolls2P}
@@ -1322,10 +1330,12 @@ export default function BPRoomPage() {
             search={search} setSearch={setSearch}
             onSyncSlots={syncMySummonSlots}
             onCommit={commitMySummons}
-            isConfirmed={myRole === '1P' ? roomState!.summonsConfirmed1P : roomState!.summonsConfirmed2P}
+            isConfirmed={viewRole === '1P' ? roomState!.summonsConfirmed1P : roomState!.summonsConfirmed2P}
+            disabled={readonly}
           />
         )
       case 'done':
+        if (readonly) return null
         return (
           <DonePhase
             onConfirmNextGame={confirmNextGame}
@@ -1362,7 +1372,7 @@ export default function BPRoomPage() {
                 <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                   <li>创建房间的一方为 1P，房间号由系统生成，6 位字符。</li>
                   <li>输入房间号加入的一方占用空出的玩家席位，优先 1P，其次 2P。两个席位都已占用时无法以玩家身份加入。</li>
-                  <li>观众以观众身份加入，每个房间最多 5 名观众，只能查看，不能操作。</li>
+                  <li>观众以观众身份加入，每个房间最多 15 名观众，只能查看，不能操作。</li>
                   <li>双方在等待页各自点击“开始 BP”后才进入禁用阶段。</li>
                 </ul>
               </div>
@@ -1432,7 +1442,7 @@ export default function BPRoomPage() {
               <div className="space-y-2">
                 <p className="font-semibold">显示与刷新</p>
                 <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                  <li>观众可以查看实时阵容、禁用、密卷、通灵和倒计时。</li>
+                  <li>观众可以查看实时阵容、禁用、密卷、通灵和倒计时，点击 1P 或 2P 的头像可切换查看该选手剩下的通灵与密卷。</li>
                   <li>界面显示与房间状态不一致时，点击房间右上角“刷新”按钮重新拉取房间状态。</li>
                 </ul>
               </div>
@@ -1695,7 +1705,7 @@ export default function BPRoomPage() {
       </div>
 
       {/* ban/pick 阶段的显示开关 */}
-      {(roomState.phase === 'ban' || roomState.phase === 'pick') && !isSpectator && (
+      {(roomState.phase === 'ban' || roomState.phase === 'pick') && (
         <div className="flex items-center justify-end gap-2">
           <Label htmlFor="tier-grouping-toggle" className="text-sm cursor-pointer select-none">
             按梯度分组
@@ -1710,19 +1720,23 @@ export default function BPRoomPage() {
 
       <Card className="p-6">
         <div className="flex items-start gap-4">
-          <div className="flex w-16 shrink-0 flex-col items-center gap-1.5 self-start">
-            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${myRole === '1P' ? 'ring-2 ring-primary' : ''}`}>
+          <button
+            type="button"
+            onClick={() => { if (isSpectator) setWatchRole('1P') }}
+            className={`flex w-16 shrink-0 flex-col items-center gap-1.5 self-start rounded-lg p-1 ${isSpectator ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default'} ${isSpectator && watchRole === '1P' ? 'bg-primary/10' : ''}`}
+          >
+            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${(isSpectator ? watchRole === '1P' : myRole === '1P') ? 'ring-2 ring-primary' : ''}`}>
               {roomState.player1PAvatar
                 ? <Image src={roomState.player1PAvatar} alt="" className="h-full w-full object-cover" />
                 : <UserRound className="h-5 w-5 text-muted-foreground" />}
             </div>
             <span
-              className={`max-w-[64px] truncate text-center text-xs leading-tight ${myRole === '1P' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
+              className={`max-w-[64px] truncate text-center text-xs leading-tight ${(isSpectator ? watchRole === '1P' : myRole === '1P') ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
               title={roomState.player1PName || '1P'}
             >
               {roomState.player1PName || '1P'}
             </span>
-          </div>
+          </button>
 
           <div className="min-w-0 flex-1">
             {roomState.deadline && (
@@ -1741,19 +1755,23 @@ export default function BPRoomPage() {
             {renderPhase()}
           </div>
 
-          <div className="flex w-16 shrink-0 flex-col items-center gap-1.5 self-start">
-            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${myRole === '2P' ? 'ring-2 ring-primary' : ''}`}>
+          <button
+            type="button"
+            onClick={() => { if (isSpectator) setWatchRole('2P') }}
+            className={`flex w-16 shrink-0 flex-col items-center gap-1.5 self-start rounded-lg p-1 ${isSpectator ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default'} ${isSpectator && watchRole === '2P' ? 'bg-primary/10' : ''}`}
+          >
+            <div className={`h-11 w-11 rounded-full overflow-hidden border flex items-center justify-center bg-muted/30 ${(isSpectator ? watchRole === '2P' : myRole === '2P') ? 'ring-2 ring-primary' : ''}`}>
               {roomState.player2PAvatar
                 ? <Image src={roomState.player2PAvatar} alt="" className="h-full w-full object-cover" />
                 : <UserRound className="h-5 w-5 text-muted-foreground" />}
             </div>
             <span
-              className={`max-w-[64px] truncate text-center text-xs leading-tight ${myRole === '2P' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
+              className={`max-w-[64px] truncate text-center text-xs leading-tight ${(isSpectator ? watchRole === '2P' : myRole === '2P') ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
               title={roomState.player2PName || '2P'}
             >
               {roomState.player2PName || '2P'}
             </span>
-          </div>
+          </button>
         </div>
       </Card>
 

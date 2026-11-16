@@ -44,8 +44,10 @@ export default function SummonsPhase({
   const myScrolls = myRole === '1P' ? scrolls1P : scrolls2P
   const myHistory = myRole === '1P' ? summonHistory1P : summonHistory2P
 
+  // 观众直接读房间里的实时槽位，不维护本地预选
   const [picks, setPicks] = useState<Record<number, string>>(() => {
     const initial: Record<number, string> = {}
+    if (disabled) return initial
     order.forEach((teamIndex) => {
       const id = mySummons[teamIndex]
       if (id) initial[teamIndex + 1] = id
@@ -58,35 +60,6 @@ export default function SummonsPhase({
     return <p className="text-center text-muted-foreground">已确认通灵，等待对手...</p>
   }
 
-  if (disabled) {
-    return (
-      <div className="space-y-4">
-        <h3 className="text-center font-semibold">通灵配置（观众模式）</h3>
-        <div className="flex justify-center gap-4">
-          {order.map((i) => {
-            const ninja = ninjas.find(n => n.id === myTeam[i])
-            const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
-            const summon = mySummons[i] ? summons.find(s => s.id === mySummons[i]) : null
-            return (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <div className="w-16 h-16 border rounded overflow-hidden">
-                  {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>}
-                </div>
-                <div className="flex gap-1">
-                  <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted/30">
-                    {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">-</span>}
-                  </div>
-                  <div className="w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center bg-muted/30">
-                    {summon ? <Image src={summon.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
 
   const available = [...poolSummons]
     .filter(s => !myHistory.has(s.id))
@@ -103,6 +76,10 @@ export default function SummonsPhase({
   }
 
   const positionOf = (summonId: string): number | null => {
+    if (disabled) {
+      const index = mySummons.findIndex(id => id === summonId)
+      return index >= 0 ? index + 1 : null
+    }
     const key = Object.keys(picks).find(k => picks[Number(k)] === summonId)
     return key ? Number(key) : null
   }
@@ -111,9 +88,10 @@ export default function SummonsPhase({
     return picks[slot] ?? mySummons[slot - 1] ?? null
   }
 
-  const pickedCount = Object.keys(picks).length
+  const pickedCount = disabled ? mySummons.filter(Boolean).length : Object.keys(picks).length
 
   const handlePick = (summonId: string) => {
+    if (disabled) return
     const existing = positionOf(summonId)
     if (existing !== null) {
       const next = { ...picks }
@@ -137,7 +115,9 @@ export default function SummonsPhase({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-center font-semibold">选择通灵</h3>
+      <h3 className="text-center font-semibold">
+        选择通灵{disabled ? '（观众模式）' : ''}
+      </h3>
 
       <div className="flex justify-center gap-4">
         {order.map((teamIndex) => {
@@ -145,7 +125,7 @@ export default function SummonsPhase({
           const scroll = myScrolls[teamIndex] ? scrolls.find(s => s.id === myScrolls[teamIndex]) : null
           const summonId = slotIdOf(teamIndex + 1)
           const summon = summonId ? summons.find(s => s.id === summonId) : null
-          const marked = picks[teamIndex + 1] !== undefined
+          const marked = disabled ? !!mySummons[teamIndex] : picks[teamIndex + 1] !== undefined
           return (
             <div key={teamIndex} className="flex flex-col items-center gap-1">
               <div className="w-16 h-16 border rounded overflow-hidden">
@@ -172,7 +152,7 @@ export default function SummonsPhase({
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={() => setConfirmOpen(true)} disabled={pickedCount !== 3}>
+        <Button onClick={() => setConfirmOpen(true)} disabled={disabled || pickedCount !== 3}>
           <Check className="h-4 w-4" /> 确认通灵配置
         </Button>
       </div>

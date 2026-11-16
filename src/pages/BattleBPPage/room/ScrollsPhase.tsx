@@ -39,8 +39,10 @@ export default function ScrollsPhase({
   const myHistory = myRole === '1P' ? scrollHistory1P : scrollHistory2P
 
   // 预选表：键为序号 1/2/3，值为密卷 id。序号不重排，取消后由新选择补最小空号
+  // 观众直接读房间里的实时槽位，不维护本地预选
   const [picks, setPicks] = useState<Record<number, string>>(() => {
     const initial: Record<number, string> = {}
+    if (disabled) return initial
     order.forEach((teamIndex) => {
       const id = myScrolls[teamIndex]
       if (id) initial[teamIndex + 1] = id
@@ -53,35 +55,6 @@ export default function ScrollsPhase({
     return <p className="text-center text-muted-foreground">已确认密卷，等待对手...</p>
   }
 
-  // 观众模式下仅显示阵容，不做任何交互
-  if (disabled) {
-    return (
-      <div className="space-y-4">
-        <h3 className="text-center font-semibold">密卷配置（观众模式）</h3>
-        <div className="flex justify-center gap-4">
-          {order.map((i) => {
-            const ninja = ninjas.find(n => n.id === myTeam[i])
-            const scroll = myScrolls[i] ? scrolls.find(s => s.id === myScrolls[i]) : null
-            return (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <div className="w-16 h-16 border rounded overflow-hidden">
-                  {ninja ? <Image src={ninja.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center text-xs">?</div>}
-                </div>
-                <div className="flex gap-1">
-                  <div className="w-8 h-8 border rounded-full overflow-hidden flex items-center justify-center bg-muted/30">
-                    {scroll ? <Image src={scroll.imageUrl} className="w-full h-full object-cover" /> : <span className="text-xs text-muted-foreground">?</span>}
-                  </div>
-                  <div className="w-8 h-8 border rounded-full flex items-center justify-center opacity-50">
-                    <span className="text-xs text-muted-foreground">-</span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
 
   const available = [...poolScrolls]
     .filter(s => !myHistory.has(s.id))
@@ -98,6 +71,10 @@ export default function ScrollsPhase({
   }
 
   const positionOf = (scrollId: string): number | null => {
+    if (disabled) {
+      const index = myScrolls.findIndex(id => id === scrollId)
+      return index >= 0 ? index + 1 : null
+    }
     const key = Object.keys(picks).find(k => picks[Number(k)] === scrollId)
     return key ? Number(key) : null
   }
@@ -106,9 +83,10 @@ export default function ScrollsPhase({
     return picks[slot] ?? myScrolls[slot - 1] ?? null
   }
 
-  const pickedCount = Object.keys(picks).length
+  const pickedCount = disabled ? myScrolls.filter(Boolean).length : Object.keys(picks).length
 
   const handlePick = (scrollId: string) => {
+    if (disabled) return
     const existing = positionOf(scrollId)
     if (existing !== null) {
       const next = { ...picks }
@@ -132,14 +110,16 @@ export default function ScrollsPhase({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-center font-semibold">选择密卷</h3>
+      <h3 className="text-center font-semibold">
+        选择密卷{disabled ? '（观众模式）' : ''}
+      </h3>
 
       <div className="flex justify-center gap-4">
         {order.map((teamIndex) => {
           const ninja = ninjas.find(n => n.id === myTeam[teamIndex])
           const scrollId = slotIdOf(teamIndex + 1)
           const scroll = scrollId ? scrolls.find(s => s.id === scrollId) : null
-          const marked = picks[teamIndex + 1] !== undefined
+          const marked = disabled ? !!myScrolls[teamIndex] : picks[teamIndex + 1] !== undefined
           return (
             <div key={teamIndex} className="flex flex-col items-center gap-1">
               <div className="w-16 h-16 border rounded overflow-hidden">
@@ -166,7 +146,7 @@ export default function ScrollsPhase({
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={() => setConfirmOpen(true)} disabled={pickedCount !== 3}>
+        <Button onClick={() => setConfirmOpen(true)} disabled={disabled || pickedCount !== 3}>
           <Check className="h-4 w-4" /> 确认密卷配置
         </Button>
       </div>
