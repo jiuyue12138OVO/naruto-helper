@@ -2326,8 +2326,8 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1783349530165",
-          "scrollName": "掌仙术·活",
+          "scrollId": "1783349062619",
+          "scrollName": "通灵·返手里剑",
           "priority": 2
         },
         {
@@ -2344,6 +2344,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349379011",
           "scrollName": "风遁·真空波",
           "priority": 5
+        },
+        {
+          "scrollId": "1783349530165",
+          "scrollName": "掌仙术·活",
+          "priority": 6
         }
       ]
     },
@@ -5248,13 +5253,13 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "priority": 1
         },
         {
-          "scrollId": "1783349647927",
-          "scrollName": "解术·散",
+          "scrollId": "2",
+          "scrollName": "冰遁·冻雪",
           "priority": 2
         },
         {
-          "scrollId": "1783349842473",
-          "scrollName": "木遁·扦插之术",
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
           "priority": 3
         }
       ]
@@ -5285,6 +5290,11 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "1783349328947",
           "scrollName": "土遁·土流枪",
           "priority": 2
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 3
         }
       ]
     },
@@ -9004,6 +9014,33 @@ export const MOCK_RECOMMENDATIONS: IRecommendation[] = [
           "scrollId": "2",
           "scrollName": "冰遁·冻雪",
           "priority": 2
+        }
+      ]
+    },
+    {
+      "id": "1795181564722",
+      "ninjaId": "1795181541676",
+      "ninjaName": "千手扉间【永夜逐光】",
+      "scrolls": [
+        {
+          "scrollId": "1783350043475",
+          "scrollName": "风遁·气旋",
+          "priority": 1
+        },
+        {
+          "scrollId": "12",
+          "scrollName": "火遁·烈焰弹",
+          "priority": 2
+        },
+        {
+          "scrollId": "1783349647927",
+          "scrollName": "解术·散",
+          "priority": 3
+        },
+        {
+          "scrollId": "1783349683914",
+          "scrollName": "禁术·阴愈伤灭",
+          "priority": 4
         }
       ]
     }

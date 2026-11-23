@@ -192,7 +192,8 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309691119",
         "2",
         "1783309829510",
-        "1783316337877"
+        "1783316337877",
+        "1783309162593"
       ],
       "extras": [
         {
@@ -356,7 +357,8 @@ export const MOCK_EASTER_EGGS: IEasterEgg[] = [
         "1783309803512",
         "1783316837191",
         "1785510479412",
-        "20"
+        "20",
+        "5"
       ],
       "defeatTargetNinjaIds": [
         "11",

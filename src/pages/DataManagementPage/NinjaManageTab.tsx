@@ -335,7 +335,11 @@ export default function NinjaManageTab() {
     }
     return TIER_OPTIONS.map(tier => ({
       tier,
-      ninjas: list.filter(n => n.tier === tier),
+      ninjas: list
+        .filter(n => n.tier === tier)
+        .sort((a, b) =>
+          (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
+        ),
     })).filter(g => g.ninjas.length > 0)
   }, [ninjas, batchSearchKeyword])
 
