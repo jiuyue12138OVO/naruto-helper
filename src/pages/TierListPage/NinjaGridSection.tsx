@@ -47,7 +47,7 @@ export default function NinjaGridSection({ ninjas, sortByGameOrder = false }: Ni
 
   // 每个梯度内部排序：
   // - 打开"按游戏内编号排序"：同一梯度内直接按 gameOrder 升序（不再分趋势）
-  // - 未打开：按趋势分组（down 优先，无趋势居中，up 最后）
+   // - 未打开：按趋势分组（down 优先，up 次之，无趋势最后）
   Object.keys(grouped).forEach(tier => {
     grouped[tier].sort((a, b) => {
       if (sortByGameOrder) {
@@ -57,7 +57,7 @@ export default function NinjaGridSection({ ninjas, sortByGameOrder = false }: Ni
         return a.name.localeCompare(b.name)
       }
 
-      const trendOrder = { down: 0, undefined: 1, up: 2 }
+      const trendOrder = { down: 0, up: 1, undefined: 2 }
       const trendA = a.trend ? trendOrder[a.trend] : trendOrder.undefined
       const trendB = b.trend ? trendOrder[b.trend] : trendOrder.undefined
       return trendA - trendB

@@ -161,6 +161,7 @@ interface RoomState {
   startConfirmed1P: boolean
   startConfirmed2P: boolean
   reuseScrollSummon?: boolean
+  disableCountdown?: boolean
   player1PPool?: PlayerPool
   player2PPool?: PlayerPool
   lastTimeout?: { key: string; message: string; at: number }
@@ -187,6 +188,7 @@ const emptyRoomState = (
   reuseScrollSummon = false,
   profile?: { name?: string; avatar?: string | null },
   pool: PlayerPool = EMPTY_POOL,
+  disableCountdown = false,
 ): RoomState => ({
   phase: 'waiting',
   gameNumber: 1,
@@ -224,7 +226,12 @@ const emptyRoomState = (
   startConfirmed1P: false,
   startConfirmed2P: false,
   reuseScrollSummon,
+  disableCountdown,
 })
+
+// 关闭倒计时时返回 null，各阶段不设截止时间，也不会触发超时随机
+const nextDeadline = (state: RoomState | null): number | null =>
+  state?.disableCountdown ? null : Date.now() + COUNTDOWN_SECONDS * 1000
 
 export default function BPRoomPage() {
   const { ninjas, scrolls, summons } = useData()
@@ -245,9 +252,12 @@ export default function BPRoomPage() {
   const [timeoutNotice, setTimeoutNotice] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [showRules, setShowRules] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   // 创建房间时的复用开关
   const [reuseSwitch, setReuseSwitch] = useState(false)
+  // 创建房间时关闭倒计时
+  const [disableCountdown, setDisableCountdown] = useState(false)
 
   // 玩家资料，保存在本机，建房和加入房间共用
   const [myName, setMyName] = useState(() => {
@@ -320,6 +330,12 @@ export default function BPRoomPage() {
 
   // ban/pick 阶段：是否按梯度分组（默认关闭，按游戏内编号全排）
   const [showTierGrouping, setShowTierGrouping] = useState(false)
+
+  // ban/pick 阶段的评级筛选
+  const [ratingFilter, setRatingFilter] = useState<'all' | 'S' | 'A' | 'B' | 'C'>('all')
+
+  // 只看可选：隐藏已用与已禁项目，恢复旧版纯可选列表
+  const [onlySelectable, setOnlySelectable] = useState(false)
   // 公 ban 阶段：是否按梯度分组（默认关闭）
   const [publicBanTierGrouping, setPublicBanTierGrouping] = useState(false)
 
@@ -511,7 +527,7 @@ export default function BPRoomPage() {
   const createRoom = async () => {
     const id = Math.random().toString(36).substring(2, 8).toUpperCase()
     const playerId = generatePlayerId()
-    const init = emptyRoomState(playerId, reuseSwitch, { name: myName.trim(), avatar: myAvatar }, myPool)
+    const init = emptyRoomState(playerId, reuseSwitch, { name: myName.trim(), avatar: myAvatar }, myPool, disableCountdown)
     setRoomId(id); setMyPlayerId(playerId); setRoomState(init)
     supabase.from('rooms').upsert({ id, state: init }).then()
   }
@@ -598,7 +614,7 @@ export default function BPRoomPage() {
         await updateRoom({
           phase: 'ban',
           banStep: 0,
-          deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+          deadline: nextDeadline(latestState),
           currentPlayer: BAN_STEPS[0].player,
           startConfirmed1P: false,
           startConfirmed2P: false,
@@ -617,17 +633,27 @@ export default function BPRoomPage() {
     }
   }
 
-  // 禁用阶段：所有忍者都可被禁，不受个人池限制
+  // 禁用/选用阶段显示全部忍者，锁定状态用标记区分，不再隐藏
   const availableNinjas = useMemo(() => {
     if (!roomState) return []
-    const publicBanSet = new Set(roomState.publicBan || [])
-    const banned = new Set([...roomState.ban1P.filter(Boolean), ...roomState.ban2P.filter(Boolean)])
-    return ninjas.filter(n =>
-      !roomState.usedNinjas.includes(n.id)
-      && !banned.has(n.id)
-      && !publicBanSet.has(n.id)
-    )
+    return ninjas
   }, [roomState, ninjas])
+
+  // 已被使用过的忍者：灰度头像 + 灰色“封”
+  const usedNinjaIds = useMemo(
+    () => new Set(roomState?.usedNinjas || []),
+    [roomState?.usedNinjas]
+  )
+
+  // 已禁用的忍者（公共盲禁 + 本小局双方禁用）：黑白头像 + 红色“封”
+  const bannedNinjaIds = useMemo(() => {
+    if (!roomState) return new Set<string>()
+    return new Set([
+      ...(roomState.publicBan || []),
+      ...roomState.ban1P,
+      ...roomState.ban2P,
+    ].filter(Boolean) as string[])
+  }, [roomState])
 
   // 选用阶段：只允许自己席位池内的忍者
   const pickableNinjas = useMemo(() => {
@@ -684,9 +710,17 @@ export default function BPRoomPage() {
   // ban/pick 阶段的忍者分组
   const groupedNinjas = useMemo(() => {
     const source = roomState?.phase === 'pick' ? pickableNinjas : availableNinjas
-    const filtered = search
+    const searched = search
       ? source.filter(n => n.name.toLowerCase().includes(search.toLowerCase()))
       : source
+
+    const ratingFiltered = ratingFilter === 'all'
+      ? searched
+      : searched.filter(n => n.rating === ratingFilter)
+
+    const filtered = onlySelectable
+      ? ratingFiltered.filter(n => !usedNinjaIds.has(n.id) && !bannedNinjaIds.has(n.id))
+      : ratingFiltered
 
     if (showTierGrouping) {
       const groups: { tier: string; ninjas: INinja[] }[] = []
@@ -700,7 +734,7 @@ export default function BPRoomPage() {
       const sorted = [...filtered].sort(sortByGameOrder)
       return [{ tier: '全部', ninjas: sorted }]
     }
-  }, [availableNinjas, pickableNinjas, roomState?.phase, search, showTierGrouping, sortByGameOrder])
+  }, [availableNinjas, pickableNinjas, roomState?.phase, search, ratingFilter, showTierGrouping, sortByGameOrder, onlySelectable, usedNinjaIds, bannedNinjaIds])
 
   const isMyTurn = useMemo(() => {
     if (!roomState || !isPlayer) return false
@@ -748,7 +782,7 @@ export default function BPRoomPage() {
         return {
           ...banUpdate,
           banStep: nextStep,
-          deadline: nextStep < BAN_STEPS.length ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+          deadline: nextStep < BAN_STEPS.length ? nextDeadline(latest) : null,
           currentPlayer: nextStep < BAN_STEPS.length ? BAN_STEPS[nextStep].player : null,
           lastTimeout: {
             key,
@@ -790,7 +824,7 @@ export default function BPRoomPage() {
           ...teamUpdate,
           usedNinjas: [...latest.usedNinjas, chosen.id],
           pickStep: nextStep,
-          deadline: nextStep < PICK_STEPS.length ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+          deadline: nextStep < PICK_STEPS.length ? nextDeadline(latest) : null,
           currentPlayer: nextStep < PICK_STEPS.length ? PICK_STEPS[nextStep].player : null,
           lastTimeout: {
             key,
@@ -932,8 +966,19 @@ export default function BPRoomPage() {
     return () => clearTimeout(timer)
   }, [roomState?.lastTimeout?.at])
 
+  useEffect(() => {
+    if (!pendingSelection) return
+    if (usedNinjaIds.has(pendingSelection) || bannedNinjaIds.has(pendingSelection)) {
+      setPendingSelection(null)
+    }
+  }, [pendingSelection, usedNinjaIds, bannedNinjaIds, setPendingSelection])
+
   const confirmSelection = (ninjaId: string) => {
     if (!roomState || !isPlayer || !isMyTurn) return
+    if (usedNinjaIds.has(ninjaId) || bannedNinjaIds.has(ninjaId)) {
+      setPendingSelection(null)
+      return
+    }
     const { phase, banStep, pickStep } = roomState
     if (phase === 'ban') {
       const step = BAN_STEPS[banStep]
@@ -943,7 +988,7 @@ export default function BPRoomPage() {
       updateRoom({
         [step.player === '1P' ? 'ban1P' : 'ban2P']: newBan,
         banStep: nextStep,
-        deadline: nextStep < 4 ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+        deadline: nextStep < 4 ? nextDeadline(roomState) : null,
         currentPlayer: nextStep < 4 ? BAN_STEPS[nextStep].player : null,
       })
     } else if (phase === 'pick') {
@@ -955,7 +1000,7 @@ export default function BPRoomPage() {
         [step.player === '1P' ? 'team1P' : 'team2P']: newTeam,
         usedNinjas: [...roomState.usedNinjas, ninjaId],
         pickStep: nextStep,
-        deadline: nextStep < 6 ? Date.now() + COUNTDOWN_SECONDS * 1000 : null,
+        deadline: nextStep < 6 ? nextDeadline(roomState) : null,
         currentPlayer: nextStep < 6 ? PICK_STEPS[nextStep].player : null,
       })
     }
@@ -1047,7 +1092,7 @@ export default function BPRoomPage() {
         scrollsConfirmed1P: false, scrollsConfirmed2P: false,
         summons1P: [null, null, null], summons2P: [null, null, null],
         summonsConfirmed1P: false, summonsConfirmed2P: false,
-        deadline: Date.now() + COUNTDOWN_SECONDS * 1000,
+        deadline: nextDeadline(state),
         currentPlayer: BAN_STEPS[0].player,
         myScrollHistory: new2PScrollHistory,
         opponentScrollHistory: new1PScrollHistory,
@@ -1085,13 +1130,13 @@ export default function BPRoomPage() {
   useEffect(() => {
     if (!roomState || isSpectator) return
     if (roomState.phase === 'ban' && roomState.banStep >= 4) {
-      updateRoom({ phase: 'pick', pickStep: 0, deadline: Date.now() + COUNTDOWN_SECONDS * 1000, currentPlayer: PICK_STEPS[0].player })
+      updateRoom({ phase: 'pick', pickStep: 0, deadline: nextDeadline(roomState), currentPlayer: PICK_STEPS[0].player })
     }
     if (roomState.phase === 'pick' && roomState.pickStep >= 6) {
-      updateRoom({ phase: 'scrolls', deadline: Date.now() + COUNTDOWN_SECONDS * 1000, currentPlayer: null })
+      updateRoom({ phase: 'scrolls', deadline: nextDeadline(roomState), currentPlayer: null })
     }
     if (roomState.phase === 'scrolls' && roomState.scrollsConfirmed1P && roomState.scrollsConfirmed2P) {
-      updateRoom({ phase: 'summons', deadline: Date.now() + COUNTDOWN_SECONDS * 1000, currentPlayer: null })
+      updateRoom({ phase: 'summons', deadline: nextDeadline(roomState), currentPlayer: null })
     }
     if (roomState.phase === 'summons' && roomState.summonsConfirmed1P && roomState.summonsConfirmed2P) {
       updateRoom({ phase: 'done', deadline: null, currentPlayer: null })
@@ -1285,6 +1330,8 @@ export default function BPRoomPage() {
             isMyTurn={isMyTurn}
             pendingSelection={pendingSelection} setPendingSelection={setPendingSelection}
             onConfirm={confirmSelection}
+            usedNinjaIds={usedNinjaIds}
+            bannedNinjaIds={bannedNinjaIds}
             disabled={readonly}
           />
         )
@@ -1296,6 +1343,8 @@ export default function BPRoomPage() {
             isMyTurn={isMyTurn}
             pendingSelection={pendingSelection} setPendingSelection={setPendingSelection}
             onConfirm={confirmSelection}
+            usedNinjaIds={usedNinjaIds}
+            bannedNinjaIds={bannedNinjaIds}
             disabled={readonly}
           />
         )
@@ -1313,6 +1362,7 @@ export default function BPRoomPage() {
             onSyncSlots={syncMyScrollSlots}
             onCommit={commitMyScrolls}
             isConfirmed={viewRole === '1P' ? roomState!.scrollsConfirmed1P : roomState!.scrollsConfirmed2P}
+            onlySelectable={onlySelectable}
             disabled={readonly}
           />
         )
@@ -1331,6 +1381,7 @@ export default function BPRoomPage() {
             onSyncSlots={syncMySummonSlots}
             onCommit={commitMySummons}
             isConfirmed={viewRole === '1P' ? roomState!.summonsConfirmed1P : roomState!.summonsConfirmed2P}
+            onlySelectable={onlySelectable}
             disabled={readonly}
           />
         )
@@ -1374,6 +1425,7 @@ export default function BPRoomPage() {
                   <li>输入房间号加入的一方占用空出的玩家席位，优先 1P，其次 2P。两个席位都已占用时无法以玩家身份加入。</li>
                   <li>观众以观众身份加入，每个房间最多 15 名观众，只能查看，不能操作。</li>
                   <li>双方在等待页各自点击“开始 BP”后才进入禁用阶段。</li>
+                  <li>建房时开启“取消倒计时”后，本房间的禁用、选用、密卷、通灵各阶段都不设时限，也不会触发超时随机。</li>
                 </ul>
               </div>
 
@@ -1450,8 +1502,23 @@ export default function BPRoomPage() {
           )}
         </Card>
 
-        <Card className="p-6 space-y-4">
-          <h2 className="text-xl font-bold">我的资料</h2>
+        <Card className="overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowProfile(v => !v)}
+            className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors"
+          >
+            <span className="flex items-center gap-2 font-semibold">
+              <UserRound className="h-4 w-4" />
+              我的资料
+            </span>
+            {showProfile
+              ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </button>
+
+          {showProfile && (
+          <div className="px-6 pb-6 space-y-4">
           <p className="text-sm text-muted-foreground">昵称和头像会显示在 BP 界面左右两侧，左侧为 1P、右侧为 2P，供双方辨认身份。两项都可以不填。</p>
           <div className="space-y-2">
             <Label htmlFor="player-name" className="text-sm">昵称</Label>
@@ -1490,6 +1557,8 @@ export default function BPRoomPage() {
             </div>
             <Button variant="outline" size="sm" onClick={() => setShowPoolDialog(true)}>设置</Button>
           </div>
+          </div>
+          )}
         </Card>
 
         <Card className="p-6">
@@ -1503,6 +1572,16 @@ export default function BPRoomPage() {
               id="reuse-switch"
               checked={reuseSwitch}
               onCheckedChange={setReuseSwitch}
+            />
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <Label htmlFor="countdown-switch" className="text-sm cursor-pointer select-none">
+              取消倒计时
+            </Label>
+            <Switch
+              id="countdown-switch"
+              checked={disableCountdown}
+              onCheckedChange={setDisableCountdown}
             />
           </div>
           <Button onClick={createRoom} className="w-full">创建新房间</Button>
@@ -1704,17 +1783,28 @@ export default function BPRoomPage() {
         </div>
       </div>
 
-      {/* ban/pick 阶段的显示开关 */}
-      {(roomState.phase === 'ban' || roomState.phase === 'pick') && (
-        <div className="flex items-center justify-end gap-2">
-          <Label htmlFor="tier-grouping-toggle" className="text-sm cursor-pointer select-none">
-            按梯度分组
-          </Label>
-          <Switch
-            id="tier-grouping-toggle"
-            checked={showTierGrouping}
-            onCheckedChange={setShowTierGrouping}
-          />
+      {/* BP 各阶段的显示开关 */}
+      {(roomState.phase === 'ban' || roomState.phase === 'pick' || roomState.phase === 'scrolls' || roomState.phase === 'summons') && (
+        <div className="flex items-center justify-end gap-3">
+          {(roomState.phase === 'ban' || roomState.phase === 'pick') && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="tier-grouping-toggle" className="text-sm cursor-pointer select-none">
+                按梯度分组
+              </Label>
+              <Switch
+                id="tier-grouping-toggle"
+                checked={showTierGrouping}
+                onCheckedChange={setShowTierGrouping}
+              />
+            </div>
+          )}
+          <Button
+            variant={onlySelectable ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setOnlySelectable(v => !v)}
+          >
+            只看可选
+          </Button>
         </div>
       )}
 
@@ -1753,6 +1843,25 @@ export default function BPRoomPage() {
             {renderBanDisplay()}
             {roomState.phase !== 'ban' && renderTeamDisplay()}
             {renderPhase()}
+
+            {(roomState.phase === 'ban' || roomState.phase === 'pick') && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                {(['all', 'S', 'A', 'B', 'C'] as const).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRatingFilter(r)}
+                    className={
+                      ratingFilter === r
+                        ? 'flex h-8 w-8 items-center justify-center rounded-md border border-primary bg-primary text-sm font-semibold text-primary-foreground'
+                        : 'flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/50'
+                    }
+                  >
+                    {r === 'all' ? '全' : r}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <button

@@ -28,6 +28,7 @@ interface SummonsPhaseProps {
   onSyncSlots: (slots: (string | null)[]) => void
   onCommit: (slots: (string | null)[]) => void
   isConfirmed: boolean
+  onlySelectable?: boolean
   disabled?: boolean
 }
 
@@ -37,6 +38,7 @@ export default function SummonsPhase({
   summonHistory1P, summonHistory2P,
   ninjas, summons, scrolls, poolSummons = summons, order, search, setSearch,
   onSyncSlots, onCommit, isConfirmed,
+  onlySelectable = false,
   disabled = false,
 }: SummonsPhaseProps) {
   const myTeam = myRole === '1P' ? team1P : team2P
@@ -62,7 +64,7 @@ export default function SummonsPhase({
 
 
   const available = [...poolSummons]
-    .filter(s => !myHistory.has(s.id))
+    .filter(s => !(onlySelectable && myHistory.has(s.id)))
     .sort((a, b) => (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER))
   const filtered = search ? available.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) : available
 
@@ -92,6 +94,7 @@ export default function SummonsPhase({
 
   const handlePick = (summonId: string) => {
     if (disabled) return
+    if (myHistory.has(summonId)) return
     const existing = positionOf(summonId)
     if (existing !== null) {
       const next = { ...picks }
@@ -176,8 +179,22 @@ export default function SummonsPhase({
             >
               <div className="relative w-12 h-12">
                 <div className="w-full h-full rounded-full overflow-hidden border border-border/40 bg-card">
-                  <Image src={summon.imageUrl} alt={summon.name} className="w-full h-full object-cover" />
+                  <Image
+                    src={summon.imageUrl}
+                    alt={summon.name}
+                    className={`w-full h-full object-cover ${isHistoryUsed ? 'grayscale opacity-60' : ''}`}
+                  />
                 </div>
+                {isHistoryUsed && (
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <span
+                      style={{ fontFamily: 'SimSun, 宋体, serif' }}
+                      className="text-base font-bold text-gray-400 drop-shadow"
+                    >
+                      封
+                    </span>
+                  </div>
+                )}
                 {position !== null && (
                   <span className="absolute -top-1 -left-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-200 text-[10px] font-bold text-amber-900 shadow">
                     {position}

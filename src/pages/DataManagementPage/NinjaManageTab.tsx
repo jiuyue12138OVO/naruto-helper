@@ -131,7 +131,7 @@ export default function NinjaManageTab() {
   // ✨ 新增：按趋势分开的已应用快照（只有点击"更新"后才会刷新）
   const [trendOrderSnapshot, setTrendOrderSnapshot] = useState<Record<string, string[]>>({})
 
-  // ✨ 新增：按趋势分开开关（默认关闭=保持数据顺序；打开=每梯度内下降在前、无趋势居中、上升在后）
+  // ✨ 新增：按趋势分开开关（默认关闭=保持数据顺序；打开=每梯度内下降、上升、无趋势依次排列）
   const [splitByTrend, setSplitByTrend] = useState(false)
 
   // ---------- 批量管理状态 ----------
@@ -267,13 +267,13 @@ export default function NinjaManageTab() {
 
   // ✨ 新增：点击"更新"时，将当前数据按趋势排序并写入快照（之后不再随趋势变化实时更新）
   const applyTrendSplit = useCallback(() => {
-    const trendOrder: Record<string, number> = { down: 0, up: 2 }
+    const trendOrder: Record<string, number> = { down: 0, up: 1 }
     const snapshot: Record<string, string[]> = {}
     TIER_OPTIONS.forEach(tier => {
       const list = ninjas.filter(n => n.tier === tier)
       list.sort((a, b) => {
-        const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
-        const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
+        const ta = a.trend ? trendOrder[a.trend] ?? 2 : 2
+        const tb = b.trend ? trendOrder[b.trend] ?? 2 : 2
         if (ta !== tb) return ta - tb
         return (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
       })
@@ -285,13 +285,13 @@ export default function NinjaManageTab() {
   // ✨ 新增：打开"按趋势分开"时立即生成一次快照；之后只有点击"更新"按钮才刷新
   useEffect(() => {
     if (!splitByTrend) return
-    const trendOrder: Record<string, number> = { down: 0, up: 2 }
+    const trendOrder: Record<string, number> = { down: 0, up: 1 }
     const snapshot: Record<string, string[]> = {}
     TIER_OPTIONS.forEach(tier => {
       const list = ninjas.filter(n => n.tier === tier)
       list.sort((a, b) => {
-        const ta = a.trend ? trendOrder[a.trend] ?? 1 : 1
-        const tb = b.trend ? trendOrder[b.trend] ?? 1 : 1
+        const ta = a.trend ? trendOrder[a.trend] ?? 2 : 2
+        const tb = b.trend ? trendOrder[b.trend] ?? 2 : 2
         if (ta !== tb) return ta - tb
         return (a.gameOrder ?? Number.MAX_SAFE_INTEGER) - (b.gameOrder ?? Number.MAX_SAFE_INTEGER)
       })

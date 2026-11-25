@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import FilterBarSection from './FilterBarSection'
 import NinjaGridSection from './NinjaGridSection'
 import { useData } from '@/contexts/DataContext'
+import CustomTierBoard from './CustomTierBoard'
 
 const TIER_COLORS: Record<string, string> = {
   '天王': 'bg-red-500/10 text-red-500 border-red-500/20',
@@ -52,6 +53,9 @@ export default function TierListPage() {
 
   // 按游戏内编号排序开关
   const [sortByGameOrder, setSortByGameOrder] = useState(false)
+
+  // 强度排行 / 我的排档
+  const [viewMode, setViewMode] = useState<'official' | 'custom'>('official')
 
   // 梯度说明折叠
   const [showTierGuide, setShowTierGuide] = useState(false)
@@ -202,78 +206,100 @@ export default function TierListPage() {
               </h1>
               <p className="text-muted-foreground text-sm">点击图片查看详细信息</p>
             </div>
-            <div className="flex items-center gap-2 pt-1">
-              <Label htmlFor="sort-by-game-order" className="text-sm cursor-pointer select-none">
-                按游戏内编号排序
-              </Label>
-              <Switch
-                id="sort-by-game-order"
-                checked={sortByGameOrder}
-                onCheckedChange={setSortByGameOrder}
-              />
+            <div className="flex items-center gap-3 pt-1">
+              {viewMode === 'official' && (
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="sort-by-game-order" className="text-sm cursor-pointer select-none">
+                    按游戏内编号排序
+                  </Label>
+                  <Switch
+                    id="sort-by-game-order"
+                    checked={sortByGameOrder}
+                    onCheckedChange={setSortByGameOrder}
+                  />
+                </div>
+              )}
+              <Button
+                size="sm"
+                variant={viewMode === 'custom' ? 'default' : 'outline'}
+                className="border-b-2 border-b-red-500"
+                onClick={() => setViewMode(viewMode === 'custom' ? 'official' : 'custom')}
+              >
+                {viewMode === 'custom' ? '返回强度排行' : '忍者排档'}
+              </Button>
             </div>
           </div>
 
-          <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
-            <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <span>
-              忍者强度排行基于个人理解与实战经验，仅供参考。每位玩家的打法和理解不同，实际强度可能因操作者而异，如有不同意见以你为准。
-              <br />
-              排行综合考虑忍者状态：奥义点、专属通灵兽及适配密卷。
-            </span>
-          </div>
-
-          {/* 梯度定位说明（可折叠） */}
-          <div className="mt-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => setShowTierGuide(v => !v)}
-            >
-              {showTierGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              梯度定位说明
-            </Button>
-
-            {showTierGuide && (
-              <div className="mt-2 bg-muted/30 border border-border rounded-lg p-4 space-y-2">
-                {TIER_DESCRIPTIONS.map(({ tier, desc }) => (
-                  <div key={tier} className="flex items-start gap-3">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        'text-xs font-bold px-2 py-0.5 shrink-0 min-w-[48px] justify-center',
-                        TIER_COLORS[tier]
-                      )}
-                    >
-                      {tier}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground leading-relaxed">{desc}</span>
-                  </div>
-                ))}
+          {viewMode === 'official' && (
+            <>
+              <div className="mt-4 bg-muted/50 border border-border rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-start gap-2">
+                <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+                <span>
+                  忍者强度排行基于个人理解与实战经验，仅供参考。每位玩家的打法和理解不同，实际强度可能因操作者而异，如有不同意见以你为准。
+                  <br />
+                  排行综合考虑忍者状态：奥义点、专属通灵兽及适配密卷。
+                </span>
               </div>
-            )}
-          </div>
+
+              {/* 梯度定位说明（可折叠） */}
+              <div className="mt-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowTierGuide(v => !v)}
+                >
+                  {showTierGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  梯度定位说明
+                </Button>
+
+                {showTierGuide && (
+                  <div className="mt-2 bg-muted/30 border border-border rounded-lg p-4 space-y-2">
+                    {TIER_DESCRIPTIONS.map(({ tier, desc }) => (
+                      <div key={tier} className="flex items-start gap-3">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'text-xs font-bold px-2 py-0.5 shrink-0 min-w-[48px] justify-center',
+                            TIER_COLORS[tier]
+                          )}
+                        >
+                          {tier}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground leading-relaxed">{desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
-        <FilterBarSection
-          activeTier={activeTier}
-          onTierChange={setActiveTier}
-          activeRating={activeRating}
-          onRatingChange={setActiveRating}
-          tagStatus={tagStatus}
-          onTagCycle={handleTagCycle}
-          onClearTags={handleClearTags}
-          acquisitionStatus={acquisitionStatus}
-          onAcquisitionCycle={handleAcquisitionCycle}
-          onClearAcquisitions={handleClearAcquisitions}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          matchAllTags={matchAllTags}
-          onMatchAllTagsChange={setMatchAllTags}
-        />
+        {viewMode === 'official' ? (
+          <>
+            <FilterBarSection
+              activeTier={activeTier}
+              onTierChange={setActiveTier}
+              activeRating={activeRating}
+              onRatingChange={setActiveRating}
+              tagStatus={tagStatus}
+              onTagCycle={handleTagCycle}
+              onClearTags={handleClearTags}
+              acquisitionStatus={acquisitionStatus}
+              onAcquisitionCycle={handleAcquisitionCycle}
+              onClearAcquisitions={handleClearAcquisitions}
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              matchAllTags={matchAllTags}
+              onMatchAllTagsChange={setMatchAllTags}
+            />
 
-        <NinjaGridSection ninjas={filtered} sortByGameOrder={sortByGameOrder} />
+            <NinjaGridSection ninjas={filtered} sortByGameOrder={sortByGameOrder} />
+          </>
+        ) : (
+          <CustomTierBoard ninjas={ninjas} />
+        )}
       </div>
     </div>
   )
